@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Bluesky Feed Moderator",
+  "version": "1.5.1",
+  "description": "Moderate Bluesky content directly from bsky.app",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "notifications",
+    "downloads"
+  ],
+  
+  "host_permissions": [
+    "https://bsky.app/*",
+    "https://*.bsky.app/*"
+  ],
+  
+  "content_scripts": [
+    {
+      "matches": ["https://bsky.app/*", "https://*.bsky.app/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_end"
+    }
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Feed Moderator Settings"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "modmaster-browser@fema.monster": {
+      "updates": [
+        {
+          "version": "1.3.3",
+          "update_link": "https://github.com/femavibes/modmaster-browser/releases/download/v1.3.3/modmaster-browser.zip"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,92 @@
+/* Styles for Feed Moderator extension */
+
+.fm-post-actions {
+  position: relative;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.fm-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #cfd9de;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  z-index: 1000;
+  min-width: 220px;
+  padding: 8px 0;
+  backdrop-filter: blur(12px);
+}
+
+.fm-dropdown div {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f1419;
+  transition: background-color 0.2s;
+}
+
+.fm-dropdown div:hover {
+  background-color: #f7f9f9;
+}
+
+.fm-profile-actions {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  border: 1px solid #cfd9de;
+  backdrop-filter: blur(12px);
+}
+
+.fm-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 500;
+  z-index: 10000;
+  max-width: 300px;
+  animation: slideIn 0.3s ease-out;
+  backdrop-filter: blur(12px);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .fm-dropdown {
+    background: rgba(21, 32, 43, 0.9);
+    border-color: #2f3336;
+    color: #e7e9ea;
+  }
+  
+  .fm-dropdown div {
+    color: #e7e9ea;
+  }
+  
+  .fm-dropdown div:hover {
+    background-color: rgba(239, 243, 244, 0.1);
+  }
+  
+  .fm-profile-actions {
+    background: rgba(21, 32, 43, 0.8);
+    border-color: #2f3336;
+    color: #e7e9ea;
+  }
+}

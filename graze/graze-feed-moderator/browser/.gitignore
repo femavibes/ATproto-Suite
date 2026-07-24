@@ -1,0 +1,19 @@
+# Build artifacts
+build/
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Node modules (if you add any build tools later)
+node_modules/
