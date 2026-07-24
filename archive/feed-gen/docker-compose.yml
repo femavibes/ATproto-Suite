@@ -1,0 +1,122 @@
+# Optional: run everything natively on the host instead — see NATIVE_RUN.md (Dockerfiles stay for CI/images).
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: feed-gen-postgres
+    environment:
+      POSTGRES_USER: feedgen
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-feedgen}
+      POSTGRES_DB: feedgen
+    ports:
+      - "5440:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U feedgen"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - feed-gen-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: feed-gen-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - feed-gen-network
+
+  jetstream-ingestion:
+    build:
+      context: .
+      dockerfile: services/jetstream-ingestion/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://feedgen:${POSTGRES_PASSWORD:-feedgen}@postgres:5432/feedgen
+      KEYWORDS_FILE: /app/keywords.txt
+      LANGUAGE_FILTER: en
+      BATCH_SIZE: 100
+      # Optional: index only posts that pass at least one live feed graph (same engine as assignment).
+      INGESTION_GRAPH_MATCH: ${INGESTION_GRAPH_MATCH:-false}
+      INGESTION_FEED_GRAPH_CACHE_SECONDS: ${INGESTION_FEED_GRAPH_CACHE_SECONDS:-60}
+    volumes:
+      - ./keywords.txt:/app/keywords.txt:ro
+    networks:
+      - feed-gen-network
+    restart: unless-stopped
+
+  feed-assignment-worker:
+    build: ./services/feed-assignment-worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://feedgen:${POSTGRES_PASSWORD:-feedgen}@postgres:5432/feedgen
+      ASSIGNMENT_BATCH_SIZE: ${ASSIGNMENT_BATCH_SIZE:-5000}
+      ASSIGNMENT_POLL_SECONDS: ${ASSIGNMENT_POLL_SECONDS:-2.0}
+    networks:
+      - feed-gen-network
+    restart: unless-stopped
+
+  feed-api:
+    build:
+      context: .
+      dockerfile: services/feed-api/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://feedgen:${POSTGRES_PASSWORD:-feedgen}@postgres:5432/feedgen
+      # One public URL by default; advanced users can still override APP_PUBLIC_ORIGIN / PUBLIC_BASE_URL.
+      PUBLIC_URL: ${PUBLIC_URL:-https://feeds.fema.monster}
+      APP_PUBLIC_ORIGIN: ${APP_PUBLIC_ORIGIN:-}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production}
+      FORCE_SECURE_COOKIES: ${FORCE_SECURE_COOKIES:-false}
+      OWNER_HANDLE: ${OWNER_HANDLE:-}
+      ALLOWED_HANDLES: ${ALLOWED_HANDLES:-}
+      HOSTED_MODE: ${HOSTED_MODE:-false}
+      INGESTION_GRAPH_MATCH: ${INGESTION_GRAPH_MATCH:-false}
+    networks:
+      - feed-gen-network
+
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["caddy"]
+    depends_on:
+      - feed-api
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - feed-gen-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  feed-gen-network:
+    driver: bridge

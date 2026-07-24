@@ -1,0 +1,95 @@
+/* Language-specific styles (shared modal styles imported in component) */
+.language-modal {
+  max-width: 500px;
+}
+
+.language-search {
+  margin-bottom: 12px;
+}
+
+.languages-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  padding: 8px;
+  background: #1a1a1a;
+}
+
+.language-group {
+  margin-bottom: 8px;
+}
+
+.language-group:last-child {
+  margin-bottom: 0;
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 4px;
+}
+
+.language-option:hover {
+  background: #2f2f2f;
+  border-color: #4a4a4a;
+}
+
+.language-option input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: #4a9eff;
+  flex-shrink: 0;
+}
+
+.language-option input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.language-content {
+  flex: 1;
+}
+
+.language-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e0e0e0;
+  margin-bottom: 2px;
+}
+
+.language-code {
+  font-size: 10px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  color: #888;
+}
+
+.locale-option {
+  margin-left: 24px;
+  background: #222;
+  border-color: #2a2a2a;
+}
+
+.locale-option:hover {
+  background: #272727;
+}
+
+.language-locales {
+  margin-top: 4px;
+}
+
+.selected-languages-summary {
+  margin-top: 12px;
+  padding: 8px;
+  background: #1a2a3a;
+  border: 1px solid #3a4a5a;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #4a9eff;
+}

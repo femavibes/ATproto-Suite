@@ -1,0 +1,275 @@
+<h2 class="page-title">Data Sources</h2>
+<p style="text-align: center; color: #525252; margin-bottom: 1.5rem;">Parse and import location data from census sources</p>
+
+<div class="stats" style="margin-bottom: 2rem;">
+    <h2 style="margin-bottom: 1rem;">Database Overview</h2>
+    <div class="stats-grid" id="stats"></div>
+</div>
+
+<div class="section">
+    <h2>Geoapify Data Parser</h2>
+    <p class="note" style="margin-bottom: 1rem;">Unified parser for all countries with city boundaries, counties, and location hierarchy. Safe to re-run - updates existing cities and adds new ones.</p>
+    <div class="threshold-control">
+        <label>Population Threshold:</label>
+        <input type="number" id="geoapifyPopulationThreshold" value="50000" min="1000" step="1000">
+        <label style="margin-left: 1rem;">Countries:</label>
+        <select id="geoapifyCountries" multiple style="margin-left: 0.5rem; padding: 0.5rem; min-width: 150px; height: 150px;">
+            <!-- Options will be loaded dynamically -->
+        </select>
+        <button onclick="runGeoapifyParser()" style="margin-left: 1rem;">Parse & Update</button>
+    </div>
+    <div class="threshold-control" style="margin-top: 1rem;">
+        <label>Filter by Region (optional):</label>
+        <select id="geoapifyRegion" style="margin-left: 0.5rem; padding: 0.5rem; min-width: 150px;">
+            <option value="">All Regions</option>
+            <!-- Options will be loaded dynamically -->
+        </select>
+        <label style="margin-left: 1rem;">Search City (optional):</label>
+        <input type="text" id="geoapifyCitySearch" list="cityList" placeholder="e.g., Portland" style="margin-left: 0.5rem; padding: 0.5rem; min-width: 200px;">
+        <datalist id="cityList"></datalist>
+    </div>
+    <div style="margin-top: 1rem; padding: 1rem; background: #f5f5f5; border-radius: 4px;">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Polygon Geometry Options:</label>
+        <label style="display: block; margin-bottom: 0.5rem;">
+            <input type="checkbox" id="fetchPolygons" style="margin-right: 0.5rem;">
+            Fetch polygon boundaries from OpenStreetMap API
+        </label>
+        <label style="display: block; margin-bottom: 0.5rem;">
+            <input type="checkbox" id="forceRefreshPolygons" style="margin-right: 0.5rem;">
+            Force refresh (re-fetch even if polygons already exist)
+        </label>
+        <p class="note" style="margin-top: 0.5rem; margin-bottom: 0; font-size: 0.9em;">
+            <strong>Note:</strong> Polygon fetching is slow (API calls with delays). Only enable when needed. 
+            By default, polygons are only fetched for new cities or when missing. Use "Force refresh" to re-fetch all polygons.
+        </p>
+    </div>
+    <p class="note">Creates/updates countries, states, counties, and cities with bounding boxes. Links cities to counties.</p>
+    <div id="parserLogContainer" style="margin-top: 1.5rem; display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h3 style="margin: 0;">Parser Logs <span id="parserStatus" style="font-size: 0.8em; padding: 2px 8px; border-radius: 4px; margin-left: 0.5rem;"></span></h3>
+            <button onclick="clearParserLogs()" style="font-size: 0.8em; padding: 4px 10px;">Clear</button>
+        </div>
+        <pre id="parserLogs" style="background: #1a1a2e; color: #0f0; font-family: 'Courier New', monospace; font-size: 0.82em; padding: 1rem; border-radius: 6px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; line-height: 1.4;"></pre>
+    </div>
+</div>
+
+<script>
+    // v2.0 - Added region and city filters
+    async function loadStats() {
+        const response = await fetch('/api/stats', { headers: getAuthHeaders() });
+        const stats = await response.json();
+        
+        document.getElementById('stats').innerHTML = `
+            <div class="stat">
+                <div class="stat-value">${stats.cities || 0}</div>
+                <div class="stat-label">Cities</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">${stats.counties || 0}</div>
+                <div class="stat-label">Counties</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">${stats.states || 0}</div>
+                <div class="stat-label">States</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">${stats.countries || 0}</div>
+                <div class="stat-label">Countries</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">${stats.min_pop ? stats.min_pop.toLocaleString() : 'N/A'}</div>
+                <div class="stat-label">Min Population (Cities)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">${stats.max_pop ? stats.max_pop.toLocaleString() : 'N/A'}</div>
+                <div class="stat-label">Max Population (Cities)</div>
+            </div>
+        `;
+    }
+
+    async function loadConfig() {
+        const response = await fetch('/api/config', { headers: getAuthHeaders() });
+        const config = await response.json();
+        
+        if (config.min_population) {
+            document.getElementById('geoapifyPopulationThreshold').value = config.min_population;
+        }
+    }
+
+    async function loadGeoapifyCountries() {
+        try {
+            const response = await fetch('/api/geoapify-countries', { headers: getAuthHeaders() });
+            const countries = await response.json();
+            
+            const select = document.getElementById('geoapifyCountries');
+            // Clear existing options except selected ones
+            const selected = Array.from(select.selectedOptions).map(opt => opt.value);
+            select.innerHTML = '';
+            
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = country.name;
+                if (selected.includes(country.code)) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading countries:', error);
+        }
+    }
+
+    let parserEventSource = null;
+
+    function connectParserLogs() {
+        if (parserEventSource) parserEventSource.close();
+        parserEventSource = new EventSource('/api/parser-logs');
+        parserEventSource.onmessage = (e) => {
+            const entry = JSON.parse(e.data);
+            if (entry.msg.startsWith('__status__:')) {
+                const status = entry.msg.split(':')[1];
+                const el = document.getElementById('parserStatus');
+                if (status === 'running') {
+                    el.textContent = '● RUNNING';
+                    el.style.background = '#22c55e'; el.style.color = '#fff';
+                } else {
+                    el.textContent = '● IDLE';
+                    el.style.background = '#525252'; el.style.color = '#fff';
+                }
+                return;
+            }
+            const container = document.getElementById('parserLogContainer');
+            container.style.display = 'block';
+            const pre = document.getElementById('parserLogs');
+            const time = new Date(entry.ts).toLocaleTimeString();
+            let color = '#0f0';
+            if (entry.msg.includes('❌') || entry.msg.includes('ERROR') || entry.msg.includes('FATAL')) color = '#f87171';
+            else if (entry.msg.includes('⚠') || entry.msg.includes('WARNING')) color = '#fbbf24';
+            else if (entry.msg.includes('✓') || entry.msg.includes('✅') || entry.msg.includes('completed')) color = '#4ade80';
+            else if (entry.msg.includes('Inserted:')) color = '#60a5fa';
+            else if (entry.msg.includes('Updated:')) color = '#a78bfa';
+            pre.innerHTML += `<span style="color:#666">[${time}]</span> <span style="color:${color}">${entry.msg.replace(/</g,'&lt;')}</span>\n`;
+            pre.scrollTop = pre.scrollHeight;
+        };
+        parserEventSource.onerror = () => { setTimeout(connectParserLogs, 3000); };
+    }
+
+    function clearParserLogs() {
+        document.getElementById('parserLogs').innerHTML = '';
+    }
+
+    async function runGeoapifyParser() {
+        const threshold = parseInt(document.getElementById('geoapifyPopulationThreshold').value);
+        const countriesSelect = document.getElementById('geoapifyCountries');
+        const countries = Array.from(countriesSelect.selectedOptions).map(opt => opt.value);
+        const fetchPolygons = document.getElementById('fetchPolygons').checked;
+        const forceRefreshPolygons = document.getElementById('forceRefreshPolygons').checked;
+        const regionFilter = document.getElementById('geoapifyRegion').value;
+        const citySearch = document.getElementById('geoapifyCitySearch').value.trim();
+        
+        if (countries.length === 0) {
+            alert('Please select at least one country');
+            return;
+        }
+        
+        const polygonMsg = fetchPolygons 
+            ? (forceRefreshPolygons ? ' (will fetch/refresh all polygons - SLOW)' : ' (will fetch missing polygons - SLOW)')
+            : ' (skipping polygon fetch - FAST)';
+        
+        let filterMsg = '';
+        if (regionFilter) filterMsg += `\nRegion filter: ${regionFilter}`;
+        if (citySearch) filterMsg += `\nCity search: "${citySearch}"`;
+        
+        if (!confirm(`⚠️ WARNING: This will parse Geoapify data and modify the database.\n\nPopulation threshold: ${threshold.toLocaleString()}\nCountries: ${countries.join(', ').toUpperCase()}${filterMsg}${polygonMsg}\n\nAre you absolutely sure you want to continue?`)) {
+            return;
+        }
+        
+        document.getElementById('parserLogContainer').style.display = 'block';
+        clearParserLogs();
+        
+        try {
+            const response = await fetch('/api/parse-geoapify', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ 
+                    threshold: threshold,
+                    countries: countries,
+                    fetchPolygons: fetchPolygons,
+                    forceRefreshPolygons: forceRefreshPolygons,
+                    regionFilter: regionFilter || null,
+                    citySearch: citySearch || null
+                })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                const pre = document.getElementById('parserLogs');
+                pre.innerHTML += `<span style="color:#4ade80">${result.message}</span>\n`;
+            } else {
+                alert(`Error: ${result.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        }
+    }
+
+    async function loadRegions() {
+        try {
+            const response = await fetch('/api/regions-by-country', { headers: getAuthHeaders() });
+            const regions = await response.json();
+            
+            const select = document.getElementById('geoapifyRegion');
+            select.innerHTML = '<option value="">All Regions</option>';
+            
+            regions.forEach(region => {
+                const option = document.createElement('option');
+                option.value = region.region_code;
+                option.textContent = `${region.region_name} (${region.region_code})`;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading regions:', error);
+        }
+    }
+
+    let citiesData = [];
+
+    async function loadCities() {
+        try {
+            const response = await fetch('/api/cities-for-search', { headers: getAuthHeaders() });
+            citiesData = await response.json();
+            
+            const datalist = document.getElementById('cityList');
+            datalist.innerHTML = '';
+            
+            citiesData.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.name;
+                option.textContent = `${city.name}, ${city.region_name}`;
+                datalist.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading cities:', error);
+        }
+    }
+
+    document.getElementById('geoapifyCitySearch').addEventListener('input', function(e) {
+        const cityName = e.target.value;
+        const city = citiesData.find(c => c.name === cityName);
+        if (city && city.country_code) {
+            const countryCode = city.country_code.toLowerCase();
+            const select = document.getElementById('geoapifyCountries');
+            Array.from(select.options).forEach(opt => {
+                if (opt.value === countryCode) opt.selected = true;
+            });
+        }
+    });
+
+    loadStats();
+    loadConfig();
+    loadGeoapifyCountries();
+    loadRegions();
+    loadCities();
+    connectParserLogs();
+</script>

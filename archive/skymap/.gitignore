@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Database
+postgres_data/
+*.dump
+*.sql.backup
+# But allow backups in the backup directory
+!data/skymappostgresbackup/*.dump
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backup files
+*.backup
+backups/
+*_backup_*
+
+# Cloudflare (if any)
+.cloudflared/
+
+# SSL certificates (should not be in git)
+*.pem
+*.key
+*.crt
+*.csr
+
+# Google Cloud credentials
+gcs-credentials.json
+*credentials*.json
+
+# Nginx (host system files, not in repo)
+# Note: nginx/*.conf are in repo, but actual /etc/nginx files are not
+
+# Ozone (production only, not in git)
+ozone/postgres/
+ozone/caddy/
+ozone/**/*.lock
+ozone/*.env
+ozone/*.env.*
+docker-compose.override.yml
+gcs-credentials.json

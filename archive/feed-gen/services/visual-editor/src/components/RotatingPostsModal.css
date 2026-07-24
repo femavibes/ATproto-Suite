@@ -1,0 +1,58 @@
+.rotating-posts-modal {
+  max-width: 600px;
+}
+
+.post-urls-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.post-url-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.post-url-input {
+  flex: 1;
+}
+
+.btn-remove {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: #3a3a3a;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-remove:hover {
+  background: #4a4a4a;
+  border-color: #5a5a5a;
+  color: #ff6b6b;
+}
+
+.btn-add {
+  padding: 8px 16px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.btn-add:hover {
+  background: #3a3a3a;
+  border-color: #4a4a4a;
+  color: #4a9eff;
+}

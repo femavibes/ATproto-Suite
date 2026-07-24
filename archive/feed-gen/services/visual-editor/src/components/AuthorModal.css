@@ -1,0 +1,109 @@
+/* Author-specific styles (shared modal styles imported in component) */
+.author-modal {
+  max-width: 550px;
+}
+
+.authors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.author-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.author-input {
+  flex: 1;
+}
+
+.list-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.list-input {
+  flex: 1;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.btn-add-list {
+  padding: 10px 16px;
+  background: #3a3a3a;
+  border: 1px solid #4a4a4a;
+  border-radius: 6px;
+  color: #e0e0e0;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-add-list:hover:not(:disabled) {
+  background: #4a4a4a;
+  border-color: #4a9eff;
+  color: #4a9eff;
+}
+
+.btn-add-list:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lists-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  padding: 8px;
+  background: #1a1a1a;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+}
+
+.list-uri {
+  flex: 1;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 11px;
+  color: #888;
+  word-break: break-all;
+}
+
+.btn-remove-small {
+  background: #3a3a3a;
+  border: 1px solid #4a4a4a;
+  color: #e0e0e0;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-remove-small:hover {
+  background: #4a1a1a;
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}

@@ -1,0 +1,403 @@
+    <style>
+        #interestsTab .container { max-width: 1200px; margin: 0 auto; }
+        #interestsTab h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; }
+        .interests-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 2px solid #ddd; }
+        .interests-tab { padding: 0.5rem 1rem; background: none; color: #666; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; font-size: 0.9rem; font-weight: 500; box-shadow: none; transform: none; }
+        .interests-tab.active { color: #333; border-bottom-color: #333; }
+        .interests-tab:hover { color: #333; }
+        .interests-tab-content { display: none; }
+        .interests-tab-content.active { display: block; }
+        .note { font-size: 0.9rem; color: #737373; font-style: italic; }
+    </style>
+    <div class="container">
+        <h1>Interests Management</h1>
+        
+        <div class="interests-tabs">
+            <button class="interests-tab active" onclick="switchInterestsTab('interests')">Interests</button>
+            <button class="interests-tab" onclick="switchInterestsTab('categories')">Categories</button>
+            <button class="interests-tab" onclick="switchInterestsTab('customTags')">Custom Tags</button>
+        </div>
+        
+        <!-- Interests Section -->
+        <div id="interests" class="interests-tab-content active">
+            <div class="section">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 style="margin:0;">Interests</h2>
+                    <button onclick="showAddInterestForm()">Add Interest</button>
+                </div>
+                <div id="addInterestForm" style="display:none; margin-top:1rem; margin-bottom:1rem;">
+                    <div style="display:flex; gap:0.5rem;">
+                        <input type="text" id="newInterestKey" placeholder="Key (e.g., photography)" style="flex:1;">
+                        <input type="text" id="newInterestName" placeholder="Name (e.g., Photography)" style="flex:1;">
+                        <select id="newInterestCategory" style="flex:1;"></select>
+                    </div>
+                    <textarea id="newInterestDescription" placeholder="Description" style="width:100%; display:block;"></textarea>
+                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <label>Sort: <input type="number" id="newInterestSortOrder" value="0" style="width:80px;"></label>
+                        <label><input type="checkbox" id="newInterestNsfw"> NSFW</label>
+                    </div>
+                    <button onclick="addInterest()">Create</button>
+                    <button onclick="hideAddInterestForm()">Cancel</button>
+                </div>
+            <div style="margin-bottom:1rem;">
+                <input type="text" id="searchInterests" placeholder="Search interests..." onkeyup="filterInterests()">
+                <select id="filterCategory" onchange="filterInterests()">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            <div id="interestsList"></div>
+            </div>
+        </div>
+
+        <!-- Categories Section -->
+        <div id="categories" class="interests-tab-content">
+            <div class="section">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 style="margin:0;">Categories</h2>
+                    <button onclick="showAddCategoryForm()">Add Category</button>
+                </div>
+            <div id="categoriesList"></div>
+            <div id="addCategoryForm" style="display:none; margin-top:1rem;">
+                <input type="text" id="newCategoryKey" placeholder="Key (e.g., creative)">
+                <input type="text" id="newCategoryName" placeholder="Name (e.g., Creative)">
+                <input type="number" id="newCategorySortOrder" placeholder="Sort Order" value="0">
+                <button onclick="addCategory()">Create</button>
+                <button onclick="hideAddCategoryForm()">Cancel</button>
+            </div>
+            </div>
+        </div>
+
+        <!-- Custom Tags Section -->
+        <div id="customTags" class="interests-tab-content">
+            <div class="section">
+                <h2>Custom Tags (from Events)</h2>
+            <p class="note">Popular custom tags that can be promoted to official interests</p>
+            <div id="customTagsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchInterestsTab(tabName) {
+            const clickedTab = event.currentTarget;
+            document.querySelectorAll('.interests-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.interests-tab-content').forEach(c => c.classList.remove('active'));
+            clickedTab.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function getAuthHeaders() {
+            return { 'Content-Type': 'application/json' };
+        }
+
+        let categories = [];
+        let interests = [];
+        let customTags = [];
+
+        async function loadCategories() {
+            const response = await fetch('/api/admin/interests/categories', { headers: getAuthHeaders() });
+            categories = await response.json();
+            
+            const list = document.getElementById('categoriesList');
+            list.innerHTML = categories.map(cat => `
+                <div style="padding:0.5rem; border:1px solid #ddd; margin-bottom:0.5rem;">
+                    <strong>${cat.name}</strong> (${cat.key}) - Sort: ${cat.sort_order}
+                    <button onclick="editCategory(${cat.id})">Edit</button>
+                </div>
+            `).join('');
+
+            // Update filter dropdown
+            const filter = document.getElementById('filterCategory');
+            const newCatSelect = document.getElementById('newInterestCategory');
+            const options = categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+            filter.innerHTML = '<option value="">All Categories</option>' + options;
+            newCatSelect.innerHTML = '<option value="">Select Category</option>' + options;
+        }
+
+        async function loadInterests() {
+            const response = await fetch('/api/admin/interests', { headers: getAuthHeaders() });
+            interests = await response.json();
+            displayInterests();
+        }
+
+        function displayInterests() {
+            const search = document.getElementById('searchInterests').value.toLowerCase();
+            const categoryFilter = document.getElementById('filterCategory').value;
+            
+            const filtered = interests.filter(i => {
+                const matchesSearch = !search || i.name.toLowerCase().includes(search) || i.key.toLowerCase().includes(search);
+                const matchesCategory = !categoryFilter || i.category_id == categoryFilter;
+                return matchesSearch && matchesCategory;
+            });
+
+            const grouped = {};
+            filtered.forEach(i => {
+                const catName = i.category_name || 'Uncategorized';
+                if (!grouped[catName]) grouped[catName] = [];
+                grouped[catName].push(i);
+            });
+
+            const list = document.getElementById('interestsList');
+            list.innerHTML = Object.entries(grouped).map(([catName, items]) => `
+                <div style="margin-bottom:1.5rem;">
+                    <h3>${catName}</h3>
+                    ${items.map(i => `
+                        <div style="padding:0.5rem; border:1px solid #ddd; margin-bottom:0.5rem; ${!i.active ? 'opacity:0.5; background:#f5f5f5;' : ''}">
+                            <strong>${i.name}</strong> (${i.key}) - Sort: ${i.sort_order || 0}
+                            ${i.is_nsfw ? '<span style="color:red;">[NSFW]</span>' : ''}
+                            ${!i.active ? '<span style="color:orange;">[DEACTIVATED]</span>' : ''}
+                            <br>
+                            <small>Users: ${i.user_count || 0} | Events: ${i.event_count || 0}</small>
+                            ${i.description ? `<br><small>${i.description}</small>` : ''}
+                            <br>
+                            <button onclick="editInterest(${i.id})">Edit</button>
+                            ${i.active ? `<button onclick="deactivateInterest(${i.id})">Deactivate</button>` : `<button onclick="reactivateInterest(${i.id})">Reactivate</button>`}
+                            <button onclick="hardDeleteInterest(${i.id})" style="background:#dc2626;">Hard Delete</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        function filterInterests() {
+            displayInterests();
+        }
+
+        async function loadCustomTags() {
+            const response = await fetch('/api/admin/interests/custom-tags', { headers: getAuthHeaders() });
+            customTags = await response.json();
+            
+            const list = document.getElementById('customTagsList');
+            list.innerHTML = customTags.map(tag => `
+                <div style="padding:0.5rem; border:1px solid #ddd; margin-bottom:0.5rem;">
+                    <strong>${tag.custom_tag}</strong> - Used ${tag.usage_count} times
+                    <button onclick="promoteTag('${tag.custom_tag}')">Promote to Interest</button>
+                </div>
+            `).join('');
+        }
+
+        function showAddCategoryForm() {
+            document.getElementById('addCategoryForm').style.display = 'block';
+        }
+
+        function hideAddCategoryForm() {
+            const form = document.getElementById('addCategoryForm');
+            form.style.display = 'none';
+            delete form.dataset.editId;
+            document.querySelector('#addCategoryForm button[onclick="addCategory()"]').textContent = 'Create';
+            document.getElementById('newCategoryKey').value = '';
+            document.getElementById('newCategoryName').value = '';
+            document.getElementById('newCategorySortOrder').value = '0';
+        }
+
+        function editCategory(id) {
+            const category = categories.find(c => c.id === id);
+            if (!category) return;
+
+            document.getElementById('newCategoryKey').value = category.key;
+            document.getElementById('newCategoryName').value = category.name;
+            document.getElementById('newCategorySortOrder').value = category.sort_order || 0;
+            
+            document.getElementById('addCategoryForm').style.display = 'block';
+            document.getElementById('addCategoryForm').dataset.editId = id;
+            document.querySelector('#addCategoryForm button[onclick="addCategory()"]').textContent = 'Update';
+        }
+
+        async function addCategory() {
+            const form = document.getElementById('addCategoryForm');
+            const editId = form.dataset.editId;
+            
+            const key = document.getElementById('newCategoryKey').value;
+            const name = document.getElementById('newCategoryName').value;
+            const sortOrder = document.getElementById('newCategorySortOrder').value;
+
+            const url = editId ? `/api/admin/interests/categories/${editId}` : '/api/admin/interests/categories';
+            const method = editId ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ key, name, sort_order: parseInt(sortOrder) })
+            });
+
+            if (response.ok) {
+                hideAddCategoryForm();
+                loadCategories();
+            } else {
+                alert(editId ? 'Error updating category' : 'Error creating category');
+            }
+        }
+
+        function showAddInterestForm() {
+            document.getElementById('addInterestForm').style.display = 'block';
+        }
+
+        function hideAddInterestForm() {
+            const form = document.getElementById('addInterestForm');
+            form.style.display = 'none';
+            delete form.dataset.editId;
+            document.querySelector('#addInterestForm button[onclick="addInterest()"]').textContent = 'Create';
+            document.getElementById('newInterestKey').value = '';
+            document.getElementById('newInterestName').value = '';
+            document.getElementById('newInterestDescription').value = '';
+            document.getElementById('newInterestCategory').value = '';
+            document.getElementById('newInterestSortOrder').value = '0';
+            document.getElementById('newInterestNsfw').checked = false;
+        }
+
+        async function addInterest() {
+            const form = document.getElementById('addInterestForm');
+            const editId = form.dataset.editId;
+            
+            const key = document.getElementById('newInterestKey').value.trim();
+            const name = document.getElementById('newInterestName').value.trim();
+            const description = document.getElementById('newInterestDescription').value.trim();
+            const categoryId = document.getElementById('newInterestCategory').value;
+            const sortOrder = document.getElementById('newInterestSortOrder').value;
+            const isNsfw = document.getElementById('newInterestNsfw').checked;
+
+            if (!key || !name) {
+                alert('Key and Name are required');
+                return;
+            }
+
+            const url = editId ? `/api/admin/interests/${editId}` : '/api/admin/interests';
+            const method = editId ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ 
+                    key, 
+                    name, 
+                    description: description || null, 
+                    category_id: categoryId ? parseInt(categoryId) : null,
+                    sort_order: parseInt(sortOrder) || 0,
+                    is_nsfw: isNsfw
+                })
+            });
+
+            if (response.ok) {
+                hideAddInterestForm();
+                loadInterests();
+            } else {
+                const errorData = await response.json();
+                alert(editId ? 'Error updating interest: ' + (errorData.error || 'Unknown error') : 'Error creating interest: ' + (errorData.error || 'Unknown error'));
+            }
+        }
+
+        async function editInterest(id) {
+            const interest = interests.find(i => i.id === id);
+            if (!interest) return;
+
+            document.getElementById('newInterestKey').value = interest.key;
+            document.getElementById('newInterestName').value = interest.name;
+            document.getElementById('newInterestDescription').value = interest.description || '';
+            document.getElementById('newInterestCategory').value = interest.category_id || '';
+            document.getElementById('newInterestSortOrder').value = interest.sort_order || 0;
+            document.getElementById('newInterestNsfw').checked = interest.is_nsfw || false;
+            
+            document.getElementById('addInterestForm').style.display = 'block';
+            document.getElementById('addInterestForm').dataset.editId = id;
+            document.querySelector('#addInterestForm button[onclick="addInterest()"]').textContent = 'Update';
+        }
+
+        async function deactivateInterest(id) {
+            const interest = interests.find(i => i.id === id);
+            if (!confirm(`Deactivate "${interest.name}"? This hides it but keeps the data.`)) return;
+
+            try {
+                const response = await fetch(`/api/admin/interests/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    alert('Interest deactivated');
+                    loadInterests();
+                } else {
+                    const data = await response.json();
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function reactivateInterest(id) {
+            const interest = interests.find(i => i.id === id);
+            if (!confirm(`Reactivate "${interest.name}"?`)) return;
+
+            try {
+                const response = await fetch(`/api/admin/interests/${id}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ 
+                        name: interest.name,
+                        description: interest.description,
+                        aliases: interest.aliases,
+                        category_id: interest.category_id,
+                        sort_order: interest.sort_order,
+                        is_nsfw: interest.is_nsfw,
+                        active: true
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Interest reactivated');
+                    loadInterests();
+                } else {
+                    const data = await response.json();
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function hardDeleteInterest(id) {
+            const interest = interests.find(i => i.id === id);
+            if (!confirm(`PERMANENTLY DELETE "${interest.name}"? This cannot be undone and will break any users/events using it!`)) return;
+
+            try {
+                const response = await fetch(`/api/admin/interests/${id}/hard`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    alert('Interest permanently deleted');
+                    loadInterests();
+                } else {
+                    const data = await response.json();
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function promoteTag(tag) {
+            const name = prompt(`Promote "${tag}" to official interest. Enter display name:`, tag);
+            if (!name) return;
+
+            const response = await fetch('/api/admin/interests/promote-tag', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ custom_tag: tag, name })
+            });
+
+            if (response.ok) {
+                alert('Tag promoted successfully');
+                loadInterests();
+                loadCustomTags();
+            } else {
+                alert('Error promoting tag');
+            }
+        }
+
+        // Load data on page load
+        loadCategories();
+        loadInterests();
+        loadCustomTags();
+    </script>

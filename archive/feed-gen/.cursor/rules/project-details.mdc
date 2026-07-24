@@ -1,0 +1,17 @@
+---
+name: project-details
+description: This is a new rule
+---
+
+# Overview
+
+Docker compose V2
+/root/feed-gen/PROGRESS.md always document progress here
+/root/feed-gen/PLATFORM_PLAN.md this is the master doc with the plan. We may deviate from this plan as we develop so if anything seems to conflict with this plan please just ask, it may be intentional.
+Postgres 16 port 5440
+
+# Post Metadata Source Of Truth
+
+- Use `/home/ubuntu/feed-gen/POST_METADATA.md` as the canonical guide when adding new nodes, filters, and evaluator field access.
+- Prefer Bluesky-native field names from that document (e.g. `createdAt`, `langs`, `embed.*`, `facets.*`, `reply.*`).
+- Ignore Graze-specific `hydrated_metadata.*` fields by default unless a task explicitly asks to implement them.

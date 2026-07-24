@@ -1,0 +1,79 @@
+# Keywords for Aho-Corasick filtering
+# One keyword per line
+# Case-insensitive matching
+# These are placeholder keywords - will be replaced by feed keywords from database later
+
+urbanism
+walkable
+transit
+public transport
+bike lane
+cycling
+pedestrian
+zoning
+housing
+affordable housing
+city planning
+urban planning
+architecture
+sustainable
+climate
+environment
+renewable
+solar
+wind energy
+electric vehicle
+ev
+tesla
+technology
+ai
+artificial intelligence
+machine learning
+programming
+coding
+software
+developer
+startup
+entrepreneurship
+business
+finance
+crypto
+bitcoin
+blockchain
+web3
+nft
+gaming
+video games
+esports
+streaming
+music
+art
+design
+photography
+food
+cooking
+recipe
+travel
+adventure
+fitness
+health
+wellness
+yoga
+meditation
+science
+research
+education
+learning
+books
+reading
+writing
+journalism
+news
+politics
+democracy
+freedom
+human rights
+social justice
+equality
+diversity
+inclusion

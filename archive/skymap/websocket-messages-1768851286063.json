@@ -1,0 +1,2003 @@
+{
+  "feed_uri": "at://did:plc:hikdgxc7fic2hjekzn2ebrk3/app.bsky.feed.generator/skymap-tags",
+  "captured_at": "2026-01-19T19:34:46.063Z",
+  "message_count": 20,
+  "messages": [
+    {
+      "did": "did:plc:ndjdmq6yfdkm7psa7ncumn5k",
+      "time_us": 1768479196945992,
+      "kind": "commit",
+      "commit": {
+        "rev": "222223cyfwp22",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchkn3ixiqk2",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "bridgyOriginalText": "<p>Uptown F trains are delayed while we address a mechanical problem on a train at East Broadway.</p><p>For latest updates, visit <a href=\"https://new.mta.info/agency/new-york-city-transit\" target=\"_blank\" rel=\"nofollow noopener\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"ellipsis\">new.mta.info/agency/new-york-c</span><span class=\"invisible\">ity-transit</span></a> and <a href=\"https://mta.info\" target=\"_blank\" rel=\"nofollow noopener\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"\">mta.info</span><span class=\"invisible\"></span></a>. <a href=\"https://stefanbohacek.online/tags/nyc\" class=\"mention hashtag\" rel=\"tag\">#<span>nyc</span></a> <a href=\"https://stefanbohacek.online/tags/mta\" class=\"mention hashtag\" rel=\"tag\">#<span>mta</span></a> <a href=\"https://stefanbohacek.online/tags/subway\" class=\"mention hashtag\" rel=\"tag\">#<span>subway</span></a></p>",
+          "bridgyOriginalUrl": "https://stefanbohacek.online/@mtaupdates/115899052221070061",
+          "createdAt": "2026-01-15T12:13:10.000Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "$type": "app.bsky.embed.external#external",
+              "description": "New York City Transit manages and maintains subway and bus service in New York.",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreic6hiqpe4hfy33lsg7iztzhalgoegsjx77nini7sgn66vgneldifa"
+                },
+                "mimeType": "image/jpeg",
+                "size": 1009404
+              },
+              "title": "New York City Transit",
+              "uri": "https://www.mta.info/agency/new-york-city-transit"
+            }
+          },
+          "facets": [
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "nyc"
+                }
+              ],
+              "index": {
+                "byteEnd": 198,
+                "byteStart": 194
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "mta"
+                }
+              ],
+              "index": {
+                "byteEnd": 203,
+                "byteStart": 199
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "subway"
+                }
+              ],
+              "index": {
+                "byteEnd": 211,
+                "byteStart": 204
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://new.mta.info/agency/new-york-city-transit"
+                }
+              ],
+              "index": {
+                "byteEnd": 171,
+                "byteStart": 122
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://mta.info"
+                }
+              ],
+              "index": {
+                "byteEnd": 192,
+                "byteStart": 176
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "Uptown F trains are delayed while we address a mechanical problem on a train at East Broadway.\n\nFor latest updates, visit https://new.mta.info/agency/new-york-city-transit and https://mta.info. #nyc #mta #subway"
+        },
+        "cid": "bafyreih6yi6qc5gjjtxlnw4n436hjxpfmk7i2se63rhvy2xsmy3m23cgea"
+      }
+    },
+    {
+      "did": "did:plc:s7isc2tzjunkttchg7zrxplf",
+      "time_us": 1768479618833541,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchkzqgqkh2d",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchkznxtzs2y",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T12:20:15.017Z",
+          "embed": {
+            "$type": "app.bsky.embed.images",
+            "images": [
+              {
+                "alt": "",
+                "aspectRatio": {
+                  "height": 2000,
+                  "width": 1336
+                },
+                "image": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreiftwlpemzw5x4zhq2xx6izcutxn2ssgzusv3umoyw53fmqhcvmlae"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 994143
+                }
+              }
+            ]
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "cityscape"
+                }
+              ],
+              "index": {
+                "byteEnd": 29,
+                "byteStart": 19
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "longexposure"
+                }
+              ],
+              "index": {
+                "byteEnd": 43,
+                "byteStart": 30
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "nyc"
+                }
+              ],
+              "index": {
+                "byteEnd": 48,
+                "byteStart": 44
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "Shoot For The Moon\n#cityscape #longexposure #nyc"
+        },
+        "cid": "bafyreich275afj6e3kssxtrcek6xkknhvf4m63kjqfjlpp4cvec6i72emi"
+      }
+    },
+    {
+      "did": "did:plc:pzobmjzmjf3kifdyqmwl4iqs",
+      "time_us": 1768480201831431,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchll4y3dx22",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchlktj4kc2a",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T12:29:51.199Z",
+          "embed": {
+            "$type": "app.bsky.embed.images",
+            "images": [
+              {
+                "alt": "A graphic with a purple background featuring a skyline view of Midtown Manhattan, including the Empire State Building. Large white text reads, \"NYC has the fastest-growing bisexual population in the world\". Smaller blue text below states, \"Feeld’s new data shows a 161% jump in bisexual identification among NYC users\". The image includes a byline for Laura Ratliff and logos for Time Out and Robyn Ochs.",
+                "aspectRatio": {
+                  "height": 900,
+                  "width": 1600
+                },
+                "image": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreigbhdsk3b65q6ryydtp2qb2jyy6pvddjjmn7ctyns6wnas7v4wgpe"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 689196
+                }
+              }
+            ]
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://www.timeout.com/newyork/news/nyc-has-the-fastest-growing-bisexual-population-in-the-world-010726"
+                }
+              ],
+              "index": {
+                "byteEnd": 256,
+                "byteStart": 225
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "BiVisibility"
+                }
+              ],
+              "index": {
+                "byteEnd": 271,
+                "byteStart": 258
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "NYC"
+                }
+              ],
+              "index": {
+                "byteEnd": 276,
+                "byteStart": 272
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "LGBTQ"
+                }
+              ],
+              "index": {
+                "byteEnd": 283,
+                "byteStart": 277
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "NYC is the world’s fastest-growing bisexual hub, with a 161% increase in identification! This isn’t a trend... it’s a movement of living without apology. We’re here, growing, and refusing to hide. 💖💜💙\n\nRead: www.timeout.com/newyork/news...\n\n#BiVisibility #NYC #LGBTQ"
+        },
+        "cid": "bafyreihyrw2k4eroj3oonnujsiam2v5pvz4mfojuwyrf4e2uc7f7ycbioe"
+      }
+    },
+    {
+      "did": "did:plc:chqagdlmw4yfrdh3dr5ktxvl",
+      "time_us": 1768480208754016,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchllctoxb2b",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchll6mcr22c",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T12:30:02.795Z",
+          "embed": {
+            "$type": "app.bsky.embed.images",
+            "images": [
+              {
+                "alt": "",
+                "aspectRatio": {
+                  "height": 1292,
+                  "width": 2000
+                },
+                "image": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreierby4kqobizfkkewqrqurewg3m6nilg7kmqs4mqiqa5a7mnwganq"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 912680
+                }
+              }
+            ]
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "UrbanGaze"
+                }
+              ],
+              "index": {
+                "byteEnd": 10,
+                "byteStart": 0
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "PhotographersOfBluesky"
+                }
+              ],
+              "index": {
+                "byteEnd": 34,
+                "byteStart": 11
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "photography"
+                }
+              ],
+              "index": {
+                "byteEnd": 47,
+                "byteStart": 35
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "blueskyphotography"
+                }
+              ],
+              "index": {
+                "byteEnd": 67,
+                "byteStart": 48
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "PhotographersUnited"
+                }
+              ],
+              "index": {
+                "byteEnd": 88,
+                "byteStart": 68
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "NYC"
+                }
+              ],
+              "index": {
+                "byteEnd": 93,
+                "byteStart": 89
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "#UrbanGaze #PhotographersOfBluesky #photography #blueskyphotography #PhotographersUnited #NYC"
+        },
+        "cid": "bafyreifjgddkvh2x3bdpdhuyerv2agrt7meyhvypw4je5hxg3ahxgg5f2m"
+      }
+    },
+    {
+      "did": "did:plc:mkaxngaoofpse3t6vfeq2nu3",
+      "time_us": 1768480363336180,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchlpw6iyu2a",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchlpsecns2a",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T12:32:37.818Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "Carl Sheline urged residents and businesses to know their rights and have a plan if they’re contacted by agents.",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreiabgq3o6k7d4eusfo3km4aovr2hzd52dnhugfarswqoq2upq7upja"
+                },
+                "mimeType": "image/jpeg",
+                "size": 905589
+              },
+              "title": "Portland and Lewiston are bracing for ICE to come to their cities",
+              "uri": "https://shorturl.at/G5KPa"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Inlandsterrorismus"
+                }
+              ],
+              "index": {
+                "byteEnd": 57,
+                "byteStart": 38
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "ICE"
+                }
+              ],
+              "index": {
+                "byteEnd": 142,
+                "byteStart": 138
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Portland"
+                }
+              ],
+              "index": {
+                "byteEnd": 186,
+                "byteStart": 177
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://shorturl.at/G5KPa"
+                }
+              ],
+              "index": {
+                "byteEnd": 229,
+                "byteStart": 212
+              }
+            }
+          ],
+          "langs": [
+            "de"
+          ],
+          "text": "Portland & Lewiston bereiten sich auf #Inlandsterrorismus vor\n\n„Unsere Gemeinde ist besorgt & ängstlich angesichts der Nachricht, dass #ICE plant, nächste Woche Beamte nach #Portland & Lewiston zu entsenden. shorturl.at/G5KPa Wir sind eine gastfreundliche Stadt“, sagte Bürgermeister Mark Dion."
+        },
+        "cid": "bafyreiaqph2xmzef6cdfedfb5yabiop5ig4tym44hivozcnxuvcygzrkly"
+      }
+    },
+    {
+      "did": "did:plc:rlbtjnal6iigrzlj4ikli32u",
+      "time_us": 1768480500053999,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchltz7jmo2o",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchltwvoc22e",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T12:34:56.800Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "YouTube video by CHANNEL NYC",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreigehnzqfs67lyq3h622o34f5gkmix2lbzpar7mr5nj7c3avxsgs2i"
+                },
+                "mimeType": "image/jpeg",
+                "size": 637692
+              },
+              "title": "\"ASK ANITA!\" -  ALTERNATE SIDE OF THE STREET PARKING (PROMO)",
+              "uri": "https://youtu.be/JqpmRYh0Q9I?si=R2zvJzI_Cr65vA-k"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "AskAnita"
+                }
+              ],
+              "index": {
+                "byteEnd": 26,
+                "byteStart": 17
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#mention",
+                  "did": "did:plc:mw7oh5sk5jbjk2362oly7kci"
+                }
+              ],
+              "index": {
+                "byteEnd": 56,
+                "byteStart": 32
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "nyc"
+                }
+              ],
+              "index": {
+                "byteEnd": 133,
+                "byteStart": 129
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "newyorkcity"
+                }
+              ],
+              "index": {
+                "byteEnd": 146,
+                "byteStart": 134
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "alternateside"
+                }
+              ],
+              "index": {
+                "byteEnd": 161,
+                "byteStart": 147
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "parking"
+                }
+              ],
+              "index": {
+                "byteEnd": 170,
+                "byteStart": 162
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "transportation"
+                }
+              ],
+              "index": {
+                "byteEnd": 186,
+                "byteStart": 171
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://youtu.be/JqpmRYh0Q9I?si=R2zvJzI_Cr65vA-k"
+                }
+              ],
+              "index": {
+                "byteEnd": 212,
+                "byteStart": 188
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "Did you miss us? #AskAnita! and @channelnyc1.bsky.social are back, with the story behind Alternate Side Of The Street Parking. \n\n#nyc #newyorkcity #alternateside #parking #transportation\n\nyoutu.be/JqpmRYh0Q9I?..."
+        },
+        "cid": "bafyreig2hoa2lcqwdcoldqill5wrbjrohjr4clpxae4v7dcih4czysbrha"
+      }
+    },
+    {
+      "did": "did:plc:cw5fa57pwxyira4souq7phpt",
+      "time_us": 1768480680254304,
+      "kind": "commit",
+      "commit": {
+        "rev": "222223cyhna22",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchlnmq7spi2",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "bridgyOriginalText": "<p>WiredNYC – Certified Buildings<br />Source: <a href=\"https://data.cityofnewyork.us/d/37it-gmcp\" target=\"_blank\" rel=\"nofollow noopener\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"ellipsis\">data.cityofnewyork.us/d/37it-g</span><span class=\"invisible\">mcp</span></a><br /><a href=\"https://stefanbohacek.online/tags/nyc\" class=\"mention hashtag\" rel=\"tag\">#<span>nyc</span></a> <a href=\"https://stefanbohacek.online/tags/data\" class=\"mention hashtag\" rel=\"tag\">#<span>data</span></a> <a href=\"https://stefanbohacek.online/tags/dataviz\" class=\"mention hashtag\" rel=\"tag\">#<span>dataviz</span></a></p>",
+          "bridgyOriginalUrl": "https://stefanbohacek.online/@nycdatabot/115899123540855974",
+          "createdAt": "2026-01-15T12:31:18.000Z",
+          "embed": {
+            "$type": "app.bsky.embed.images",
+            "images": [
+              {
+                "$type": "app.bsky.embed.images#image",
+                "alt": "A map with locations from the WiredNYC – Certified Buildings dataset. Please visit the link for full details.",
+                "aspectRatio": {
+                  "height": 600,
+                  "width": 900
+                },
+                "image": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreidkh4ri56pmsz7dstgacky2epzd2e324xfw2u3jgo5vwae4qpvnvy"
+                  },
+                  "mimeType": "image/png",
+                  "size": 266015
+                }
+              }
+            ]
+          },
+          "facets": [
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "nyc"
+                }
+              ],
+              "index": {
+                "byteEnd": 87,
+                "byteStart": 83
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "data"
+                }
+              ],
+              "index": {
+                "byteEnd": 93,
+                "byteStart": 88
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "dataviz"
+                }
+              ],
+              "index": {
+                "byteEnd": 102,
+                "byteStart": 94
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://data.cityofnewyork.us/d/37it-gmcp"
+                }
+              ],
+              "index": {
+                "byteEnd": 82,
+                "byteStart": 41
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "WiredNYC – Certified Buildings\nSource: https://data.cityofnewyork.us/d/37it-gmcp\n#nyc #data #dataviz"
+        },
+        "cid": "bafyreickur6n3hmcl7eo7g7hcfafvqbpqyjv7jx42y35wdpo3sq56oampu"
+      }
+    },
+    {
+      "did": "did:plc:4powcnwhdxom75wqml7a4zgl",
+      "time_us": 1768481324639229,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchmmlq7ae2a",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchmmlprku2a",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T12:48:43.808Z",
+          "embed": {
+            "$type": "app.bsky.embed.images",
+            "images": [
+              {
+                "alt": "",
+                "image": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreibsxn3topenshgjvzqres46pdbzbadvkj7lbaxq5wwbo4pbus6kwi"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 206320
+                }
+              }
+            ]
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Crypto"
+                }
+              ],
+              "index": {
+                "byteEnd": 169,
+                "byteStart": 162
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "BTC"
+                }
+              ],
+              "index": {
+                "byteEnd": 174,
+                "byteStart": 170
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "NYC"
+                }
+              ],
+              "index": {
+                "byteEnd": 179,
+                "byteStart": 175
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "XRP"
+                }
+              ],
+              "index": {
+                "byteEnd": 184,
+                "byteStart": 180
+              }
+            }
+          ],
+          "text": "📰📈  Whales cautious accumulation signals a structural weakness in BTCs momentum. Despite bullish indicators, the $101K reclaim may be a top, not a bottom.\n\n#Crypto #BTC #NYC #XRP"
+        },
+        "cid": "bafyreidkdr5gv7v33eiq5tiatbcxqjk7stisfzcije54dfb2xpv2eunmxe"
+      }
+    },
+    {
+      "did": "did:plc:4powcnwhdxom75wqml7a4zgl",
+      "time_us": 1768481437948134,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchmpxv4oc2y",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchmpxuk4k2y",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T12:50:37.204Z",
+          "embed": {
+            "$type": "app.bsky.embed.images",
+            "images": [
+              {
+                "alt": "",
+                "image": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreiddzl3buhr5y42uwivbjgwpuqcvm7b3dqyas5a3oyl7gxeejermoq"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 199620
+                }
+              }
+            ]
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Crypto"
+                }
+              ],
+              "index": {
+                "byteEnd": 264,
+                "byteStart": 257
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "NYC"
+                }
+              ],
+              "index": {
+                "byteEnd": 269,
+                "byteStart": 265
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "XRP"
+                }
+              ],
+              "index": {
+                "byteEnd": 274,
+                "byteStart": 270
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "NCAA"
+                }
+              ],
+              "index": {
+                "byteEnd": 280,
+                "byteStart": 275
+              }
+            }
+          ],
+          "text": "🧠📉  A contrarian bet on U.S. striking Iran tonight by a Polymarket trader places $40,000 against low chances of a strike. This unusual move indicates traders are pricing in a potential escalation, potentially disrupting global markets. As BTC/ETH…\n\n#Crypto #NYC #XRP #NCAA"
+        },
+        "cid": "bafyreicipjcqchak4r72wgpwwgavenvcoujcngh2cy7ybrx3pga27tbjtq"
+      }
+    },
+    {
+      "did": "did:plc:namifrcorf6hzy45phd4shvt",
+      "time_us": 1768482048741482,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchnc5zvxh2e",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchnc5zo5h2e",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T13:00:47.459355+00:00",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "$type": "app.bsky.embed.external#external",
+              "description": "Portland businesses paid $1.4B in taxes in 2023, up from $781M in 2019. New taxes & increased rates ...",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreice6nmu46arsk2nmyv6gui2uixwklwicbymkjiulartyi3lhfhyqm"
+                },
+                "mimeType": "image/jpeg",
+                "size": 183560
+              },
+              "title": "How Portland taxes have grown since the pandemic",
+              "uri": "https://www.opb.org/article/2026/01/14/portland-taxes-pandemic/"
+            }
+          },
+          "facets": [
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Portland"
+                }
+              ],
+              "index": {
+                "$type": "app.bsky.richtext.facet#byteSlice",
+                "byteEnd": 185,
+                "byteStart": 176
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "News"
+                }
+              ],
+              "index": {
+                "$type": "app.bsky.richtext.facet#byteSlice",
+                "byteEnd": 191,
+                "byteStart": 186
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "Portland businesses paid $1.4B in taxes in 2023, up from $781M in 2019. New taxes & increased rates are key factors. Some worry it's hurting the city's business climate. (OPB) #Portland #News"
+        },
+        "cid": "bafyreicfr222ajed47o7pxlnzjqazicykrryexmszgcptppb7zgllqrv4q"
+      }
+    },
+    {
+      "did": "did:plc:73p2oq3vk4wnkf5ri3vwy6d4",
+      "time_us": 1768482859547539,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mcho2dtevx22",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mcho2cypsc2x",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T13:14:18.293Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "YouTube video by DavidMusicLover",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreieq6zejpcsu373ak5qzaxx2zs6whvnistf7bonoc32wnil2jxvswi"
+                },
+                "mimeType": "image/jpeg",
+                "size": 101999
+              },
+              "title": "Grandmaster Flash & The Furious Five - The Message",
+              "uri": "https://youtu.be/4kjeWGQ175g?si=HFQ3NY3GYhPlYM_s"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "NYC"
+                }
+              ],
+              "index": {
+                "byteEnd": 4,
+                "byteStart": 0
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "HipHop"
+                }
+              ],
+              "index": {
+                "byteEnd": 121,
+                "byteStart": 114
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "GrandmasterFlash"
+                }
+              ],
+              "index": {
+                "byteEnd": 139,
+                "byteStart": 122
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://youtu.be/4kjeWGQ175g?si=HFQ3NY3GYhPlYM_s"
+                }
+              ],
+              "index": {
+                "byteEnd": 165,
+                "byteStart": 141
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "#NYC today, this rap joint released in 1982 still applies to the life I live. Almost to a “t” as it’s said. #HipHop #GrandmasterFlash\n\nyoutu.be/4kjeWGQ175g?..."
+        },
+        "cid": "bafyreiarg7cohuzofc7aakqx5lgohet4xlaeiarmvgs7mizn4b4ue3yoty"
+      }
+    },
+    {
+      "did": "did:plc:hslirr7h6d7livppaxty435b",
+      "time_us": 1768483242169388,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchofqjmvr2o",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchofqjc5z2o",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T13:20:39Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "Vetsource's latest white paper highlights the challenges and strategies veterinary practices can adopt to improve client relationships and drive growth.",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreigxhbohiw2o7xynzjsotdpo5pk4ntyfj4k2yzyw27mtfkrwjw6574"
+                },
+                "mimeType": "image/webp",
+                "size": 8320
+              },
+              "title": "Enhancing Client Connections: Strategies for Veterinary Practice Growth and Success",
+              "uri": "https://third-news.com/article/fc91783c-f214-11f0-993f-9ca3ba0a67df"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "USA"
+                }
+              ],
+              "index": {
+                "byteEnd": 88,
+                "byteStart": 83
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Portland"
+                }
+              ],
+              "index": {
+                "byteEnd": 98,
+                "byteStart": 88
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Pets"
+                }
+              ],
+              "index": {
+                "byteEnd": 104,
+                "byteStart": 98
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Veterinary"
+                }
+              ],
+              "index": {
+                "byteEnd": 116,
+                "byteStart": 104
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Vetsource"
+                }
+              ],
+              "index": {
+                "byteEnd": 127,
+                "byteStart": 116
+              }
+            }
+          ],
+          "text": "Enhancing Client Connections: Strategies for Veterinary Practice Growth and Success #USA #Portland #Pets #Veterinary #Vetsource"
+        },
+        "cid": "bafyreiajlschqqdcqfzu64akhgirfglstta5emiloiew7vwlvzzuuh5rya"
+      }
+    },
+    {
+      "did": "did:plc:zayhk3wsutfa73uk5a2lglbo",
+      "time_us": 1768483363740657,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchojdijil24",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchojaobik2i",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T13:22:39.164Z",
+          "embed": {
+            "$type": "app.bsky.embed.images",
+            "images": [
+              {
+                "alt": "",
+                "aspectRatio": {
+                  "height": 1024,
+                  "width": 1024
+                },
+                "image": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreih56l7rw3ndbp6fcn6h4lia5i6tlc2wovcdpbmkrueqhlr6sjskmi"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 991505
+                }
+              }
+            ]
+          },
+          "facets": [
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#mention",
+                  "did": "did:plc:6jfovg3shgag5swqboajaumd"
+                }
+              ],
+              "index": {
+                "byteEnd": 167,
+                "byteStart": 150
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#mention",
+                  "did": "did:plc:eclio37ymobqex2ncko63h4r"
+                }
+              ],
+              "index": {
+                "byteEnd": 180,
+                "byteStart": 168
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "NYPL"
+                }
+              ],
+              "index": {
+                "byteEnd": 187,
+                "byteStart": 182
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "NYC"
+                }
+              ],
+              "index": {
+                "byteEnd": 192,
+                "byteStart": 188
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "BookRecommendations"
+                }
+              ],
+              "index": {
+                "byteEnd": 213,
+                "byteStart": 193
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "AI at 78 is live.\nA calm, step-by-step guide for older adults learning AI for writing, tech help, and daily life—without feeling “left behind.”\n@nypl.bsky.social\n@nytimes.com\n\n#NYPL #NYC #BookRecommendations"
+        },
+        "cid": "bafyreicnmocs2as5ukipklj2aoupu7wb2zuiy3ceqsjgljrb42zkywpscy"
+      }
+    },
+    {
+      "did": "did:plc:4powcnwhdxom75wqml7a4zgl",
+      "time_us": 1768483384446686,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchojyjp3y2f",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchojyj7hy2f",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T13:23:04.045Z",
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Crypto"
+                }
+              ],
+              "index": {
+                "byteEnd": 252,
+                "byteStart": 245
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "DA"
+                }
+              ],
+              "index": {
+                "byteEnd": 256,
+                "byteStart": 253
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "AI"
+                }
+              ],
+              "index": {
+                "byteEnd": 260,
+                "byteStart": 257
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "NYC"
+                }
+              ],
+              "index": {
+                "byteEnd": 265,
+                "byteStart": 261
+              }
+            }
+          ],
+          "text": "📰📉  DAs call for stronger crypto enforcement echoes a familiar theme. Retail traders still chasing get rich quick schemes while institutional investors wait for clarity. Market correction likely, but not a parabolic blowoff like gold.…\n\n#Crypto #DA #AI #NYC"
+        },
+        "cid": "bafyreifeulzovhaenevf7ibp3xup6cupvsuerzwt37ta5q2zizpefn3s7i"
+      }
+    },
+    {
+      "did": "did:plc:ndjdmq6yfdkm7psa7ncumn5k",
+      "time_us": 1768483849655480,
+      "kind": "commit",
+      "commit": {
+        "rev": "222223cym5k22",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchoois662k2",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "bridgyOriginalText": "<p>Uptown A trains are running local from Canal St to 59 St-Columbus Circle while we address a door problem on a train at 14 St.</p><p>For latest updates, visit <a href=\"https://new.mta.info/agency/new-york-city-transit\" target=\"_blank\" rel=\"nofollow noopener\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"ellipsis\">new.mta.info/agency/new-york-c</span><span class=\"invisible\">ity-transit</span></a> and <a href=\"https://mta.info\" target=\"_blank\" rel=\"nofollow noopener\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"\">mta.info</span><span class=\"invisible\"></span></a>. <a href=\"https://stefanbohacek.online/tags/nyc\" class=\"mention hashtag\" rel=\"tag\">#<span>nyc</span></a> <a href=\"https://stefanbohacek.online/tags/mta\" class=\"mention hashtag\" rel=\"tag\">#<span>mta</span></a> <a href=\"https://stefanbohacek.online/tags/subway\" class=\"mention hashtag\" rel=\"tag\">#<span>subway</span></a></p>",
+          "bridgyOriginalUrl": "https://stefanbohacek.online/@mtaupdates/115899336727434487",
+          "createdAt": "2026-01-15T13:25:31.000Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "$type": "app.bsky.embed.external#external",
+              "description": "New York City Transit manages and maintains subway and bus service in New York.",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreic6hiqpe4hfy33lsg7iztzhalgoegsjx77nini7sgn66vgneldifa"
+                },
+                "mimeType": "image/jpeg",
+                "size": 1009404
+              },
+              "title": "New York City Transit",
+              "uri": "https://www.mta.info/agency/new-york-city-transit"
+            }
+          },
+          "facets": [
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "nyc"
+                }
+              ],
+              "index": {
+                "byteEnd": 229,
+                "byteStart": 225
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "mta"
+                }
+              ],
+              "index": {
+                "byteEnd": 234,
+                "byteStart": 230
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "subway"
+                }
+              ],
+              "index": {
+                "byteEnd": 242,
+                "byteStart": 235
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://new.mta.info/agency/new-york-city-transit"
+                }
+              ],
+              "index": {
+                "byteEnd": 202,
+                "byteStart": 153
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://mta.info"
+                }
+              ],
+              "index": {
+                "byteEnd": 223,
+                "byteStart": 207
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "Uptown A trains are running local from Canal St to 59 St-Columbus Circle while we address a door problem on a train at 14 St.\n\nFor latest updates, visit https://new.mta.info/agency/new-york-city-transit and https://mta.info. #nyc #mta #subway"
+        },
+        "cid": "bafyreidi4uvntdhpkv5c2ebqz3zsn42zdahx6zfu4ojkjh3vmqnxftf6fa"
+      }
+    },
+    {
+      "did": "did:plc:ndjdmq6yfdkm7psa7ncumn5k",
+      "time_us": 1768483852327175,
+      "kind": "commit",
+      "commit": {
+        "rev": "222223cym7e22",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchopo2zdhb2",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "bridgyOriginalText": "<p>Uptown A trains are delayed while we address a door problem on a train at 14 St.</p><p>For latest updates, visit <a href=\"https://new.mta.info/agency/new-york-city-transit\" target=\"_blank\" rel=\"nofollow noopener\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"ellipsis\">new.mta.info/agency/new-york-c</span><span class=\"invisible\">ity-transit</span></a> and <a href=\"https://mta.info\" target=\"_blank\" rel=\"nofollow noopener\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"\">mta.info</span><span class=\"invisible\"></span></a>. <a href=\"https://stefanbohacek.online/tags/nyc\" class=\"mention hashtag\" rel=\"tag\">#<span>nyc</span></a> <a href=\"https://stefanbohacek.online/tags/mta\" class=\"mention hashtag\" rel=\"tag\">#<span>mta</span></a> <a href=\"https://stefanbohacek.online/tags/subway\" class=\"mention hashtag\" rel=\"tag\">#<span>subway</span></a></p>",
+          "bridgyOriginalUrl": "https://stefanbohacek.online/@mtaupdates/115899334751284409",
+          "createdAt": "2026-01-15T13:25:01.000Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "$type": "app.bsky.embed.external#external",
+              "description": "New York City Transit manages and maintains subway and bus service in New York.",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreic6hiqpe4hfy33lsg7iztzhalgoegsjx77nini7sgn66vgneldifa"
+                },
+                "mimeType": "image/jpeg",
+                "size": 1009404
+              },
+              "title": "New York City Transit",
+              "uri": "https://www.mta.info/agency/new-york-city-transit"
+            }
+          },
+          "facets": [
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "nyc"
+                }
+              ],
+              "index": {
+                "byteEnd": 184,
+                "byteStart": 180
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "mta"
+                }
+              ],
+              "index": {
+                "byteEnd": 189,
+                "byteStart": 185
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "subway"
+                }
+              ],
+              "index": {
+                "byteEnd": 197,
+                "byteStart": 190
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://new.mta.info/agency/new-york-city-transit"
+                }
+              ],
+              "index": {
+                "byteEnd": 157,
+                "byteStart": 108
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://mta.info"
+                }
+              ],
+              "index": {
+                "byteEnd": 178,
+                "byteStart": 162
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "Uptown A trains are delayed while we address a door problem on a train at 14 St.\n\nFor latest updates, visit https://new.mta.info/agency/new-york-city-transit and https://mta.info. #nyc #mta #subway"
+        },
+        "cid": "bafyreiaditwnhtmkmroilw5h5bljdr5e2hjusykhx2s7hgbz6wsbq3hpzu"
+      }
+    },
+    {
+      "did": "did:plc:ndjdmq6yfdkm7psa7ncumn5k",
+      "time_us": 1768483863029977,
+      "kind": "commit",
+      "commit": {
+        "rev": "222223cymgz22",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchoszwbypk2",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "bridgyOriginalText": "<p>Uptown A, C, E trains are running with delays after we addressed a door problem on a train at 14 St.</p><p>For latest updates, visit <a href=\"https://new.mta.info/agency/new-york-city-transit\" target=\"_blank\" rel=\"nofollow noopener\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"ellipsis\">new.mta.info/agency/new-york-c</span><span class=\"invisible\">ity-transit</span></a> and <a href=\"https://mta.info\" target=\"_blank\" rel=\"nofollow noopener\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"\">mta.info</span><span class=\"invisible\"></span></a>. <a href=\"https://stefanbohacek.online/tags/nyc\" class=\"mention hashtag\" rel=\"tag\">#<span>nyc</span></a> <a href=\"https://stefanbohacek.online/tags/mta\" class=\"mention hashtag\" rel=\"tag\">#<span>mta</span></a> <a href=\"https://stefanbohacek.online/tags/subway\" class=\"mention hashtag\" rel=\"tag\">#<span>subway</span></a></p>",
+          "bridgyOriginalUrl": "https://stefanbohacek.online/@mtaupdates/115899346699037106",
+          "createdAt": "2026-01-15T13:28:03.000Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "$type": "app.bsky.embed.external#external",
+              "description": "New York City Transit manages and maintains subway and bus service in New York.",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreic6hiqpe4hfy33lsg7iztzhalgoegsjx77nini7sgn66vgneldifa"
+                },
+                "mimeType": "image/jpeg",
+                "size": 1009404
+              },
+              "title": "New York City Transit",
+              "uri": "https://www.mta.info/agency/new-york-city-transit"
+            }
+          },
+          "facets": [
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "nyc"
+                }
+              ],
+              "index": {
+                "byteEnd": 204,
+                "byteStart": 200
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "mta"
+                }
+              ],
+              "index": {
+                "byteEnd": 209,
+                "byteStart": 205
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "subway"
+                }
+              ],
+              "index": {
+                "byteEnd": 217,
+                "byteStart": 210
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://new.mta.info/agency/new-york-city-transit"
+                }
+              ],
+              "index": {
+                "byteEnd": 177,
+                "byteStart": 128
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://mta.info"
+                }
+              ],
+              "index": {
+                "byteEnd": 198,
+                "byteStart": 182
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "Uptown A, C, E trains are running with delays after we addressed a door problem on a train at 14 St.\n\nFor latest updates, visit https://new.mta.info/agency/new-york-city-transit and https://mta.info. #nyc #mta #subway"
+        },
+        "cid": "bafyreidvj727prcu4plfnq6dhh2p4azbc3vm7nwoi4ulaf7xmidknyqkhi"
+      }
+    },
+    {
+      "did": "did:plc:hslirr7h6d7livppaxty435b",
+      "time_us": 1768484670154291,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchpqci7kq2a",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchpqchzpa2a",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T13:44:28Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "In an exciting collaboration, Toyota Trucks and The Dyrt are set to launch the 2026 Camping Report, enriched with real stories and trends from camping enthusiasts across the U.S.",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreibetdk335hub7kcobqhbiifrvqzxufqzqixp64wwdx6s6iymfe54a"
+                },
+                "mimeType": "image/webp",
+                "size": 8710
+              },
+              "title": "Toyota Trucks Collaborates with The Dyrt for the 2026 Camping Report",
+              "uri": "https://third-news.com/article/4fcbaee8-f218-11f0-97c7-9ca3ba0a67df"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "USA"
+                }
+              ],
+              "index": {
+                "byteEnd": 73,
+                "byteStart": 68
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Portland"
+                }
+              ],
+              "index": {
+                "byteEnd": 83,
+                "byteStart": 73
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "The_Dyrt"
+                }
+              ],
+              "index": {
+                "byteEnd": 93,
+                "byteStart": 83
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Toyota_Trucks"
+                }
+              ],
+              "index": {
+                "byteEnd": 108,
+                "byteStart": 93
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Camping_Report"
+                }
+              ],
+              "index": {
+                "byteEnd": 124,
+                "byteStart": 108
+              }
+            }
+          ],
+          "text": "Toyota Trucks Collaborates with The Dyrt for the 2026 Camping Report #USA #Portland #The_Dyrt #Toyota_Trucks #Camping_Report"
+        },
+        "cid": "bafyreiax76rujcczgaqcvuefm5wzjmtqhkunwvyapozkbvnp32dbtyxoxe"
+      }
+    },
+    {
+      "did": "did:plc:73cmnmw4cxf62gbsmppmhiq3",
+      "time_us": 1768485233233538,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchqb2dwpn2n",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchqb2dkyn2n",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T13:53:51.046671Z",
+          "embed": {
+            "$type": "app.bsky.embed.video",
+            "aspectRatio": {
+              "height": 1920,
+              "width": 1080
+            },
+            "video": {
+              "$type": "blob",
+              "ref": {
+                "$link": "bafkreicqpgy2crqrf5xaxr2zszsdkvy5xihwimd4tdhzwsok26uqfx2txq"
+              },
+              "mimeType": "video/mp4",
+              "size": 24330849
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "gold"
+                }
+              ],
+              "index": {
+                "byteEnd": 218,
+                "byteStart": 213
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "silver"
+                }
+              ],
+              "index": {
+                "byteEnd": 226,
+                "byteStart": 219
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "preciousmetals"
+                }
+              ],
+              "index": {
+                "byteEnd": 242,
+                "byteStart": 227
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "nyc"
+                }
+              ],
+              "index": {
+                "byteEnd": 247,
+                "byteStart": 243
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "newyorkcity"
+                }
+              ],
+              "index": {
+                "byteEnd": 260,
+                "byteStart": 248
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "bulliontradingnyc"
+                }
+              ],
+              "index": {
+                "byteEnd": 279,
+                "byteStart": 261
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "bulliontradingllc"
+                }
+              ],
+              "index": {
+                "byteEnd": 298,
+                "byteStart": 280
+              }
+            }
+          ],
+          "text": "Gold Takes a Breather, Silver Slips — Did the Metals Hit Snooze\nGold chills near $4,590 and silver cools after record highs as inflation eases and geopolitics calm down. Even metals need a coffee break. ☕🪙 #gold #silver #preciousmetals #nyc #newyorkcity #bulliontradingnyc #bulliontradingllc"
+        },
+        "cid": "bafyreiebkl4u2vqyd73nsmszmg7g4wcjn7bz4emu5zav7ku7rcc6dfdyhm"
+      }
+    },
+    {
+      "did": "did:plc:ythjjblagj3kd7huottxyto6",
+      "time_us": 1768485342348481,
+      "kind": "commit",
+      "commit": {
+        "rev": "3mchqedsvdk2n",
+        "operation": "create",
+        "collection": "app.bsky.feed.post",
+        "rkey": "3mchqebwmz22o",
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2026-01-15T13:55:40.204Z",
+          "embed": {
+            "$type": "app.bsky.embed.images",
+            "images": [
+              {
+                "alt": "",
+                "aspectRatio": {
+                  "height": 1107,
+                  "width": 1125
+                },
+                "image": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreif3o4tfkfeimye5kxykhqq5ptesvatd7eniycuquf4nnwfohvj6em"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 739316
+                }
+              }
+            ]
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Red-Green"
+                }
+              ],
+              "index": {
+                "byteEnd": 14,
+                "byteStart": 4
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "alliance"
+                }
+              ],
+              "index": {
+                "byteEnd": 24,
+                "byteStart": 15
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "destroyed"
+                }
+              ],
+              "index": {
+                "byteEnd": 35,
+                "byteStart": 25
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Iran"
+                }
+              ],
+              "index": {
+                "byteEnd": 41,
+                "byteStart": 36
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "corrupted"
+                }
+              ],
+              "index": {
+                "byteEnd": 77,
+                "byteStart": 67
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "UN"
+                }
+              ],
+              "index": {
+                "byteEnd": 85,
+                "byteStart": 82
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Arab"
+                }
+              ],
+              "index": {
+                "byteEnd": 141,
+                "byteStart": 136
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Venezuela"
+                }
+              ],
+              "index": {
+                "byteEnd": 162,
+                "byteStart": 152
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "undermining"
+                }
+              ],
+              "index": {
+                "byteEnd": 203,
+                "byteStart": 191
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "Europe"
+                }
+              ],
+              "index": {
+                "byteEnd": 211,
+                "byteStart": 204
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "NYC"
+                }
+              ],
+              "index": {
+                "byteEnd": 250,
+                "byteStart": 246
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "The #Red-Green #alliance #destroyed #Iran.\n\nThe Red-Green alliance #corrupted the #UN.\n\nThe Red-Green alliance impoverished much of the #Arab world and #Venezuela.\n\nThe Red-Green alliance is #undermining #Europe.\n\nWhy, why, why is it embraced in #NYC?"
+        },
+        "cid": "bafyreie4b4ycl2rt2kobayhpsac5p7z5kbuqpvfa2zdtirelgfjjiuydli"
+      }
+    }
+  ]
+}

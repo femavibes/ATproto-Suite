@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Nodes - ATlas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="My Nodes - ATlas">
+    <meta property="og:description" content="Manage your feed nodes on ATlas.">
+    <meta property="og:image" content="https://atls.city/atlas_banner.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://atls.city/atlas_banner.webp">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="/styles.css">
+    <style>
+        
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            color: #171717;
+            text-decoration: none;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 16px rgba(120, 198, 119, 0.1);
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.6);
+            transform: translateY(-1px);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #171717;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #737373;
+            font-size: 1.125rem;
+        }
+        
+        .usage {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(120, 198, 119, 0.15);
+        }
+        
+        .usage-text {
+            font-size: 0.9375rem;
+            color: #525252;
+        }
+        
+        button {
+            padding: 0.875rem 1.5rem;
+            background: rgba(23, 23, 23, 0.9);
+            backdrop-filter: blur(20px);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            font-family: inherit;
+        }
+        
+        button:hover {
+            background: rgba(64, 64, 64, 0.9);
+            transform: translateY(-1px);
+        }
+        
+        .node-card {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(120, 198, 119, 0.15);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .node-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #171717;
+            margin-bottom: 0.5rem;
+        }
+        
+        .node-meta {
+            color: #737373;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .node-desc {
+            color: #525252;
+            margin-bottom: 1rem;
+        }
+        
+        .node-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(24px);
+            color: #171717;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.6);
+        }
+        
+        .btn-danger {
+            background: rgba(220, 38, 38, 0.9);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: #737373;
+        }
+        
+        .empty-state h2 {
+            font-size: 1.5rem;
+            color: #171717;
+            margin-bottom: 0.5rem;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(115, 115, 115, 0.3);
+            transition: 0.2s;
+            border-radius: 28px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.2s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: rgba(23, 23, 23, 0.9);
+        }
+        
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+        
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            z-index: 10;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(24px);
+            min-width: 160px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            z-index: 100;
+            overflow: hidden;
+        }
+        
+        .dropdown-content button {
+            width: 100%;
+            text-align: left;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        @media (max-width: 640px) {
+            .container { padding: 2rem 1rem; }
+            .header h1 { font-size: 2rem; }
+            .node-actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Back to Feedmakers
+        </a>
+        
+        <div class="header">
+            <h1>My Custom Nodes</h1>
+            <p>Manage your custom feed nodes</p>
+        </div>
+
+        <div class="usage">
+            <span class="usage-text" id="usageText">Loading...</span>
+            <button onclick="window.location.href='/customnodebuilder'">Create New Node</button>
+        </div>
+
+        <div id="nodesList"></div>
+    </div>
+
+    <script>
+        let nodes = [];
+
+        async function loadNodes() {
+            try {
+                // Check auth
+                const sessionRes = await fetch('/api/auth/session', {
+                    credentials: 'same-origin'
+                });
+                const session = await sessionRes.json();
+                if (!session.authenticated) {
+                    document.getElementById('nodesList').innerHTML = `
+                        <div style="text-align: center; padding: 3rem;">
+                            <h3 style="margin-bottom: 1rem;">Login Required</h3>
+                            <p style="color: var(--text-tertiary); margin-bottom: 1.5rem;">Please log in to view and manage your custom nodes.</p>
+                            <button onclick="window.location.href='/'" class="btn-primary">Go to Home & Login</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Load count
+                const countRes = await fetch('/api/user/custom-nodes/count');
+                const countData = await countRes.json();
+                document.getElementById('usageText').textContent = `${countData.count} of ${countData.limit} nodes used`;
+
+                // Load nodes
+                const nodesRes = await fetch('/api/user/custom-nodes');
+                nodes = await nodesRes.json();
+
+                renderNodes();
+            } catch (err) {
+                console.error('Error loading nodes:', err);
+                document.getElementById('nodesList').innerHTML = `
+                    <div style="text-align: center; padding: 3rem;">
+                        <h3 style="margin-bottom: 1rem;">Unable to Load Nodes</h3>
+                        <p style="color: var(--text-tertiary); margin-bottom: 1.5rem;">Please make sure you're logged in.</p>
+                        <button onclick="window.location.href='/'" class="btn-primary">Go to Home & Login</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderNodes() {
+            const container = document.getElementById('nodesList');
+            
+            if (nodes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h2>No nodes yet</h2>
+                        <p>Create your first custom node to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = nodes.map(node => {
+                const created = new Date(node.created_at).toLocaleDateString('en-US', { 
+                    month: 'short', day: 'numeric', year: 'numeric' 
+                });
+                const expires = node.expires_at 
+                    ? new Date(node.expires_at).toLocaleString('en-US', { 
+                        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
+                    })
+                    : 'Never';
+
+                return `
+                    <div class="node-card">
+                        <div class="node-title">${escapeHtml(node.node_name)}</div>
+                        <div class="node-meta">Created: ${created} | Expires: ${expires}</div>
+                        ${node.node_description ? `<div class="node-desc">${escapeHtml(node.node_description)}</div>` : ''}
+                        <div class="node-actions">
+                            <button class="btn-small" onclick="window.open('https://graze.social/custom-nodes/${node.graze_component_id}', '_blank')">View on Graze</button>
+                            <button class="btn-small btn-secondary" onclick="viewJSON(${node.id})">View JSON</button>
+                            <button class="btn-small btn-secondary" onclick="editInBuilder(${node.id})">Edit in Builder</button>
+                            <div class="dropdown">
+                                <button class="btn-small btn-danger">Delete ▼</button>
+                                <div class="dropdown-content">
+                                    <button onclick="deleteFromGraze(${node.id})">Delete from Graze</button>
+                                    <button onclick="deleteFromAtlas(${node.id})">Delete from Atlas</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function viewJSON(id) {
+            const node = nodes.find(n => n.id === id);
+            if (!node) return;
+            
+            const json = JSON.stringify(node.manifest, null, 2);
+            alert(json);
+        }
+
+        async function deleteFromGraze(id) {
+            if (!confirm('Delete this node from Graze? (It will remain in Atlas for reference)')) return;
+            
+            try {
+                const res = await fetch(`/api/user/custom-nodes/${id}/hard`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Failed to delete');
+                
+                alert('Node deleted from Graze');
+                loadNodes();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        async function deleteFromAtlas(id) {
+            if (!confirm('Permanently delete this node from Atlas database? This cannot be undone.')) return;
+            
+            try {
+                const res = await fetch(`/api/user/custom-nodes/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Failed to delete');
+                
+                alert('Node deleted from Atlas');
+                loadNodes();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        function editInBuilder(id) {
+            const node = nodes.find(n => n.id === id);
+            if (!node) return;
+            
+            // Store node data in sessionStorage for the builder to load
+            sessionStorage.setItem('editingNode', JSON.stringify({
+                id: node.id,
+                name: node.node_name,
+                description: node.node_description,
+                manifest: node.manifest,
+                grazeComponentId: node.graze_component_id
+            }));
+            
+            // Redirect to builder
+            window.location.href = '/customnodebuilder';
+        }
+
+        window.viewJSON = viewJSON;
+        window.deleteFromGraze = deleteFromGraze;
+        window.deleteFromAtlas = deleteFromAtlas;
+        window.editInBuilder = editInBuilder;
+        window.loadNodes = loadNodes;
+
+        loadNodes();
+    </script>
+</body>
+</html>

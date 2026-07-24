@@ -1,0 +1,33 @@
+{
+  "graph": {
+    "nodes": [
+      { "id": "start", "type": "start", "data": {} },
+      { "id": "junction-main", "type": "junction", "data": {} },
+      { "id": "end-trending", "type": "end", "data": {} },
+      { "id": "end-video", "type": "end", "data": {} },
+      {
+        "id": "language-en",
+        "type": "language",
+        "data": { "languages": ["en"] }
+      },
+      {
+        "id": "video-only",
+        "type": "media",
+        "data": { "types": ["video"] }
+      }
+    ],
+    "edges": [
+      { "source": "start", "target": "junction-main", "sourceHandle": "output-right", "targetHandle": "input-left" },
+      { "source": "junction-main", "target": "end-trending", "sourceHandle": "output-right", "targetHandle": "input-left" },
+      { "source": "junction-main", "target": "end-video", "sourceHandle": "output-right", "targetHandle": "input-left" },
+      { "source": "language-en", "target": "junction-main", "sourceHandle": "logic-right", "targetHandle": "logic-top" },
+      { "source": "video-only", "target": "junction-main", "sourceHandle": "logic-right", "targetHandle": "logic-bottom" }
+    ]
+  },
+  "post": {
+    "uri": "at://did:plc:test/app.bsky.feed.post/abc123",
+    "langs": ["en"],
+    "has_video": true,
+    "post_type": "post"
+  }
+}

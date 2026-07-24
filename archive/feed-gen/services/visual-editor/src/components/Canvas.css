@@ -1,0 +1,291 @@
+.canvas-wrapper {
+  flex: 1;
+  background: #1a1a1a;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* One-shot swipe when navigation depth / group context changes (tree focus, breadcrumb, zoom into group). */
+.canvas-wrapper.canvas-wrapper--depth-pulse-in::after,
+.canvas-wrapper.canvas-wrapper--depth-pulse-out::after,
+.canvas-wrapper.canvas-wrapper--depth-pulse-neutral::after {
+  /* Disabled: this overlay can appear as a translucent block behind nodes. */
+  content: none;
+}
+
+/* Zoom deeper: cool band sweeps left → right */
+.canvas-wrapper.canvas-wrapper--depth-pulse-in::after {
+  left: -12%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(74, 158, 255, 0) 18%,
+    rgba(74, 158, 255, 0.14) 48%,
+    rgba(74, 158, 255, 0.22) 52%,
+    rgba(74, 158, 255, 0.12) 82%,
+    transparent 100%
+  );
+  transform-origin: center;
+  animation: canvas-depth-swipe-in 0.58s cubic-bezier(0.22, 0.82, 0.28, 1) forwards;
+}
+
+/* Zoom out: warm band sweeps right → left */
+.canvas-wrapper.canvas-wrapper--depth-pulse-out::after {
+  left: auto;
+  right: -12%;
+  background: linear-gradient(
+    260deg,
+    transparent 0%,
+    rgba(255, 149, 0, 0) 18%,
+    rgba(255, 149, 0, 0.12) 48%,
+    rgba(255, 149, 0, 0.2) 52%,
+    rgba(255, 149, 0, 0.1) 82%,
+    transparent 100%
+  );
+  animation: canvas-depth-swipe-out 0.58s cubic-bezier(0.22, 0.82, 0.28, 1) forwards;
+}
+
+/* Same depth, different group: subtle vertical-ish swipe */
+.canvas-wrapper.canvas-wrapper--depth-pulse-neutral::after {
+  left: 10%;
+  width: 80%;
+  top: -8%;
+  bottom: -8%;
+  background: linear-gradient(
+    185deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0) 65%,
+    transparent 100%
+  );
+  animation: canvas-depth-swipe-neutral 0.52s cubic-bezier(0.33, 1, 0.42, 1) forwards;
+}
+
+@keyframes canvas-depth-swipe-in {
+  0% {
+    transform: translate3d(-8%, 0, 0) skewX(-7deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(215%, 0, 0) skewX(-7deg);
+    opacity: 0;
+  }
+}
+
+@keyframes canvas-depth-swipe-out {
+  0% {
+    transform: translate3d(8%, 0, 0) skewX(7deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(-215%, 0, 0) skewX(7deg);
+    opacity: 0;
+  }
+}
+
+@keyframes canvas-depth-swipe-neutral {
+  0% {
+    transform: translate3d(-18%, -12%, 0) skewX(-3deg);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(18%, 12%, 0) skewX(-3deg);
+    opacity: 0;
+  }
+}
+
+.canvas-wrapper:focus {
+  outline: none;
+}
+
+/* Ensure logic edge labels render above all other edges */
+.react-flow__edge g[key^="logic-label"] {
+  z-index: 100;
+}
+
+.react-flow__edge .logic-edge-label {
+  z-index: 100;
+}
+
+.canvas-info {
+  background: rgba(42, 42, 42, 0.9);
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #888;
+  user-select: none;
+}
+
+/* END pipeline: dashed slot lives in flow coordinates; keep node layer above it */
+.canvas-wrapper--end-pipeline .react-flow__nodes {
+  position: relative;
+  z-index: 2;
+}
+
+/* Sorting module is not draggable — avoid grab cursor */
+.canvas-wrapper--end-pipeline .react-flow__node {
+  cursor: default;
+}
+
+.end-pipeline-slot-on-canvas {
+  pointer-events: none;
+  z-index: 0;
+  box-sizing: border-box;
+  border: 2px dashed rgba(151, 117, 250, 0.55);
+  border-radius: 8px;
+  background: rgba(24, 20, 36, 0.42);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  text-align: center;
+}
+
+.end-pipeline-slot-on-canvas--filled {
+  border-style: solid;
+  border-color: rgba(151, 117, 250, 0.35);
+  background: rgba(24, 20, 36, 0.28);
+}
+
+.end-pipeline-slot-on-canvas__title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b197fc;
+}
+
+.end-pipeline-slot-on-canvas__hint {
+  font-size: 10px;
+  line-height: 1.35;
+  color: #888;
+  max-width: 100%;
+}
+
+.end-pipeline-slot-on-canvas--access {
+  border-color: rgba(32, 201, 151, 0.55);
+  background: rgba(18, 32, 28, 0.42);
+}
+
+.end-pipeline-slot-on-canvas--access.end-pipeline-slot-on-canvas--filled {
+  border-color: rgba(32, 201, 151, 0.38);
+  background: rgba(18, 32, 28, 0.28);
+}
+
+.end-pipeline-slot-on-canvas--access .end-pipeline-slot-on-canvas__title {
+  color: #63e6be;
+}
+
+.end-pipeline-slot-on-canvas--injection {
+  border-color: rgba(250, 176, 5, 0.55);
+  background: rgba(40, 32, 14, 0.42);
+}
+
+.end-pipeline-slot-on-canvas--injection.end-pipeline-slot-on-canvas--filled {
+  border-color: rgba(250, 176, 5, 0.38);
+  background: rgba(40, 32, 14, 0.28);
+}
+
+.end-pipeline-slot-on-canvas--injection .end-pipeline-slot-on-canvas__title {
+  color: #fcc419;
+}
+
+.end-pipeline-slot-on-canvas--fixed {
+  border-color: rgba(77, 171, 247, 0.55);
+  background: rgba(16, 28, 42, 0.42);
+}
+
+.end-pipeline-slot-on-canvas--fixed.end-pipeline-slot-on-canvas--filled {
+  border-color: rgba(77, 171, 247, 0.38);
+  background: rgba(16, 28, 42, 0.28);
+}
+
+.end-pipeline-slot-on-canvas--fixed .end-pipeline-slot-on-canvas__title {
+  color: #74c0fc;
+}
+
+.end-pipeline-add-slot-btn {
+  box-sizing: border-box;
+  width: 180px;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #d0bfff;
+  background: rgba(24, 20, 36, 0.75);
+  border: 1px dashed rgba(151, 117, 250, 0.55);
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.end-pipeline-add-slot-btn:hover {
+  color: #fff;
+  border-color: rgba(151, 117, 250, 0.85);
+  background: rgba(36, 28, 52, 0.9);
+}
+
+.end-pipeline-add-slot-btn:active {
+  transform: translateY(1px);
+}
+
+.end-pipeline-add-slot-btn--access {
+  color: #b2f2bb;
+  border-color: rgba(32, 201, 151, 0.55);
+  background: rgba(18, 32, 28, 0.75);
+}
+
+.end-pipeline-add-slot-btn--access:hover {
+  border-color: rgba(32, 201, 151, 0.85);
+  background: rgba(24, 44, 36, 0.9);
+}
+
+.end-pipeline-add-slot-btn--injection {
+  color: #ffe066;
+  border-color: rgba(250, 176, 5, 0.55);
+  background: rgba(40, 32, 14, 0.75);
+}
+
+.end-pipeline-add-slot-btn--injection:hover {
+  border-color: rgba(250, 176, 5, 0.85);
+  background: rgba(52, 40, 16, 0.9);
+}
+
+.end-pipeline-add-slot-btn--fixed {
+  color: #a5d8ff;
+  border-color: rgba(77, 171, 247, 0.55);
+  background: rgba(16, 28, 42, 0.75);
+}
+
+.end-pipeline-add-slot-btn--fixed:hover {
+  border-color: rgba(77, 171, 247, 0.85);
+  background: rgba(22, 36, 52, 0.9);
+}
+
+/* Fills space below the single sorting slot (no “+ add sorting” when max is 1). */
+.end-pipeline-sorting-footnote {
+  box-sizing: border-box;
+  padding: 10px 10px;
+  font-size: 10px;
+  line-height: 1.45;
+  color: #8b8b9a;
+  text-align: left;
+  border-radius: 8px;
+  border: 1px dashed rgba(151, 117, 250, 0.35);
+  background: rgba(24, 20, 36, 0.55);
+  pointer-events: none;
+}

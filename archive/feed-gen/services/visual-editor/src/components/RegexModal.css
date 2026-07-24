@@ -1,0 +1,120 @@
+/* Regex-specific styles (shared modal styles imported in component) */
+.regex-modal {
+  max-width: 600px;
+}
+
+.pattern-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+}
+
+.pattern-prefix,
+.pattern-suffix {
+  color: #888;
+  font-weight: 500;
+}
+
+.pattern-input {
+  flex: 1;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.pattern-input-wrapper {
+  align-items: flex-start;
+}
+
+.pattern-prefix {
+  padding-top: 10px;
+}
+
+.pattern-input.error {
+  border-color: #ff6b6b;
+}
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.flags-selector {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.flag-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #e0e0e0;
+}
+
+.flag-option input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: #4a9eff;
+}
+
+.test-textarea {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.test-result {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.test-result.match {
+  background: #1a3a1a;
+  border: 1px solid #4a9eff;
+  color: #4a9eff;
+}
+
+.test-result.no-match {
+  background: #3a1a1a;
+  border: 1px solid #666;
+  color: #888;
+}
+
+.test-result.error {
+  background: #3a1a1a;
+  border: 1px solid #ff6b6b;
+  color: #ff6b6b;
+}
+
+.test-match-text {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #888;
+  font-style: italic;
+}
+
+.link {
+  color: #4a9eff;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+code {
+  background: #1a1a1a;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 10px;
+  color: #4a9eff;
+}

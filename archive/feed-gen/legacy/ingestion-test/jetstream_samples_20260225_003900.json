@@ -1,0 +1,384 @@
+[
+  {
+    "did": "did:plc:k7rfsr62tviqkrjbtrtikffm",
+    "time_us": 1771979940291593,
+    "kind": "commit",
+    "commit": {
+      "rev": "3mfngxfwpla2k",
+      "operation": "create",
+      "collection": "app.bsky.feed.post",
+      "rkey": "3mfngvuylw22x",
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "createdAt": "2026-02-25T00:38:06.513Z",
+        "langs": [
+          "en"
+        ],
+        "reply": {
+          "parent": {
+            "cid": "bafyreic3bvvuywnhx6vmvoq3b42bqhc3mekdowd4xaodic2z6x3tsy4kgq",
+            "uri": "at://did:plc:k7rfsr62tviqkrjbtrtikffm/app.bsky.feed.post/3mfngmash2c2x"
+          },
+          "root": {
+            "cid": "bafyreic3bvvuywnhx6vmvoq3b42bqhc3mekdowd4xaodic2z6x3tsy4kgq",
+            "uri": "at://did:plc:k7rfsr62tviqkrjbtrtikffm/app.bsky.feed.post/3mfngmash2c2x"
+          }
+        },
+        "text": "Tyler is a pretty extractive govtech vendor with a long history of milking dysfunctional contracts. Pulling back embedded staff from the project and alleging what amounts to emotional abuse from their client isn't what I would expect from them unless there's truth there."
+      },
+      "cid": "bafyreicft25nze6yfmpnuimpahc4eodsxzr75yf6jkyfldg5d65fg7r2cy"
+    }
+  },
+  {
+    "did": "did:plc:mfz3bnnqyghicndcmvxve5yb",
+    "time_us": 1771979940295242,
+    "kind": "commit",
+    "commit": {
+      "rev": "3mfngxfsgua2k",
+      "operation": "create",
+      "collection": "app.bsky.feed.post",
+      "rkey": "3mfngv377sk2k",
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "createdAt": "2026-02-25T00:37:39.466Z",
+        "embed": {
+          "$type": "app.bsky.embed.record",
+          "record": {
+            "cid": "bafyreidaaivze74nmrnevjy42orvw6oaoavgxow3u4pvblueorhyidndfa",
+            "uri": "at://did:plc:aduoxavv4nlceto54tgu3fjr/app.bsky.feed.post/3mfngsc7u7e2w"
+          }
+        },
+        "langs": [
+          "pt"
+        ],
+        "text": "fant\u00e1stico"
+      },
+      "cid": "bafyreihyczwhpsgbbpl53lseuwanoamh35atiriuh5df7gs4u4pwb4psvm"
+    }
+  },
+  {
+    "did": "did:plc:lq5hm7i6xsklrvzgcqejs652",
+    "time_us": 1771979940298379,
+    "kind": "commit",
+    "commit": {
+      "rev": "3mfngxh4wsy2u",
+      "operation": "create",
+      "collection": "app.bsky.feed.post",
+      "rkey": "3mfngutmhas2t",
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "createdAt": "2026-02-25T00:37:31.511Z",
+        "langs": [
+          "pt"
+        ],
+        "text": "A tpm desse m\u00eas veio com tudo \ud83d\udc80 aquela sensa\u00e7\u00e3o de vou ficar doente, mas \u00e9 s\u00f3 a poha da menstrua\u00e7\u00e3o vindo"
+      },
+      "cid": "bafyreidncjkdba5ibw4cxrpo2sjyreheugkdmz6k747upcww6c2vt63xly"
+    }
+  },
+  {
+    "did": "did:plc:m6jn2lx3q3nrybyxbalm3h6n",
+    "time_us": 1771979940300216,
+    "kind": "commit",
+    "commit": {
+      "rev": "3mfngxfqaeo25",
+      "operation": "create",
+      "collection": "app.bsky.feed.post",
+      "rkey": "3mfngwps2fc2v",
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "createdAt": "2026-02-25T00:38:34.610Z",
+        "langs": [
+          "en"
+        ],
+        "text": "It's crazy that the spurs let dad play with the kids"
+      },
+      "cid": "bafyreicbdzwhwryl7zus252kq7jajtalyrhdu2hph3hzvdqiepuip4qj5u"
+    }
+  },
+  {
+    "did": "did:plc:yawv6oodwptab373zzzfy5el",
+    "time_us": 1771979940301122,
+    "kind": "commit",
+    "commit": {
+      "rev": "3mfngxcandv2g",
+      "operation": "create",
+      "collection": "app.bsky.feed.post",
+      "rkey": "3mfngvgxuk226",
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "createdAt": "2026-02-25T00:37:51.809Z",
+        "langs": [
+          "en"
+        ],
+        "reply": {
+          "parent": {
+            "cid": "bafyreihw57nusr4mwse6i3qng46u3eiskedyzfmw7zco3hwqfoqluc5zwq",
+            "uri": "at://did:plc:orfukbskqif6bctt3kjxvbsf/app.bsky.feed.post/3mfngswovj227"
+          },
+          "root": {
+            "cid": "bafyreieiqbeyq25nwvf6iqenkiv2tmysubwo6bsifrlccfjvragwveqo7q",
+            "uri": "at://did:plc:orfukbskqif6bctt3kjxvbsf/app.bsky.feed.post/3mfnbsvpfss26"
+          }
+        },
+        "text": "OJ Simpson"
+      },
+      "cid": "bafyreihsfjsehy4kbek6df2qdoajgazyyrhwjr7ca6jeczhwhktk3jaysq"
+    }
+  },
+  {
+    "did": "did:plc:of6cvcf4uzi44zdel6slo2yn",
+    "time_us": 1771979940302430,
+    "kind": "commit",
+    "commit": {
+      "rev": "3mfngxe4i7p2x",
+      "operation": "create",
+      "collection": "app.bsky.feed.post",
+      "rkey": "3mfnguu6yys2p",
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "createdAt": "2026-02-25T00:37:32.120Z",
+        "embed": {
+          "$type": "app.bsky.embed.recordWithMedia",
+          "media": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "ALT: Doctorevil No GIF",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreiap6kosgxf44axpsgxvrwjmsz6oalqr5pwyop3p2f2p47oj7sftka"
+                },
+                "mimeType": "image/jpeg",
+                "size": 145202
+              },
+              "title": "Doctorevil No GIF",
+              "uri": "https://media.tenor.com/ygHCHl1GpiYAAAAC/doctorevil-no.gif?hh=280&ww=498"
+            }
+          },
+          "record": {
+            "$type": "app.bsky.embed.record",
+            "record": {
+              "cid": "bafyreihgdppudkezwrmprwnuh6pzp3vodqpn3filghqmhbkk3uspneahdi",
+              "uri": "at://did:plc:vi2grzfali5xn5rh2ny2n4d4/app.bsky.feed.post/3mfndcubzwc2c"
+            }
+          }
+        },
+        "langs": [
+          "en"
+        ],
+        "text": ""
+      },
+      "cid": "bafyreieacclxcn3ughvqvsydogm64wa5mt3vnekeg4oa6ftgm55brrlxye"
+    }
+  },
+  {
+    "did": "did:plc:mgwpqrhfw2bxuzfu5qd5zo2v",
+    "time_us": 1771979940305016,
+    "kind": "commit",
+    "commit": {
+      "rev": "3mfngxfeeq32x",
+      "operation": "create",
+      "collection": "app.bsky.feed.post",
+      "rkey": "3mfngvzwwd22g",
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "createdAt": "2026-02-25T00:38:11.700Z",
+        "facets": [
+          {
+            "features": [
+              {
+                "$type": "app.bsky.richtext.facet#tag",
+                "tag": "femdom"
+              }
+            ],
+            "index": {
+              "byteEnd": 123,
+              "byteStart": 116
+            }
+          },
+          {
+            "features": [
+              {
+                "$type": "app.bsky.richtext.facet#tag",
+                "tag": "abdl"
+              }
+            ],
+            "index": {
+              "byteEnd": 129,
+              "byteStart": 124
+            }
+          },
+          {
+            "features": [
+              {
+                "$type": "app.bsky.richtext.facet#tag",
+                "tag": "mommydommy"
+              }
+            ],
+            "index": {
+              "byteEnd": 141,
+              "byteStart": 130
+            }
+          }
+        ],
+        "langs": [
+          "en"
+        ],
+        "text": "Aww overnight ABDL session request \u263a\ufe0f\n\nGonna get to put a baby to bed for an overnight sleep in the crib! \ud83d\ude0d\n\n#femdom #abdl #mommydommy"
+      },
+      "cid": "bafyreibhq5xfjfnnzounn2zcqzhxm63dkj6wvlpdcpq7ims7fsjkcayd6q"
+    }
+  },
+  {
+    "did": "did:plc:tqnlm5u33meqsm5tednzah3y",
+    "time_us": 1771979940317871,
+    "kind": "commit",
+    "commit": {
+      "rev": "3mfngxhfgti2h",
+      "operation": "create",
+      "collection": "app.bsky.feed.post",
+      "rkey": "3mfngxgr6sk2p",
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "createdAt": "2026-02-25T00:38:58.698Z",
+        "embed": {
+          "$type": "app.bsky.embed.external",
+          "external": {
+            "description": "YouTube video by Late Night with Seth Meyers",
+            "thumb": {
+              "$type": "blob",
+              "ref": {
+                "$link": "bafkreiey7djezhijhfmyanckdabd24ahq4gt2iwybudj2ufnzafxmu2vn4"
+              },
+              "mimeType": "image/jpeg",
+              "size": 64691
+            },
+            "title": "Jason Momoa Bounced Ben Marshall Like a Baby in Front of His SNL Coworkers",
+            "uri": "https://youtu.be/hlovGVt5aJs?si=swRKVu771BWD6Y8N"
+          }
+        },
+        "facets": [
+          {
+            "features": [
+              {
+                "$type": "app.bsky.richtext.facet#link",
+                "uri": "https://youtu.be/hlovGVt5aJs?si=swRKVu771BWD6Y8N"
+              }
+            ],
+            "index": {
+              "byteEnd": 24,
+              "byteStart": 0
+            }
+          }
+        ],
+        "langs": [
+          "en"
+        ],
+        "text": "youtu.be/hlovGVt5aJs?..."
+      },
+      "cid": "bafyreihsekjtz435hgtq3ggjnqo7zvlwc2kmflzvbuylzxaakkzvfjcpqa"
+    }
+  },
+  {
+    "did": "did:plc:547oao4jr4thz4c3xyzdimqt",
+    "time_us": 1771979940318984,
+    "kind": "commit",
+    "commit": {
+      "rev": "3mfngxhdpjr2i",
+      "operation": "create",
+      "collection": "app.bsky.feed.post",
+      "rkey": "3mfngxcyx5k2c",
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "createdAt": "2026-02-25T00:38:54.756Z",
+        "embed": {
+          "$type": "app.bsky.embed.images",
+          "images": [
+            {
+              "alt": "",
+              "aspectRatio": {
+                "height": 1082,
+                "width": 2000
+              },
+              "image": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreiezxp5gibairngxadtyqpn6fyy7ujjd3hcbb4naa7hlotmaucm2le"
+                },
+                "mimeType": "image/jpeg",
+                "size": 569913
+              }
+            },
+            {
+              "alt": "",
+              "aspectRatio": {
+                "height": 2000,
+                "width": 1946
+              },
+              "image": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreig5totnuzulcwbmjzqhyfikotwwtrb4iinwp7snwg3fv34acudjim"
+                },
+                "mimeType": "image/jpeg",
+                "size": 707116
+              }
+            }
+          ]
+        },
+        "langs": [
+          "fr"
+        ],
+        "text": "Winnie: 718 \nunfabulous high media drama Soviet Union \nThe red apple \ud83c\udf4e"
+      },
+      "cid": "bafyreiea26d6o5ta4dc4tl2lhmtzn43rbln7h63izg5fnn4yn63zbkrnhe"
+    }
+  },
+  {
+    "did": "did:plc:bxb7xvq6bh6pencilfmesqpv",
+    "time_us": 1771979940322214,
+    "kind": "commit",
+    "commit": {
+      "rev": "3mfngxhnvfz2g",
+      "operation": "create",
+      "collection": "app.bsky.feed.post",
+      "rkey": "3mfngxg4hps22",
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "createdAt": "2026-02-25T00:38:58.019Z",
+        "embed": {
+          "$type": "app.bsky.embed.external",
+          "external": {
+            "description": "ALT: a man in a suit is running through a hallway with exit signs on the doors",
+            "thumb": {
+              "$type": "blob",
+              "ref": {
+                "$link": "bafkreib4cz7jgibcguaaxqa4fs54u6kaxf2ll4ccseihpx2tkxc2iefzp4"
+              },
+              "mimeType": "image/jpeg",
+              "size": 456084
+            },
+            "title": "a man in a suit is running through a hallway with exit signs on the doors",
+            "uri": "https://media.tenor.com/7D-mqThLpGcAAAAC/adam-sandler-run.gif?hh=280&ww=498"
+          }
+        },
+        "langs": [
+          "en"
+        ],
+        "reply": {
+          "parent": {
+            "cid": "bafyreibl5h3d4wm2dw5kd2xldeop2wotdy3nooluj4aqv5x5hz5rb2jreu",
+            "uri": "at://did:plc:vovinwhtulbsx4mwfw26r5ni/app.bsky.feed.post/3mfnfjclv242d"
+          },
+          "root": {
+            "cid": "bafyreibl5h3d4wm2dw5kd2xldeop2wotdy3nooluj4aqv5x5hz5rb2jreu",
+            "uri": "at://did:plc:vovinwhtulbsx4mwfw26r5ni/app.bsky.feed.post/3mfnfjclv242d"
+          }
+        },
+        "text": ""
+      },
+      "cid": "bafyreihxg7xkt7uf4w2tv44ugm6iburvcquuavcyxhqdkgiokgoyf7srim"
+    }
+  }
+]

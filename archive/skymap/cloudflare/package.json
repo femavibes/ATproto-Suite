@@ -1,0 +1,13 @@
+{
+  "name": "skymap-cloudflare",
+  "version": "1.0.0",
+  "description": "Cloudflare Workers for SkyMap services",
+  "scripts": {
+    "deploy": "./deploy.sh",
+    "deploy-admin": "wrangler deploy admin-worker.js --config wrangler-admin.toml",
+    "deploy-web": "wrangler deploy web-worker.js --config wrangler-web.toml"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

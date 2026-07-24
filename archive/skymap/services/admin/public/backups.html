@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Backup Management - ATlas Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { overflow-y: scroll; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.35) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.25) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(147, 197, 253, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, #f8f9fa 0%, #faf5ff 50%, #f1f3f4 100%);
+            color: #171717;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem; }
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { font-size: 2.5rem; font-weight: 600; color: #171717; margin-bottom: 0.5rem; }
+        .header p { color: #737373; font-size: 1.125rem; }
+        .section { 
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(120, 119, 198, 0.12);
+        }
+        .section h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: #171717; }
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+        .status-card { 
+            background: rgba(255, 255, 255, 0.6);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .status-card .label { font-size: 0.875rem; color: #737373; margin-bottom: 0.5rem; }
+        .status-card .value { font-size: 1.25rem; font-weight: 600; color: #171717; }
+        .status-card .value.success { color: #10b981; }
+        .status-card .value.error { color: #ef4444; }
+        .backup-item { 
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        .backup-info { flex: 1; }
+        .backup-info .database { font-weight: 600; color: #171717; margin-bottom: 0.25rem; }
+        .backup-info .details { font-size: 0.875rem; color: #737373; }
+        .backup-actions { display: flex; gap: 0.5rem; }
+        button { 
+            padding: 0.625rem 1.25rem;
+            background: rgba(23, 23, 23, 0.9);
+            backdrop-filter: blur(20px);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        button:hover { 
+            background: rgba(64, 64, 64, 0.9);
+            transform: translateY(-1px);
+        }
+        button:disabled { 
+            background: rgba(115, 115, 115, 0.5);
+            cursor: not-allowed;
+            transform: none;
+        }
+        button.secondary {
+            background: rgba(255, 255, 255, 0.6);
+            color: #171717;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .badge { 
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .badge.daily { background: #dbeafe; color: #1e40af; }
+        .badge.weekly { background: #fef3c7; color: #92400e; }
+        .badge.monthly { background: #d1fae5; color: #065f46; }
+        .loading { text-align: center; padding: 2rem; color: #737373; }
+        .error { 
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .success { 
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .filters { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .filters select { 
+            padding: 0.625rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            background: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+        }
+        .schedule-info { 
+            background: rgba(255, 255, 255, 0.6);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        .schedule-info .label { font-size: 0.875rem; color: #737373; margin-bottom: 0.25rem; }
+        .schedule-info .value { font-family: ui-monospace, 'SF Mono', Monaco, monospace; font-size: 0.9375rem; color: #171717; }
+        .log-viewer { 
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: ui-monospace, 'SF Mono', Monaco, monospace;
+            font-size: 0.875rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Backup Management</h1>
+            <p>Manage PostgreSQL database backups to Google Cloud Storage</p>
+        </div>
+
+        <div id="message"></div>
+
+        <!-- Status Section -->
+        <div class="section">
+            <h2>Service Status</h2>
+            <div class="status-grid" id="statusGrid">
+                <div class="status-card">
+                    <div class="label">Service Status</div>
+                    <div class="value" id="serviceStatus">Loading...</div>
+                </div>
+                <div class="status-card">
+                    <div class="label">Last Backup</div>
+                    <div class="value" id="lastBackup">-</div>
+                </div>
+                <div class="status-card">
+                    <div class="label">Schedule</div>
+                    <div class="value" id="schedule">-</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <button onclick="triggerBackup()">Trigger Manual Backup</button>
+                <button class="secondary" onclick="refreshStatus()">Refresh Status</button>
+                <button class="secondary" onclick="toggleLogs()">View Logs</button>
+            </div>
+            <div id="logsSection" style="display: none; margin-top: 1rem;">
+                <h3 style="margin-bottom: 0.5rem;">Recent Logs</h3>
+                <div class="log-viewer" id="logsViewer">Loading logs...</div>
+            </div>
+        </div>
+
+        <!-- Schedule Section -->
+        <div class="section">
+            <h2>Backup Schedule</h2>
+            <div class="schedule-info">
+                <div class="label">Cron Schedule</div>
+                <div class="value" id="cronSchedule">-</div>
+            </div>
+            <div class="schedule-info">
+                <div class="label">Retention Policy</div>
+                <div style="margin-top: 0.5rem;">
+                    <div>Daily: <strong id="retentionDaily">-</strong> backups</div>
+                    <div>Weekly: <strong id="retentionWeekly">-</strong> backups</div>
+                    <div>Monthly: <strong id="retentionMonthly">-</strong> backups</div>
+                </div>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: #737373;">
+                To change the schedule, update BACKUP_SCHEDULE in .env and restart the backup-service container.
+            </p>
+        </div>
+
+        <!-- Backups List -->
+        <div class="section">
+            <h2>Backup History</h2>
+            <div class="filters">
+                <select id="filterDatabase" onchange="loadBackups()">
+                    <option value="">All Databases</option>
+                    <option value="skymap">Skymap</option>
+                    <option value="ozone">Ozone</option>
+                </select>
+                <select id="filterType" onchange="loadBackups()">
+                    <option value="">All Types</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <div id="backupsList">
+                <div class="loading">Loading backups...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let logsVisible = false;
+
+        async function fetchWithAuth(url, options = {}) {
+            const response = await fetch(url, {
+                ...options,
+                credentials: 'include'
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+            }
+            return response.json();
+        }
+
+        function showMessage(text, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = type;
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        async function refreshStatus() {
+            try {
+                const status = await fetchWithAuth('/api/backups/status');
+                document.getElementById('serviceStatus').textContent = status.service_running ? 'Running' : 'Stopped';
+                document.getElementById('serviceStatus').className = status.service_running ? 'value success' : 'value error';
+                document.getElementById('lastBackup').textContent = status.last_backup ? 
+                    new Date(status.last_backup).toLocaleString() : 'Never';
+                document.getElementById('schedule').textContent = status.schedule || '-';
+            } catch (error) {
+                console.error('Error loading status:', error);
+                showMessage('Failed to load status: ' + error.message, 'error');
+            }
+        }
+
+        async function loadSchedule() {
+            try {
+                const schedule = await fetchWithAuth('/api/backups/schedule');
+                document.getElementById('cronSchedule').textContent = schedule.schedule || '-';
+                document.getElementById('retentionDaily').textContent = schedule.retention.daily || '-';
+                document.getElementById('retentionWeekly').textContent = schedule.retention.weekly || '-';
+                document.getElementById('retentionMonthly').textContent = schedule.retention.monthly || '-';
+            } catch (error) {
+                console.error('Error loading schedule:', error);
+            }
+        }
+
+        async function loadBackups() {
+            const listDiv = document.getElementById('backupsList');
+            listDiv.innerHTML = '<div class="loading">Loading backups...</div>';
+
+            try {
+                const data = await fetchWithAuth('/api/backups');
+                const backups = data.backups || [];
+
+                const filterDatabase = document.getElementById('filterDatabase').value;
+                const filterType = document.getElementById('filterType').value;
+
+                const filtered = backups.filter(backup => {
+                    if (filterDatabase && backup.database !== filterDatabase) return false;
+                    if (filterType && backup.type !== filterType) return false;
+                    return true;
+                });
+
+                if (filtered.length === 0) {
+                    listDiv.innerHTML = '<div class="loading">No backups found</div>';
+                    return;
+                }
+
+                listDiv.innerHTML = filtered.map(backup => `
+                    <div class="backup-item">
+                        <div class="backup-info">
+                            <div class="database">${backup.database}</div>
+                            <div class="details">
+                                <span class="badge ${backup.type}">${backup.type}</span>
+                                ${formatSize(backup.size)} • ${backup.date}
+                            </div>
+                        </div>
+                        <div class="backup-actions">
+                            <button onclick="downloadBackup('${backup.database}', '${backup.type}', '${backup.filename.replace('.sql.gz', '')}')">Download</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading backups:', error);
+                listDiv.innerHTML = `<div class="error">Failed to load backups: ${error.message}</div>`;
+            }
+        }
+
+        async function downloadBackup(database, type, filename) {
+            try {
+                showMessage('Generating download URL...', 'success');
+                const data = await fetchWithAuth(`/api/backups/download?database=${database}&type=${type}&filename=${filename}.sql.gz`);
+                window.open(data.download_url, '_blank');
+            } catch (error) {
+                console.error('Error downloading backup:', error);
+                showMessage('Failed to generate download URL: ' + error.message, 'error');
+            }
+        }
+
+        async function triggerBackup() {
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = 'Triggering...';
+
+            try {
+                const result = await fetchWithAuth('/api/backups/trigger', {
+                    method: 'POST'
+                });
+                showMessage('Backup triggered successfully. Check logs for progress.', 'success');
+                setTimeout(() => {
+                    refreshStatus();
+                    loadBackups();
+                }, 2000);
+            } catch (error) {
+                console.error('Error triggering backup:', error);
+                showMessage('Failed to trigger backup: ' + error.message, 'error');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Trigger Manual Backup';
+            }
+        }
+
+        async function toggleLogs() {
+            logsVisible = !logsVisible;
+            const logsSection = document.getElementById('logsSection');
+            const logsViewer = document.getElementById('logsViewer');
+
+            if (logsVisible) {
+                logsSection.style.display = 'block';
+                logsViewer.textContent = 'Loading logs...';
+                try {
+                    const data = await fetchWithAuth('/api/backups/logs');
+                    logsViewer.textContent = data.logs || 'No logs available';
+                } catch (error) {
+                    logsViewer.textContent = 'Error loading logs: ' + error.message;
+                }
+            } else {
+                logsSection.style.display = 'none';
+            }
+        }
+
+        function formatSize(bytes) {
+            if (!bytes) return 'Unknown size';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let size = bytes;
+            let unitIndex = 0;
+            while (size >= 1024 && unitIndex < units.length - 1) {
+                size /= 1024;
+                unitIndex++;
+            }
+            return `${size.toFixed(1)} ${units[unitIndex]}`;
+        }
+
+        // Initial load
+        refreshStatus();
+        loadSchedule();
+        loadBackups();
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            refreshStatus();
+            loadBackups();
+        }, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "skymap-data-parser",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "parse": "node parse-census.js",
+    "parse-canada": "node parse-canada-census.js"
+  },
+  "dependencies": {
+    "csv-parser": "^3.0.0",
+    "pg": "^8.11.3",
+    "xlsx": "^0.18.5",
+    "yauzl": "^2.10.0"
+  }
+}

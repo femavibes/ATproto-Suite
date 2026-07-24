@@ -1,0 +1,11 @@
+name = "skymap-admin"
+main = "admin-worker.js"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "skymap-admin"
+route = "admin.ozoneskymap.fema.monster/*"
+
+[[env.production.vars]]
+DATABASE_URL = "postgresql://dev:devpass@localhost:5435/skymap"
+ADMIN_API_URL = "http://localhost:3009"

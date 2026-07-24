@@ -1,0 +1,328 @@
+<h2 class="page-title">Custom Node</h2>
+<p style="text-align: center; color: #525252; margin-bottom: 1.5rem;">Generate and push custom nodes to Graze</p>
+
+<div class="section">
+    <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Region & Actions</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; flex: 1;">
+            <select id="regionSelect" style="flex: 1; min-width: 200px;">
+                <option value="">Select Region</option>
+            </select>
+            <select id="countrySelect" style="flex: 1; min-width: 200px;">
+                <option value="">All Countries</option>
+            </select>
+        </div>
+        <div id="loginStatus" style="font-size: 0.875rem; color: #737373;">Connecting to Graze...</div>
+    </div>
+    <div id="grazeUrl" style="margin-bottom: 1rem; font-size: 0.875rem; color: #737373; font-family: ui-monospace, 'SF Mono', Monaco, monospace;"></div>
+    <div id="componentIdSection" style="margin-bottom: 1rem; padding: 1rem; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+        <div style="font-size: 0.75rem; color: #dc2626; margin-bottom: 0.5rem; font-weight: 500;">
+            <strong>⚠️ WARNING:</strong> Override and set the Graze ID for the custom node. Be careful NOT to pick the wrong ID or it WILL overwrite that custom node's ID. You should NOT have to use this feature. Use this only if you created a new custom node and need to set the component ID manually.
+        </div>
+        <div id="componentIdInputs"></div>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <button onclick="pushToGraze()" id="pushBtn" disabled>Push Region to Graze</button>
+        <button onclick="confirmPushAllToGraze()" id="pushAllBtn" disabled>Push All Regions to Graze</button>
+    </div>
+    <p class="note" style="margin-top: 1rem;">Note: Push All is not working yet. It will create/update custom nodes for all 50 states.</p>
+</div>
+
+<div class="section">
+    <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Preview JSON Generation</h3>
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <button onclick="generateCustomNode()">Generate JSON</button>
+        <button onclick="copyToClipboard()">Copy JSON</button>
+    </div>
+    <div id="grazeOutput" class="graze-output" style="min-height: 100px;"></div>
+</div>
+
+<script>
+    async function loadCountries() {
+        const response = await fetch('/api/countries');
+        const countries = await response.json();
+        
+        const countrySelect = document.getElementById('countrySelect');
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.country_code;
+            option.textContent = country.country_name;
+            countrySelect.appendChild(option);
+        });
+    }
+
+    async function customNodeUpdateRegionFilter(preserveSelection = false) {
+        const countryCode = document.getElementById('countrySelect').value;
+        const regionSelect = document.getElementById('regionSelect');
+        const currentValue = preserveSelection ? regionSelect.value : '';
+        
+        regionSelect.innerHTML = '<option value="">Select Region</option>';
+        
+        const url = countryCode ? `/api/regions-by-country?country=${countryCode}` : '/api/regions-by-country';
+        const response = await fetch(url);
+        const regions = await response.json();
+        
+        const seen = new Set();
+        regions.forEach(region => {
+            if (!seen.has(region.region_code)) {
+                seen.add(region.region_code);
+                const option = document.createElement('option');
+                option.value = region.region_code;
+                option.textContent = region.region_name;
+                const ids = region.graze_component_ids ? 
+                    (typeof region.graze_component_ids === 'string' ? region.graze_component_ids : JSON.stringify(region.graze_component_ids)) 
+                    : '[]';
+                option.dataset.componentIds = ids;
+                regionSelect.appendChild(option);
+            }
+        });
+        
+        if (preserveSelection && currentValue) {
+            regionSelect.value = currentValue;
+            regionSelect.dispatchEvent(new Event('change'));
+        }
+    }
+
+    document.getElementById('countrySelect').addEventListener('change', customNodeUpdateRegionFilter);
+
+    document.getElementById('regionSelect').addEventListener('change', () => {
+        const regionSelect = document.getElementById('regionSelect');
+        const selectedOption = regionSelect.options[regionSelect.selectedIndex];
+        const componentIdsStr = selectedOption.dataset.componentIds;
+        let componentIds = null;
+        try {
+            componentIds = componentIdsStr ? JSON.parse(componentIdsStr) : null;
+        } catch (e) {
+            console.error('Error parsing component IDs:', e);
+            componentIds = null;
+        }
+        const grazeUrlDiv = document.getElementById('grazeUrl');
+        const pushBtn = document.getElementById('pushBtn');
+        const pushAllBtn = document.getElementById('pushAllBtn');
+        
+        if (regionSelect.value) {
+            pushBtn.disabled = false;
+            pushAllBtn.disabled = false;
+        } else {
+            pushBtn.disabled = true;
+            pushAllBtn.disabled = true;
+        }
+        
+        const componentIdInput = document.getElementById('componentIdInput');
+        const updateComponentIdBtn = document.getElementById('updateComponentIdBtn');
+        
+        const componentIdInputsDiv = document.getElementById('componentIdInputs');
+        
+        if (componentIds && componentIds.length > 0) {
+            const nodeLinks = componentIds.map((id, idx) => 
+                `<a href="https://www.graze.social/custom-nodes/${id}" target="_blank" style="color: #171717;">Node ${idx + 1}: ${id}</a>`
+            ).join('<br>');
+            grazeUrlDiv.innerHTML = nodeLinks;
+            
+            componentIdInputsDiv.innerHTML = componentIds.map((id, idx) => `
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+                    <label style="font-weight: 500; font-size: 0.875rem; min-width: 60px;">Node ${idx + 1}:</label>
+                    <input type="number" id="nodeId_${idx}" value="${id}" placeholder="ID" style="flex: 1; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; font-family: monospace; font-size: 0.875rem;">
+                    <button onclick="updateNodeId(${idx})" style="padding: 0.5rem 1rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500;">Update</button>
+                </div>
+            `).join('');
+        } else if (regionSelect.value) {
+            grazeUrlDiv.textContent = 'No custom node created yet for this region';
+            componentIdInputsDiv.innerHTML = `
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <label style="font-weight: 500; font-size: 0.875rem; min-width: 60px;">Node 1:</label>
+                    <input type="number" id="nodeId_0" placeholder="Enter Graze component ID" style="flex: 1; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; font-family: monospace; font-size: 0.875rem;">
+                    <button onclick="updateNodeId(0)" style="padding: 0.5rem 1rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500;">Update</button>
+                </div>
+            `;
+        } else {
+            grazeUrlDiv.textContent = '';
+            componentIdInputsDiv.innerHTML = '';
+        }
+    });
+
+    async function loadRegions() {
+        await customNodeUpdateRegionFilter();
+    }
+    
+    async function updateRegionFilter() {
+        await customNodeUpdateRegionFilter();
+    }
+
+    async function generateCustomNode() {
+        const regionCode = document.getElementById('regionSelect').value;
+        if (!regionCode) {
+            alert('Please select a region first');
+            return;
+        }
+        
+        const response = await fetch(`/api/graze-nodes/${regionCode}`);
+        const node = await response.json();
+        
+        document.getElementById('grazeOutput').textContent = JSON.stringify(node, null, 2);
+    }
+
+    async function pushToGraze() {
+        const regionCode = document.getElementById('regionSelect').value;
+        if (!regionCode) {
+            alert('Please select a region first');
+            return;
+        }
+        
+        if (!GrazeSession.sessionCookie) {
+            alert('Please login to Graze first');
+            return;
+        }
+        
+        const pushBtn = document.getElementById('pushBtn');
+        pushBtn.disabled = true;
+        pushBtn.textContent = 'Pushing...';
+        
+        try {
+            const response = await fetch(`/api/push-to-graze/${regionCode}`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ sessionCookie: GrazeSession.sessionCookie })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(`Success: ${result.message}`);
+                // Refresh the region dropdown to get updated component ID
+                await customNodeUpdateRegionFilter(true);
+                // Update the component ID input if we got one back
+                if (result.componentId) {
+                    document.getElementById('componentIdInput').value = result.componentId;
+                    // Trigger change event to update the display
+                    document.getElementById('regionSelect').dispatchEvent(new Event('change'));
+                }
+            } else {
+                alert(`Error: ${result.error}`);
+            }
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        } finally {
+            pushBtn.disabled = false;
+            pushBtn.textContent = 'Push Region to Graze';
+        }
+    }
+
+    async function confirmPushAllToGraze() {
+        if (!GrazeSession.sessionCookie) {
+            alert('Please login to Graze first');
+            return;
+        }
+        
+        if (!confirm('⚠️ DANGER: This will create/update custom nodes for ALL 50 STATES.\\n\\nThis is a BULK operation that may take several minutes and cannot be easily undone.\\n\\nAre you absolutely sure you want to continue?')) {
+            return;
+        }
+        
+        pushAllToGraze();
+    }
+
+    async function pushAllToGraze() {
+        const pushAllBtn = document.getElementById('pushAllBtn');
+        pushAllBtn.disabled = true;
+        pushAllBtn.textContent = 'Pushing All...';
+        
+        try {
+            const response = await fetch('/api/push-all-to-graze', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ sessionCookie: GrazeSession.sessionCookie })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                const summary = result.results.reduce((acc, r) => {
+                    acc[r.action] = (acc[r.action] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                alert(`Completed! Created: ${summary.created || 0}, Updated: ${summary.updated || 0}, Errors: ${summary.error || 0}`);
+            } else {
+                alert(`Error: ${result.error}`);
+            }
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        } finally {
+            pushAllBtn.disabled = false;
+            pushAllBtn.textContent = 'Push All Regions to Graze';
+        }
+    }
+
+    async function copyToClipboard() {
+        const output = document.getElementById('grazeOutput').textContent;
+        if (!output) {
+            alert('Generate a custom node first');
+            return;
+        }
+        
+        try {
+            await navigator.clipboard.writeText(output);
+            alert('JSON copied to clipboard!');
+        } catch (err) {
+            const textArea = document.createElement('textarea');
+            textArea.value = output;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('JSON copied to clipboard!');
+        }
+    }
+
+    async function updateNodeId(nodeIndex) {
+        const regionCode = document.getElementById('regionSelect').value;
+        const input = document.getElementById(`nodeId_${nodeIndex}`);
+        const componentId = input.value.trim();
+        
+        if (!regionCode) {
+            alert('Please select a region first');
+            return;
+        }
+        
+        if (!componentId || isNaN(componentId)) {
+            alert('Please enter a valid component ID (number)');
+            return;
+        }
+        
+        if (!confirm(`Set Node ${nodeIndex + 1} ID to ${componentId}?`)) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/set-node-id`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeaders()
+                },
+                body: JSON.stringify({
+                    region_code: regionCode,
+                    node_index: nodeIndex,
+                    component_id: parseInt(componentId)
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert(`Node ${nodeIndex + 1} ID updated successfully!`);
+                await customNodeUpdateRegionFilter(true);
+            } else {
+                alert(`Error: ${result.error || 'Failed to update component ID'}`);
+            }
+        } catch (error) {
+            console.error('Error updating component ID:', error);
+            alert(`Error: ${error.message}`);
+        }
+    }
+
+    loadCountries();
+    loadRegions();
+    
+    // GrazeSession will auto-initialize via DOMContentLoaded in graze-session.js
+</script>

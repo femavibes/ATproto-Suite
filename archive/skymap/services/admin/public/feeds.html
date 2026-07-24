@@ -1,0 +1,415 @@
+<h2 class="page-title">Feeds</h2>
+<p style="text-align: center; color: #525252; margin-bottom: 1.5rem;">Generate and publish feeds from location lists</p>
+<div class="section">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+    <h3>Saved Feeds</h3>
+    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+      <span id="loginStatus" style="font-size: 0.875rem; color: #737373;">Connecting to Graze...</span>
+      <button onclick="showNewFeedForm()" style="padding: 0.5rem 1rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 6px; cursor: pointer;">+ New Feed</button>
+    </div>
+  </div>
+  <div id="savedFeeds"></div>
+</div>
+
+<div class="section" id="feedFormSection" style="display: none;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h3 id="formTitle">New Feed</h3>
+    <button onclick="hideFeedForm()" style="padding: 0.5rem 1rem; background: transparent; color: #737373; border: 1px solid #d4d4d4; border-radius: 8px; cursor: pointer;">Cancel</button>
+  </div>
+  
+  <div style="margin-bottom: 1.5rem;">
+    <h4 style="margin-bottom: 0.5rem;">Feed Type</h4>
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <label style="flex: 1; min-width: 200px; padding: 1rem; background: white;  border: 2px solid #ddd; border-radius: 6px; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; gap: 0.5rem;" class="radio-card">
+        <input type="radio" name="feedType" value="location" style="width: 18px; height: 18px; cursor: pointer;"> 
+        <span style="display: flex; flex-direction: column; gap: 0.25rem;">
+          <span style="font-weight: 500;">Location-based feed (uses lists)</span>
+          <span style="font-size: 0.8rem; color: #737373;">WIP - ignore this</span>
+        </span>
+      </label>
+      <label style="flex: 1; min-width: 200px; padding: 1rem; background: white;  border: 2px solid #ddd; border-radius: 6px; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; gap: 0.5rem;" class="radio-card">
+        <input type="radio" name="feedType" value="hashtag" checked style="width: 18px; height: 18px; cursor: pointer;"> 
+        <span style="display: flex; flex-direction: column; gap: 0.25rem;">
+          <span style="font-weight: 500;">Custom hashtag feed (all hashtags from all locations)</span>
+          <span style="font-size: 0.8rem; color: #737373;">Takes all hashtag mappings for all cities and makes a feed. The purpose of this is to use this feed for Contrails websocket to ingest a feed of just location posts that we can parse and use for the heatmap on our frontend. Yeah, I thought this was pretty big brain too and the least expensive way to get this data.</span>
+        </span>
+      </label>
+    </div>
+  </div>
+  
+  <div id="locationSection" style="margin-bottom: 1.5rem; display: none;">
+    <h4 style="margin-bottom: 0.5rem;">Select Location</h4>
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+      <select id="countryFilter" style="flex: 1; min-width: 150px; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; background: white; ">
+        <option value="">All Countries</option>
+      </select>
+      <select id="regionFilter" style="flex: 1; min-width: 150px; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; background: white; ">
+        <option value="">All Regions</option>
+      </select>
+      <input type="text" id="feedsLocationSearch" placeholder="Search locations..." style="flex: 2; min-width: 200px; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; background: white; ">
+    </div>
+    <div style="margin-bottom: 1rem;">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Select Location:</label>
+      <select id="locationSelect" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; background: white; ">
+        <option value="">Select a location...</option>
+      </select>
+    </div>
+  </div>
+  
+  <div style="margin-bottom: 1.5rem;">
+    <h4>Feed Details</h4>
+    <div style="margin-bottom: 1rem;">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Display Name:</label>
+      <input type="text" id="displayName" placeholder="e.g., New York Feed" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; background: white; ">
+    </div>
+    <div style="margin-bottom: 1rem;">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Description (optional):</label>
+      <textarea id="description" rows="3" placeholder="Feed description" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; background: white; "></textarea>
+    </div>
+    <div style="margin-bottom: 1rem;">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Sticky Type:</label>
+      <select id="stickyType" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; background: white; ">
+        <option value="new">New</option>
+        <option value="hot">Hot</option>
+        <option value="top">Top</option>
+      </select>
+    </div>
+    <div style="margin-bottom: 1rem;">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Existing Feed ID (leave empty to create new):</label>
+      <input type="text" id="feedId" placeholder="e.g., 31909" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; background: white; ">
+    </div>
+  </div>
+  
+  <div style="display: flex; gap: 1rem;">
+    <button id="saveFeedBtn" style="padding: 0.5rem 1rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 6px; cursor: pointer;">Save as Draft</button>
+    <button id="publishFeedBtn" style="padding: 0.5rem 1rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 6px; cursor: pointer;">Publish Feed</button>
+  </div>
+  <div id="result" style="margin-top: 1rem;"></div>
+</div>
+
+<script>
+  var locations = [];
+
+  function showNewFeedForm() {
+    document.getElementById('feedFormSection').style.display = 'block';
+    document.getElementById('formTitle').textContent = 'New Feed';
+    document.getElementById('feedId').value = '';
+    document.getElementById('feedId').disabled = false;
+    document.getElementById('displayName').value = '';
+    document.getElementById('description').value = '';
+    document.getElementById('result').innerHTML = '';
+    document.querySelector('input[name="feedType"][value="hashtag"]').checked = true;
+    document.getElementById('locationSection').style.display = 'none';
+    document.getElementById('feedFormSection').scrollIntoView({ behavior: 'smooth' });
+  }
+  
+  function hideFeedForm() {
+    document.getElementById('feedFormSection').style.display = 'none';
+  }
+  
+  document.querySelectorAll('input[name="feedType"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const isLocation = e.target.value === 'location';
+      document.getElementById('locationSection').style.display = isLocation ? 'block' : 'none';
+    });
+  });
+
+  var feedsAllLocations = [];
+  
+  async function loadLocations() {
+    const response = await fetch('/api/locations');
+    feedsAllLocations = await response.json();
+    
+    const countries = new Set();
+    feedsAllLocations.forEach(l => {
+      if (l.country_code) countries.add(l.country_code);
+      else countries.add('US');
+    });
+    const countryFilter = document.getElementById('countryFilter');
+    [...countries].sort().forEach(code => {
+      const option = document.createElement('option');
+      option.value = code;
+      option.textContent = code === 'US' ? 'United States' : code === 'CA' ? 'Canada' : code;
+      countryFilter.appendChild(option);
+    });
+    
+    updateLocationList();
+  }
+  
+  function updateLocationList() {
+    const countryFilter = document.getElementById('countryFilter').value;
+    const regionFilter = document.getElementById('regionFilter').value;
+    const searchTerm = document.getElementById('feedsLocationSearch').value.toLowerCase();
+    
+    let filtered = feedsAllLocations.filter(loc => loc.population);
+    
+    if (countryFilter) {
+      filtered = filtered.filter(loc => 
+        (loc.country_code === countryFilter) || 
+        (countryFilter === 'US' && !loc.country_code)
+      );
+    }
+    if (regionFilter) {
+      filtered = filtered.filter(loc => loc.region_name === regionFilter);
+    }
+    if (searchTerm) {
+      filtered = filtered.filter(loc => 
+        loc.name.toLowerCase().includes(searchTerm) || 
+        loc.region_name.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    const select = document.getElementById('locationSelect');
+    
+    if (filtered.length === 0) {
+      select.innerHTML = '<option value="">No locations found</option>';
+      return;
+    }
+    
+    select.innerHTML = `<option value="">Select a location... (${filtered.length} found)</option>`;
+    
+    filtered.forEach(loc => {
+      const option = document.createElement('option');
+      option.value = loc.id;
+      option.textContent = `${loc.name}, ${loc.region_name} (${loc.lists.length} lists)`;
+      option.dataset.lists = JSON.stringify(loc.lists);
+      option.dataset.name = loc.name;
+      select.appendChild(option);
+    });
+  }
+  
+  function feedsUpdateRegionFilter() {
+    const countryFilter = document.getElementById('countryFilter').value;
+    const regionFilter = document.getElementById('regionFilter');
+    
+    let filtered = feedsAllLocations;
+    if (countryFilter) {
+      filtered = filtered.filter(loc => 
+        (loc.country_code === countryFilter) || 
+        (countryFilter === 'US' && !loc.country_code)
+      );
+    }
+    
+    const regions = [...new Set(filtered.map(loc => loc.region_name))].sort();
+    regionFilter.innerHTML = '<option value="">All Regions</option>';
+    regions.forEach(region => {
+      const option = document.createElement('option');
+      option.value = region;
+      option.textContent = region;
+      regionFilter.appendChild(option);
+    });
+    
+    updateLocationList();
+  }
+  
+  document.getElementById('countryFilter').addEventListener('change', feedsUpdateRegionFilter);
+  document.getElementById('regionFilter').addEventListener('change', updateLocationList);
+  document.getElementById('feedsLocationSearch').addEventListener('input', updateLocationList);
+
+  async function handleFeedAction(publish) {
+    const feedType = document.querySelector('input[name="feedType"]:checked').value;
+    const displayName = document.getElementById('displayName').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const stickyType = document.getElementById('stickyType').value;
+    const feedId = document.getElementById('feedId').value.trim();
+    const resultDiv = document.getElementById('result');
+    
+    if (!displayName) {
+      resultDiv.innerHTML = '<p style="color: red;">Please enter a display name</p>';
+      return;
+    }
+    
+    let listUrls = [];
+    let useHashtagManifest = false;
+    
+    if (feedType === 'location') {
+      const locationId = document.getElementById('locationSelect').value;
+      if (!locationId) {
+        resultDiv.innerHTML = '<p style="color: red;">Please select a location</p>';
+        return;
+      }
+      
+      const select = document.getElementById('locationSelect');
+      const option = select.options[select.selectedIndex];
+      const lists = JSON.parse(option.dataset.lists);
+      
+      if (lists.length === 0) {
+        resultDiv.innerHTML = '<p style="color: red;">This location has no lists</p>';
+        return;
+      }
+      
+      listUrls = lists.map(l => l.url);
+    } else {
+      useHashtagManifest = true;
+    }
+    
+    const saveBtn = document.getElementById('saveFeedBtn');
+    const publishBtn = document.getElementById('publishFeedBtn');
+    saveBtn.disabled = true;
+    publishBtn.disabled = true;
+    
+    const action = publish ? 'Publishing' : 'Saving';
+    resultDiv.innerHTML = `<p>${action} feed...</p>`;
+    
+    try {
+      const response = await fetch('/api/graze-feed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionCookie: GrazeSession.sessionCookie,
+          feedId: feedId || null,
+          displayName,
+          description,
+          stickyType,
+          listUrls,
+          publish,
+          useHashtagManifest
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        resultDiv.innerHTML = `
+          <div style="color: green;">
+            <p>✓ Feed ${publish ? 'published' : 'saved'} successfully!</p>
+            <p><strong>Feed ID:</strong> ${data.feedId}</p>
+            <p><strong>Algorithm URI:</strong> ${data.algorithmUri || 'N/A'}</p>
+            <p><strong>Status:</strong> ${publish ? 'Published ✓' : 'Draft (unpublished)'}</p>
+            <p><a href="https://www.graze.social/feed/${data.feedId}/view" target="_blank">View on Graze →</a></p>
+          </div>
+        `;
+        if (!feedId) {
+          document.getElementById('feedId').value = data.feedId;
+        }
+        loadSavedFeeds();
+      } else {
+        resultDiv.innerHTML = `<p style="color: red;">✗ Error: ${data.error}</p>`;
+      }
+    } catch (error) {
+      resultDiv.innerHTML = `<p style="color: red;">✗ Error: ${error.message}</p>`;
+    } finally {
+      saveBtn.disabled = false;
+      publishBtn.disabled = false;
+    }
+  }
+
+  document.getElementById('saveFeedBtn').addEventListener('click', () => handleFeedAction(false));
+  document.getElementById('publishFeedBtn').addEventListener('click', () => handleFeedAction(true));
+
+  async function loadSavedFeeds() {
+    try {
+      const response = await fetch('/api/graze-feeds');
+      const feeds = await response.json();
+      
+      const container = document.getElementById('savedFeeds');
+      if (feeds.length === 0) {
+        container.innerHTML = '<p style="color: #737373;">No saved feeds yet.</p>';
+        return;
+      }
+      
+      container.innerHTML = feeds.map(feed => `
+        <div style="background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 6px; border: 1px solid rgba(0, 0, 0, 0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+            <div>
+              <strong style="font-size: 1.05rem;">${feed.display_name}</strong>
+              <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">
+                Feed ID: ${feed.graze_feed_id} • ${feed.is_hashtag_feed ? 'Hashtag Feed' : 'Location Feed'} • ${feed.published ? '<span style="color: #16a34a;">✓ Published</span>' : '<span style="color: #ea580c;">Draft</span>'}
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button style="padding: 0.5rem 1rem; font-size: 0.875rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 8px; cursor: pointer;" 
+                data-feed-id="${feed.graze_feed_id}" 
+                data-display-name="${feed.display_name}" 
+                data-is-hashtag="${feed.is_hashtag_feed}" 
+                onclick="loadFeed(this.dataset.feedId, this.dataset.displayName, this.dataset.isHashtag === 'true')">Edit</button>
+              <button style="padding: 0.5rem 1rem; font-size: 0.875rem; background: #16a34a; color: white; border: none; border-radius: 8px; cursor: pointer;" 
+                onclick="publishFeedDirect('${feed.graze_feed_id}', '${feed.display_name}', ${feed.is_hashtag_feed})">Publish to Graze</button>
+              <button style="padding: 0.5rem 1rem; font-size: 0.875rem; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer;" 
+                onclick="deleteFeed('${feed.graze_feed_id}', '${feed.display_name}')">Delete</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch (error) {
+      console.error('Error loading feeds:', error);
+    }
+  }
+
+  window.loadFeed = function(feedId, displayName, isHashtagFeed) {
+    document.getElementById('feedFormSection').style.display = 'block';
+    document.getElementById('formTitle').textContent = 'Edit Feed';
+    document.getElementById('feedId').value = feedId;
+    document.getElementById('feedId').disabled = true;
+    document.getElementById('displayName').value = displayName;
+    document.getElementById('result').innerHTML = '';
+    
+    const feedType = isHashtagFeed ? 'hashtag' : 'location';
+    document.querySelector(`input[name="feedType"][value="${feedType}"]`).checked = true;
+    document.getElementById('locationSection').style.display = isHashtagFeed ? 'none' : 'block';
+    
+    document.getElementById('feedFormSection').scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  window.publishFeedDirect = async function(feedId, displayName, isHashtagFeed) {
+    if (!confirm(`Publish "${displayName}" to Graze?\n\nThis will update the feed with the latest hashtag mappings.`)) {
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/graze-feed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionCookie: GrazeSession.sessionCookie,
+          feedId: feedId,
+          displayName: displayName,
+          description: '',
+          stickyType: 'new',
+          listUrls: [],
+          publish: true,
+          useHashtagManifest: isHashtagFeed
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        alert(`✓ Feed published successfully!\n\nFeed ID: ${data.feedId}\nStatus: Published`);
+        loadSavedFeeds();
+      } else {
+        alert('✗ Error: ' + data.error);
+      }
+    } catch (error) {
+      alert('✗ Error: ' + error.message);
+    }
+  };
+
+  window.deleteFeed = async function(feedId, displayName) {
+    if (!confirm(`Delete feed "${displayName}"?\n\nThis will only remove it from the database, not from Graze.`)) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/graze-feeds/${feedId}`, {
+        method: 'DELETE'
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('Feed deleted from database');
+        loadSavedFeeds();
+      } else {
+        alert('Error: ' + result.error);
+      }
+    } catch (error) {
+      alert('Error deleting feed: ' + error.message);
+    }
+  };
+
+  loadLocations();
+  loadSavedFeeds();
+  
+  // GrazeSession will auto-initialize via DOMContentLoaded in graze-session.js
+</script>

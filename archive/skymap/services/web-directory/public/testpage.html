@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATlas Icon Test</title>
+        <link rel="stylesheet" href="/styles.css">
+    <style>
+        body {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .icon-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .icon-item svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .icon-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #171717;
+            margin-bottom: 0.5rem;
+        }
+        .icon-label {
+            font-size: 0.875rem;
+            color: #737373;
+        }
+    </style>
+</head>
+<body>
+    <h1>ATlas Icon Options</h1>
+    
+    <div class="icon-grid">
+        <!-- Option 1: Globe with grid lines -->
+        <div class="icon-item">
+            <div class="icon-number">1</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <line x1="12" y1="2" x2="12" y2="22"/>
+                <path d="M12 2a15.3 15.3 0 0 0 4 10 15.3 15.3 0 0 0 4-10M12 22a15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10"/>
+            </svg>
+            <div class="icon-label">Globe Grid</div>
+        </div>
+
+        <!-- Option 2: Map with location pin -->
+        <div class="icon-item">
+            <div class="icon-number">2</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3" fill="currentColor"/>
+            </svg>
+            <div class="icon-label">Location Pin</div>
+        </div>
+
+        <!-- Option 3: Folded map -->
+        <div class="icon-item">
+            <div class="icon-number">3</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/>
+                <path d="M10 2v16M18 6v16"/>
+            </svg>
+            <div class="icon-label">Folded Map</div>
+        </div>
+
+        <!-- Option 4: Globe with location marker -->
+        <div class="icon-item">
+            <div class="icon-number">4</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 2a15.3 15.3 0 0 0 4 10 15.3 15.3 0 0 0 4-10M12 22a15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10"/>
+                <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            </svg>
+            <div class="icon-label">Globe Marker</div>
+        </div>
+
+        <!-- Option 5: Compass -->
+        <div class="icon-item">
+            <div class="icon-number">5</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="12 6 16 14 12 12 8 14 12 6" fill="currentColor"/>
+            </svg>
+            <div class="icon-label">Compass</div>
+        </div>
+
+        <!-- Option 6: Map with grid -->
+        <div class="icon-item">
+            <div class="icon-number">6</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="9" y1="3" x2="9" y2="21"/>
+                <line x1="15" y1="3" x2="15" y2="21"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="3" y1="15" x2="21" y2="15"/>
+            </svg>
+            <div class="icon-label">Map Grid</div>
+        </div>
+
+        <!-- Option 7: Globe with lines of latitude/longitude -->
+        <div class="icon-item">
+            <div class="icon-number">7</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <ellipse cx="12" cy="12" rx="10" ry="5"/>
+                <ellipse cx="12" cy="12" rx="5" ry="10"/>
+            </svg>
+            <div class="icon-label">Globe Lines</div>
+        </div>
+
+        <!-- Option 8: Map pin with waves -->
+        <div class="icon-item">
+            <div class="icon-number">8</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3" fill="currentColor"/>
+                <circle cx="12" cy="10" r="6" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                <circle cx="12" cy="10" r="9" stroke="currentColor" stroke-width="1" opacity="0.2"/>
+            </svg>
+            <div class="icon-label">Pin Waves</div>
+        </div>
+
+        <!-- Option 9: Layered map sheets -->
+        <div class="icon-item">
+            <div class="icon-number">9</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" opacity="0.3"/>
+                <rect x="5" y="5" width="18" height="18" rx="2" opacity="0.5"/>
+                <rect x="7" y="7" width="18" height="18" rx="2"/>
+            </svg>
+            <div class="icon-label">Layered Maps</div>
+        </div>
+
+        <!-- Option 10: Globe with AT symbol -->
+        <div class="icon-item">
+            <div class="icon-number">10</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="10" r="4"/>
+                <line x1="12" y1="6" x2="12" y2="14"/>
+                <line x1="8" y1="10" x2="16" y2="10"/>
+            </svg>
+            <div class="icon-label">Globe AT</div>
+        </div>
+
+        <!-- Option 11: Topographic map -->
+        <div class="icon-item">
+            <div class="icon-number">11</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M6 12h12M9 9h6M9 15h6" stroke-linecap="round"/>
+                <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            </svg>
+            <div class="icon-label">Topographic</div>
+        </div>
+
+        <!-- Option 12: Network/connection nodes -->
+        <div class="icon-item">
+            <div class="icon-number">12</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                <circle cx="16" cy="8" r="2" fill="currentColor"/>
+                <circle cx="8" cy="16" r="2" fill="currentColor"/>
+                <circle cx="16" cy="16" r="2" fill="currentColor"/>
+                <line x1="8" y1="8" x2="16" y2="8"/>
+                <line x1="8" y1="16" x2="16" y2="16"/>
+                <line x1="8" y1="8" x2="8" y2="16"/>
+                <line x1="16" y1="8" x2="16" y2="16"/>
+            </svg>
+            <div class="icon-label">Network</div>
+        </div>
+
+        <!-- Option 13: Map with route -->
+        <div class="icon-item">
+            <div class="icon-number">13</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M6 12l4-4 4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="6" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="18" cy="12" r="1.5" fill="currentColor"/>
+            </svg>
+            <div class="icon-label">Map Route</div>
+        </div>
+
+        <!-- Option 14: Globe with crosshairs -->
+        <div class="icon-item">
+            <div class="icon-number">14</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="2" x2="12" y2="22"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            </svg>
+            <div class="icon-label">Globe Crosshairs</div>
+        </div>
+
+        <!-- Option 15: Map layers -->
+        <div class="icon-item">
+            <div class="icon-number">15</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="20" rx="2" opacity="0.4"/>
+                <rect x="4" y="4" width="20" height="20" rx="2" opacity="0.6"/>
+                <rect x="6" y="6" width="20" height="20" rx="2"/>
+            </svg>
+            <div class="icon-label">Map Layers</div>
+        </div>
+
+        <!-- Option 16: Globe with location dots -->
+        <div class="icon-item">
+            <div class="icon-number">16</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="8" cy="10" r="1.5" fill="currentColor"/>
+                <circle cx="16" cy="10" r="1.5" fill="currentColor"/>
+                <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+            </svg>
+            <div class="icon-label">Globe Dots</div>
+        </div>
+
+        <!-- Option 17: Compass rose -->
+        <div class="icon-item">
+            <div class="icon-number">17</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="2" x2="12" y2="6"/>
+                <line x1="12" y1="18" x2="12" y2="22"/>
+                <line x1="2" y1="12" x2="6" y2="12"/>
+                <line x1="18" y1="12" x2="22" y2="12"/>
+                <polygon points="12 6 16 12 12 10 8 12 12 6" fill="currentColor"/>
+            </svg>
+            <div class="icon-label">Compass Rose</div>
+        </div>
+
+        <!-- Option 18: Map with pin and grid -->
+        <div class="icon-item">
+            <div class="icon-number">18</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="12" y1="3" x2="12" y2="21"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <path d="M12 8c0 2-2 4-2 4s-2-2-2-4a2 2 0 0 1 4 0z"/>
+                <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+            </svg>
+            <div class="icon-label">Grid Pin</div>
+        </div>
+
+        <!-- Option 19: Globe with meridian lines -->
+        <div class="icon-item">
+            <div class="icon-number">19</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 2a15.3 15.3 0 0 0 4 10 15.3 15.3 0 0 0 4-10M12 22a15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+            </svg>
+            <div class="icon-label">Globe Meridian</div>
+        </div>
+
+        <!-- Option 20: Map with location marker -->
+        <div class="icon-item">
+            <div class="icon-number">20</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M12 8v8M8 12h8" stroke-linecap="round"/>
+                <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            </svg>
+            <div class="icon-label">Map Marker</div>
+        </div>
+    </div>
+</body>
+</html>

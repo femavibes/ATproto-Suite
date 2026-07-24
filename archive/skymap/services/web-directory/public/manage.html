@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage My Labels - ATlas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Manage My Labels - ATlas">
+    <meta property="og:description" content="Manage your location labels on ATlas.">
+    <meta property="og:image" content="https://atls.city/atlas_banner.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://atls.city/atlas_banner.webp">
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .label-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: white; border-radius: 6px; margin-bottom: 0.5rem; }
+        .label-actions { display: flex; gap: 0.5rem; }
+        .primary-badge { background: #e5e5e5; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container-narrow">
+        <h1>Manage My Labels</h1>
+        
+        <div id="authSection" class="card">
+            <h2>Login with Bluesky</h2>
+            <input type="text" id="handleInput" placeholder="your-handle.bsky.social" style="margin-bottom:0.5rem;" />
+            <button class="btn btn-primary" onclick="oauthLoginManage()" id="oauthBtnManage" style="margin-bottom:0.5rem;">Sign in with Bluesky</button>
+            <div style="font-size:0.8rem;color:#888;margin-bottom:0.75rem;">You'll be redirected to your Bluesky server to authorize.</div>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;color:#999;font-size:0.8rem;"><div style="flex:1;border-top:1px solid #ddd;"></div>or<div style="flex:1;border-top:1px solid #ddd;"></div></div>
+            <button onclick="document.getElementById('apFallbackManage').style.display=document.getElementById('apFallbackManage').style.display==='block'?'none':'block'" style="background:none;border:1px solid #ddd;border-radius:6px;padding:0.4rem 0.8rem;font-size:0.8rem;color:#666;cursor:pointer;margin-bottom:0.5rem;">Use an app password instead</button>
+            <div id="apFallbackManage" style="display:none;">
+                <input type="text" id="apHandleManage" placeholder="your-handle.bsky.social" style="margin-bottom:0.5rem;" />
+                <input type="password" id="passwordInput" placeholder="App Password" style="margin-bottom:0.5rem;" />
+                <button class="btn btn-primary" onclick="login()">Login</button>
+                <p style="margin-top:0.5rem;font-size:0.8rem;color:#888;">Create an app password in Bluesky Settings > App Passwords.</p>
+            </div>
+            <div id="authMessage"></div>
+        </div>
+        
+        <div id="labelsSection" class="card hidden">
+            <h2>My Labels (<span id="labelCount">0</span>/3)</h2>
+            <p style="color: var(--text-tertiary); font-size: 0.875rem; margin-bottom: 1rem;">Your primary location is where you appear on the map. Secondary locations show on your profile.</p>
+            <div id="labelsList"></div>
+            
+            <h3 style="margin-top: 1.5rem;">Add Location</h3>
+            <input type="text" id="locationInput" placeholder="US-NY-NewYorkCity" style="margin-bottom:0.5rem;" />
+            <div style="display:flex;gap:0.5rem;">
+                <button class="btn btn-primary" onclick="addLabel()">Add Label</button>
+                <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            </div>
+            <div id="labelMessage"></div>
+        </div>
+    </div>
+    
+    <script>
+        function oauthLoginManage() {
+            var handle = document.getElementById('handleInput').value.trim();
+            if (!handle) { alert('Please enter your handle'); return; }
+            var btn = document.getElementById('oauthBtnManage');
+            btn.disabled = true; btn.textContent = 'Redirecting...';
+            window.location.href = '/oauth/authorize?handle=' + encodeURIComponent(handle) + '&returnTo=/manage';
+        }
+
+        async function login() {
+            const handle = (document.getElementById('apHandleManage').value || document.getElementById('handleInput').value).trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            if (!handle || !password) return;
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ handle, password })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('labelsSection').classList.remove('hidden');
+                    loadLabels();
+                } else {
+                    document.getElementById('authMessage').innerHTML = `<div class="status-error">${data.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('authMessage').innerHTML = `<div class="status-error">Login failed</div>`;
+            }
+        }
+        
+        async function loadLabels() {
+            try {
+                const response = await fetch('/api/labels/my-labels');
+                const data = await response.json();
+                
+                const labels = data.labels || [];
+                document.getElementById('labelCount').textContent = labels.length;
+                
+                const list = document.getElementById('labelsList');
+                if (labels.length === 0) {
+                    list.innerHTML = '<p>No labels yet</p>';
+                } else {
+                    list.innerHTML = labels.map(label => {
+                        const isPrimary = label.is_primary;
+                        const primaryBadge = isPrimary ? '<span class="primary-badge">Primary</span>' : '';
+                        const setPrimaryBtn = !isPrimary ? `<button class="btn btn-sm btn-secondary" onclick="setPrimary('${label.key}')">Set Primary</button>` : '';
+                        
+                        return `
+                            <div class="label-item">
+                                <span>${label.name}, ${label.region_name}${primaryBadge}</span>
+                                <div class="label-actions">
+                                    ${setPrimaryBtn}
+                                    <button class="btn btn-sm btn-secondary" onclick="removeLabel('${label.key}')">Remove</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load labels:', error);
+            }
+        }
+        
+        async function addLabel() {
+            const locationKey = document.getElementById('locationInput').value.trim();
+            if (!locationKey) return;
+            
+            try {
+                const response = await fetch('/api/labels/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ locationKey })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('labelMessage').innerHTML = `<div class="status-success">Added ${data.location.name}!</div>`;
+                    document.getElementById('locationInput').value = '';
+                    loadLabels();
+                } else {
+                    document.getElementById('labelMessage').innerHTML = `<div class="status-error">${data.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('labelMessage').innerHTML = `<div class="status-error">Failed to add label</div>`;
+            }
+        }
+        
+        async function removeLabel(locationKey) {
+            try {
+                const response = await fetch('/api/labels/remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ locationKey })
+                });
+                const data = await response.json();
+                if (data.success) loadLabels();
+                else alert('Failed to remove label');
+            } catch (error) {
+                alert('Failed to remove label');
+            }
+        }
+        
+        async function setPrimary(locationKey) {
+            try {
+                const response = await fetch('/api/labels/set-primary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ locationKey })
+                });
+                const data = await response.json();
+                if (data.success) loadLabels();
+                else alert('Failed to set primary location');
+            } catch (error) {
+                alert('Failed to set primary location');
+            }
+        }
+        
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('labelsSection').classList.add('hidden');
+        }
+        
+        fetch('/api/auth/session')
+            .then(r => r.json())
+            .then(data => {
+                if (data.authenticated) {
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('labelsSection').classList.remove('hidden');
+                    loadLabels();
+                }
+                var urlParams = new URLSearchParams(window.location.search);
+                var oauthError = urlParams.get('oauthError');
+                if (oauthError) {
+                    document.getElementById('authMessage').innerHTML = '<div class="status-error">' + oauthError + '</div>';
+                    window.history.replaceState({}, '', window.location.pathname);
+                }
+            });
+    </script>
+</body>
+</html>

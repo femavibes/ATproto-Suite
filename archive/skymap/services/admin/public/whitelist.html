@@ -1,0 +1,115 @@
+<h2 class="page-title">Admin Users</h2>
+<p style="text-align: center; color: #525252; margin-bottom: 1.5rem;">Manage admin whitelist for SkyMap access</p>
+
+<div style="max-width: 800px; margin: 0 auto; background: white;  border: 1px solid #ddd; border-radius: 8px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+  <h2>Admin Whitelist Management</h2>
+  
+  <div id="message"></div>
+  
+  <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
+    <input type="text" id="handleInput" placeholder="Enter Bluesky handle (e.g., user.bsky.social)" style="padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; flex: 1; background: white; " />
+    <button onclick="whitelistAddUser()" style="padding: 0.75rem 1.5rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 6px; cursor: pointer;">Add User</button>
+  </div>
+  
+  <ul style="list-style: none; padding: 0; margin: 0;" id="userList"></ul>
+</div>
+
+<script>
+  window.whitelistShowMessage = function(text, type = 'success') {
+    const msg = document.getElementById('message');
+    msg.className = type;
+    msg.textContent = text;
+    msg.style.padding = '1rem';
+    msg.style.borderRadius = '4px';
+    msg.style.marginBottom = '1rem';
+    if (type === 'success') {
+      msg.style.background = '#dcfce7';
+      msg.style.color = '#166534';
+    } else {
+      msg.style.background = '#fee2e2';
+      msg.style.color = '#991b1b';
+    }
+    setTimeout(() => msg.textContent = '', 3000);
+  }
+
+  window.whitelistLoadUsers = async function() {
+    try {
+      const res = await fetch('/api/whitelist');
+      const users = await res.json();
+      
+      const list = document.getElementById('userList');
+      list.innerHTML = users.map(user => `
+        <li style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #eee;">
+          <div style="flex: 1;">
+            <div style="font-weight: 500;">${user.handle}</div>
+            <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">
+              Added: ${new Date(user.created_at).toLocaleDateString()}
+              <span style="display: inline-block; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500; margin-left: 0.5rem; ${user.active ? 'background: #dcfce7; color: #166534;' : 'background: #fee2e2; color: #991b1b;'}">${user.active ? 'Active' : 'Inactive'}</span>
+            </div>
+          </div>
+          ${user.active ? 
+            `<button style="padding: 0.75rem 1.5rem; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="whitelistRemoveUser('${user.handle}')">Remove</button>` :
+            `<button style="padding: 0.75rem 1.5rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="whitelistAddUser('${user.handle}')">Reactivate</button>`
+          }
+        </li>
+      `).join('');
+    } catch (error) {
+      whitelistShowMessage('Failed to load users', 'error');
+    }
+  }
+
+  window.whitelistAddUser = async function(handle) {
+    const handleInput = document.getElementById('handleInput');
+    const handleToAdd = handle || handleInput.value.trim();
+    
+    if (!handleToAdd) {
+      whitelistShowMessage('Please enter a handle', 'error');
+      return;
+    }
+    
+    try {
+      const res = await fetch('/api/whitelist/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ handle: handleToAdd })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        whitelistShowMessage(data.message);
+        handleInput.value = '';
+        whitelistLoadUsers();
+      } else {
+        whitelistShowMessage(data.error, 'error');
+      }
+    } catch (error) {
+      whitelistShowMessage('Failed to add user', 'error');
+    }
+  }
+
+  window.whitelistRemoveUser = async function(handle) {
+    if (!confirm(`Remove ${handle} from whitelist?`)) return;
+    
+    try {
+      const res = await fetch('/api/whitelist/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ handle })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        whitelistShowMessage(data.message);
+        whitelistLoadUsers();
+      } else {
+        whitelistShowMessage(data.error, 'error');
+      }
+    } catch (error) {
+      whitelistShowMessage('Failed to remove user', 'error');
+    }
+  }
+
+  whitelistLoadUsers();
+</script>

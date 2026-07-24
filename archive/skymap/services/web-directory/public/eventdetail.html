@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event - SkyMap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:type" content="website" id="og-type">
+    <meta property="og:title" content="Event - SkyMap" id="og-title">
+    <meta property="og:description" content="View event details on SkyMap" id="og-description">
+    <meta property="og:image" content="https://atls.city/atlas_banner.webp" id="og-image">
+    <meta property="og:url" content="" id="og-url">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Event - SkyMap" id="twitter-title">
+    <meta name="twitter:description" content="View event details on SkyMap" id="twitter-description">
+    <meta name="twitter:image" content="https://atls.city/atlas_banner.webp" id="twitter-image">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="shared.js"></script>
+        <link rel="stylesheet" href="/styles.css">
+    <style>
+        
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #737373;
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+            transition: color 0.15s ease;
+        }
+        
+        .back-link:hover {
+            color: #171717;
+        }
+        
+        .event-header {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(120, 198, 119, 0.15);
+        }
+        
+        .event-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #171717;
+            margin-bottom: 1rem;
+        }
+        
+        .event-meta {
+            color: #737373;
+            font-size: 0.9375rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .event-description {
+            color: #525252;
+            margin-top: 1rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        
+        .map-section {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .map-container {
+            height: 400px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            margin-top: 1rem;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 0.875rem 1.5rem;
+            background: rgba(23, 23, 23, 0.9);
+            backdrop-filter: blur(20px);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover {
+            background: rgba(64, 64, 64, 0.9);
+            transform: translateY(-1px);
+        }
+        
+        button.secondary {
+            background: rgba(115, 115, 115, 0.9);
+        }
+        
+        .rsvp-section {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .rsvp-count {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #171717;
+            margin-bottom: 0.5rem;
+        }
+        
+        .error {
+            color: red;
+            padding: 1rem;
+            background: rgba(255, 240, 240, 0.8);
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #737373;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to ATlas</a>
+        
+        <div id="loading" class="loading">Loading event...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="eventContent" style="display: none;">
+            <div class="event-header">
+                <h1 class="event-title" id="eventTitle"></h1>
+                <div class="event-meta">
+                    <div id="eventTime"></div>
+                    <div id="eventLocation"></div>
+                    <div id="eventCreator" style="margin-top: 0.5rem;"></div>
+                </div>
+                <div class="event-description" id="eventDescription"></div>
+            </div>
+            
+            <!-- Event Type & Category Badges -->
+            <div id="eventBadges" style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+            
+            <!-- NSFW Warning -->
+            <div id="nsfwWarning" style="display: none; margin-bottom: 1.5rem; padding: 1rem; background: rgba(244, 67, 54, 0.1); border: 2px solid rgba(244, 67, 54, 0.3); border-radius: 12px;">
+                <p style="margin: 0; color: #d32f2f; font-weight: 500; font-size: 0.9375rem;">
+                    ⚠️ This event contains NSFW/adult content. You must be 18+ to attend.
+                </p>
+            </div>
+            
+            <div class="rsvp-section">
+                <div class="rsvp-count"><span id="rsvpCount">0</span> RSVP<span id="rsvpPlural">s</span></div>
+                <p id="rsvpPrivacyNote" style="color: #737373; font-size: 0.875rem; margin-top: 0.5rem; display: none;">
+                    🔒 RSVP list is private. Only the event creator can see attendees.
+                </p>
+                <p style="color: #737373; font-size: 0.875rem; margin-top: 0.5rem;" id="rsvpInstructions">
+                    RSVP by posting <code>@<span id="botHandleDisplay">ATlas.city</span> !attend <span id="rsvpEventId"></span></code> on Bluesky
+                </p>
+                <div id="rsvpListUriSection" style="margin-top: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 8px; display: none;">
+                    <div style="font-size: 0.875rem; font-weight: 500; color: #171717; margin-bottom: 0.5rem;">AT Protocol RSVP List URI</div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <code id="rsvpListUri" style="flex: 1; font-size: 0.8125rem; word-break: break-all; background: rgba(248, 248, 248, 0.8); padding: 0.5rem; border-radius: 4px; color: #171717;"></code>
+                        <button onclick="copyRsvpListUri()" style="padding: 0.5rem 0.75rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8125rem; white-space: nowrap;">Copy</button>
+                    </div>
+                    <div style="font-size: 0.8125rem; color: #737373; margin-top: 0.5rem;">Use this URI for custom feeds on <a href="https://graze.social" target="_blank" style="color: #0066cc; text-decoration: underline;">Graze.social</a> or create a <a href="/customnodebuilder" style="color: #0066cc; text-decoration: underline;">Graze Custom Node</a></div>
+                </div>
+                <button onclick="openRSVPComposer()" style="margin-top: 1rem; width: 100%;">
+                    Open Bluesky Composer to RSVP
+                </button>
+                <button id="viewAttendeesBtn" onclick="loadRsvpList()" class="secondary" style="margin-top: 0.75rem; width: 100%; display: none;">
+                    View Attendees
+                </button>
+                <div id="rsvpListContainer" style="margin-top: 1rem; display: none;"></div>
+            </div>
+            
+            <!-- Links Section -->
+            <div id="linksSection" style="display: none; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-weight: 500;">Links</h3>
+                <div id="linksContent"></div>
+            </div>
+            
+            <div id="mapSection" class="map-section">
+                <h3 style="margin-bottom: 0.5rem; font-weight: 500;">Location</h3>
+                <div id="eventMap" class="map-container"></div>
+                <button onclick="viewOnMap()" class="secondary" style="margin-top: 1rem; width: 100%;">
+                    View on Map
+                </button>
+            </div>
+            
+            <div class="actions">
+                <button id="postToBlueskyBtn" onclick="postEventToBluesky()" class="secondary" style="display: none;">Post Event Directly to Bluesky (Enhanced! Uses markdown. Better than markdown!)</button>
+                <button onclick="shareRSVPLink()" class="secondary">Post Event via Composer to Bluesky</button>
+                <button onclick="copyEventLink()" class="secondary">Copy Event Link</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let eventData = null;
+        let eventMap = null;
+        let botHandle = 'ATlas.city';
+        let isAuthenticated = false;
+        
+        // Get event ID from URL
+        const eventId = window.location.pathname.split('/event/')[1];
+        
+        // Fetch bot handle on page load
+        async function loadBotHandle() {
+            try {
+                const response = await fetch('/api/bot-handle');
+                const data = await response.json();
+                if (data.handle) {
+                    botHandle = data.handle;
+                    // Update the display text
+                    const botHandleDisplay = document.getElementById('botHandleDisplay');
+                    if (botHandleDisplay) {
+                        botHandleDisplay.textContent = botHandle;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading bot handle:', error);
+            }
+        }
+        
+        // Load event data
+        async function loadEvent() {
+            try {
+                const sessionResponse = await fetch('/api/auth/session', { credentials: 'include' });
+                const sessionData = await sessionResponse.json();
+                isAuthenticated = sessionData.authenticated || false;
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('rsvp') === 'true') {
+                    // Wait for bot handle to load
+                    await loadBotHandle();
+                    // Immediately redirect to Bluesky composer with RSVP command
+                    const text = `@${botHandle} !attend ${eventId}`;
+                    const encodedText = encodeURIComponent(text);
+                    window.location.href = `https://bsky.app/intent/compose?text=${encodedText}`;
+                    return; // Don't load the page content
+                }
+                
+                const response = await fetch(`/api/events/${eventId}`);
+                const data = await response.json();
+                
+                if (response.ok && data.event_id) {
+                    eventData = data;
+                    displayEvent(data);
+                    initMap(data);
+                } else {
+                    showError(data.error || 'Event not found');
+                }
+            } catch (error) {
+                console.error('Error loading event:', error);
+                showError('Failed to load event');
+            }
+        }
+        
+        function displayEvent(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('eventContent').style.display = 'block';
+            
+            if (isAuthenticated) {
+                document.getElementById('postToBlueskyBtn').style.display = 'inline-block';
+            }
+            
+            const eventTitle = data.title || 'Untitled Event';
+            const eventDescription = data.description || 'No description provided.';
+            const eventImage = data.image_url || '';
+            const eventType = data.event_type || 'physical';
+            const eventCategory = data.event_category;
+            const isNsfw = data.is_nsfw || false;
+            const contentRating = data.content_rating || 'general';
+            const showRsvpList = data.show_rsvp_list !== false;
+            
+            document.getElementById('eventTitle').textContent = eventTitle;
+            document.getElementById('eventDescription').textContent = eventDescription;
+            document.getElementById('rsvpEventId').textContent = data.event_id;
+            document.getElementById('rsvpCount').textContent = data.rsvp_count || 0;
+            document.getElementById('rsvpPlural').textContent = (data.rsvp_count || 0) === 1 ? '' : 's';
+            
+            // Show/hide RSVP list button based on privacy
+            const viewAttendeesBtn = document.getElementById('viewAttendeesBtn');
+            const rsvpPrivacyNote = document.getElementById('rsvpPrivacyNote');
+            if (showRsvpList) {
+                viewAttendeesBtn.style.display = 'block';
+                rsvpPrivacyNote.style.display = 'none';
+            } else {
+                viewAttendeesBtn.style.display = 'none';
+                rsvpPrivacyNote.style.display = 'block';
+            }
+            
+            // Show RSVP list URI
+            const rsvpListUri = `at://did:web:lists.fema.monster/app.bsky.graph.list/${data.event_id}`;
+            document.getElementById('rsvpListUri').textContent = rsvpListUri;
+            document.getElementById('rsvpListUriSection').style.display = 'block';
+            
+            // Show event type and category badges
+            const badgesContainer = document.getElementById('eventBadges');
+            let badgesHtml = '';
+            if (eventType === 'physical') {
+                badgesHtml += '<span style="display: inline-flex; align-items: center; gap: 0.375rem; background: rgba(59, 130, 246, 0.12); color: #2563eb; padding: 0.375rem 0.75rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>Physical</span>';
+            } else if (eventType === 'digital') {
+                badgesHtml += '<span style="display: inline-flex; align-items: center; gap: 0.375rem; background: rgba(34, 197, 94, 0.12); color: #15803d; padding: 0.375rem 0.75rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>Digital</span>';
+            } else if (eventType === 'hybrid') {
+                badgesHtml += '<span style="display: inline-flex; align-items: center; gap: 0.375rem; background: rgba(168, 85, 247, 0.12); color: #7c3aed; padding: 0.375rem 0.75rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>Hybrid</span>';
+            }
+            if (eventCategory) {
+                badgesHtml += `<span style="background: rgba(115, 115, 115, 0.12); color: #525252; padding: 0.375rem 0.75rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500;">${escapeHtml(eventCategory)}</span>`;
+            }
+            if (isNsfw) {
+                badgesHtml += '<span style="display: inline-flex; align-items: center; gap: 0.375rem; background: rgba(244, 67, 54, 0.12); color: #d32f2f; padding: 0.375rem 0.75rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>' + contentRating.toUpperCase() + '</span>';
+            }
+            badgesContainer.innerHTML = badgesHtml;
+            
+            // Show NSFW warning
+            if (isNsfw) {
+                document.getElementById('nsfwWarning').style.display = 'block';
+            }
+            
+            // Show/hide map based on event type
+            const mapSection = document.getElementById('mapSection');
+            if (eventType === 'digital' || !data.latitude || !data.longitude) {
+                mapSection.style.display = 'none';
+            } else {
+                mapSection.style.display = 'block';
+            }
+            
+            // Display links
+            displayLinks(data);
+            
+            // Update Open Graph meta tags for link card preview
+            updateMetaTags(eventTitle, eventDescription, eventImage);
+            
+            // Format time
+            if (data.start_time) {
+                const start = new Date(data.start_time);
+                const end = data.end_time ? new Date(data.end_time) : null;
+                
+                const dateStr = start.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+                const startTimeStr = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+                const endTimeStr = end ? end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }) : null;
+                
+                const calendarIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
+                let timeStr = `${calendarIcon} ${dateStr} at ${startTimeStr}`;
+                if (endTimeStr) {
+                    timeStr += ` - ${endTimeStr}`;
+                }
+                document.getElementById('eventTime').innerHTML = timeStr;
+            }
+            
+            // Location
+            if (data.location_name || data.city_name) {
+                const locationStr = data.location_name || `${data.city_name}, ${data.region_name}`;
+                const locationIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>';
+                document.getElementById('eventLocation').innerHTML = `${locationIcon} ${locationStr}`;
+            }
+            
+            // Creator
+            if (data.creator_handle) {
+                const userIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+                document.getElementById('eventCreator').innerHTML = `${userIcon} Created by <a href="https://bsky.app/profile/${data.creator_handle}" target="_blank" style="color: #0066cc; text-decoration: none;">@${data.creator_handle}</a>`;
+            }
+        }
+        
+        function initMap(data) {
+            const eventType = data.event_type || 'physical';
+            if (eventType === 'digital' || !data.latitude || !data.longitude) return;
+            
+            eventMap = L.map('eventMap').setView([data.latitude, data.longitude], 14);
+            
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '&copy; Esri',
+                maxZoom: 16
+            }).addTo(eventMap);
+            
+            // Add marker
+            L.marker([data.latitude, data.longitude], {
+                icon: L.icon({
+                    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34]
+                })
+            }).addTo(eventMap);
+        }
+        
+        function displayLinks(data) {
+            const linksSection = document.getElementById('linksSection');
+            const linksContent = document.getElementById('linksContent');
+            let linksHtml = '';
+            let hasLinks = false;
+            
+            // Join URL (primary action)
+            if (data.join_url) {
+                hasLinks = true;
+                linksHtml += `
+                    <a href="${escapeHtml(data.join_url)}" target="_blank" rel="noopener noreferrer" 
+                       style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem; background: rgba(23, 23, 23, 0.9); color: white; text-decoration: none; border-radius: 12px; margin-bottom: 0.75rem; text-align: center; font-weight: 500; transition: all 0.15s ease;">
+                        ${data.event_type === 'digital' ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>'}
+                        <span>${data.event_type === 'digital' ? 'Join Event' : 'Join Online'}</span>
+                    </a>
+                `;
+            }
+            
+            // Website URL
+            if (data.website_url) {
+                hasLinks = true;
+                linksHtml += `
+                    <a href="${escapeHtml(data.website_url)}" target="_blank" rel="noopener noreferrer" 
+                       style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.5); color: #171717; text-decoration: none; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.5);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        <span>Visit Website</span>
+                    </a>
+                `;
+            }
+            
+            // Additional links from JSON
+            if (data.links) {
+                let linksObj = data.links;
+                if (typeof linksObj === 'string') {
+                    try {
+                        linksObj = JSON.parse(linksObj);
+                    } catch (e) {
+                        linksObj = null;
+                    }
+                }
+                
+                if (linksObj && typeof linksObj === 'object') {
+                    const linkIcons = {
+                        discord: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>',
+                        twitch: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7"></path></svg>',
+                        tickets: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path><path d="M13 5v2"></path><path d="M13 17v2"></path><path d="M13 11v2"></path></svg>',
+                        instagram: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>',
+                        twitter: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>',
+                        youtube: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>',
+                        patreon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path></svg>',
+                        onlyfans: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>'
+                    };
+                    
+                    const linkLabels = {
+                        discord: 'Discord',
+                        twitch: 'Twitch',
+                        tickets: 'Tickets',
+                        instagram: 'Instagram',
+                        twitter: 'Twitter',
+                        youtube: 'YouTube',
+                        patreon: 'Patreon',
+                        onlyfans: 'OnlyFans'
+                    };
+                    
+                    for (const [key, url] of Object.entries(linksObj)) {
+                        if (url && typeof url === 'string') {
+                            hasLinks = true;
+                            const icon = linkIcons[key] || '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>';
+                            const label = linkLabels[key] || key.charAt(0).toUpperCase() + key.slice(1);
+                            linksHtml += `
+                                <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" 
+                                   style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.5); color: #171717; text-decoration: none; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.5);">
+                                    ${icon}
+                                    <span>${label}</span>
+                                </a>
+                            `;
+                        }
+                    }
+                }
+            }
+            
+            if (hasLinks) {
+                linksSection.style.display = 'block';
+                linksContent.innerHTML = linksHtml;
+            } else {
+                linksSection.style.display = 'none';
+            }
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        let rsvpListPage = 1;
+        let rsvpListLoading = false;
+        
+        async function loadRsvpList() {
+            if (rsvpListLoading) return;
+            rsvpListLoading = true;
+            
+            const container = document.getElementById('rsvpListContainer');
+            const btn = document.getElementById('viewAttendeesBtn');
+            
+            try {
+                const response = await fetch(`/api/events/${eventId}/rsvps?page=${rsvpListPage}&perPage=20`);
+                const data = await response.json();
+                
+                if (!data.canView) {
+                    container.innerHTML = '<p style="color: #737373; font-size: 0.875rem;">RSVP list is private. Only the event creator can view attendees.</p>';
+                    btn.style.display = 'none';
+                    rsvpListLoading = false;
+                    return;
+                }
+                
+                if (data.rsvps.length === 0 && rsvpListPage === 1) {
+                    container.innerHTML = '<p style="color: #737373; font-size: 0.875rem;">No RSVPs yet. Be the first to RSVP!</p>';
+                    container.style.display = 'block';
+                    btn.textContent = 'Hide Attendees';
+                    btn.onclick = () => {
+                        container.style.display = 'none';
+                        btn.textContent = 'View Attendees';
+                        btn.onclick = () => loadRsvpList();
+                    };
+                    rsvpListLoading = false;
+                    return;
+                }
+                
+                let html = '';
+                if (rsvpListPage === 1) {
+                    html = '<div style="margin-top: 1rem;"><h4 style="margin-bottom: 0.75rem; font-weight: 500; font-size: 0.9375rem;">Attendees</h4>';
+                }
+                
+                data.rsvps.forEach(rsvp => {
+                    const displayName = rsvp.user_display_name || rsvp.user_handle || 'Unknown';
+                    const handle = rsvp.user_handle ? `@${rsvp.user_handle}` : '';
+                    const avatar = rsvp.user_avatar ? `<img src="${escapeHtml(rsvp.user_avatar)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-right: 0.75rem;" onerror="this.style.display='none'">` : '<div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(115, 115, 115, 0.3); margin-right: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #737373;">👤</div>';
+                    
+                    html += `
+                        <div style="display: flex; align-items: center; padding: 0.75rem; background: rgba(255, 255, 255, 0.3); border-radius: 8px; margin-bottom: 0.5rem;">
+                            ${avatar}
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; color: #171717; font-size: 0.9375rem;">${escapeHtml(displayName)}</div>
+                                ${handle ? `<div style="font-size: 0.8125rem; color: #737373;">${escapeHtml(handle)}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                if (data.hasMore) {
+                    html += `<button onclick="rsvpListPage++; loadRsvpList();" class="secondary" style="width: 100%; margin-top: 0.75rem;">Load More (${data.count - (rsvpListPage * 20)} remaining)</button>`;
+                }
+                
+                if (rsvpListPage === 1) {
+                    container.innerHTML = html + '</div>';
+                } else {
+                    container.innerHTML += html.replace('<div style="margin-top: 1rem;"><h4', '<div><h4');
+                }
+                
+                if (!data.hasMore) {
+                    btn.textContent = 'Attendees (' + data.count + ')';
+                    btn.onclick = null;
+                    btn.style.opacity = '0.7';
+                }
+                
+            } catch (error) {
+                console.error('Error loading RSVP list:', error);
+                container.innerHTML = '<p style="color: #f44336; font-size: 0.875rem;">Failed to load RSVP list.</p>';
+            } finally {
+                rsvpListLoading = false;
+            }
+        }
+        
+        function openRSVPComposer() {
+            openComposer(`@${botHandle} !attend ${eventId}`);
+        }
+        
+        async function shareRSVPLink() {
+            if (!eventData) return;
+            
+            // Create full URLs
+            const rsvpFullUrl = window.location.origin + window.location.pathname + '?rsvp=true';
+            const eventFullUrl = window.location.origin + window.location.pathname;
+            
+            try {
+                // Create short URLs
+                const [rsvpResponse, eventResponse] = await Promise.all([
+                    fetch('/api/shorten', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: rsvpFullUrl })
+                    }),
+                    fetch('/api/shorten', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: eventFullUrl })
+                    })
+                ]);
+                
+                const rsvpData = await rsvpResponse.json();
+                const eventData_short = await eventResponse.json();
+                
+                // Format URLs for display (remove https:// and www.)
+                const baseUrl = window.location.origin.replace(/^https?:\/\//, '').replace(/^www\./, '');
+                const rsvpShort = `${baseUrl}/e/${rsvpData.shortCode}`;
+                const eventShort = `${baseUrl}/e/${eventData_short.shortCode}`;
+                
+                // Create promotional text
+                const eventTitle = eventData.title || 'this event';
+                const promoText = `Check out ${eventTitle}!\n\nRSVP here: ${rsvpShort}\n\nEvent Details: ${eventShort}`;
+                openComposer(promoText);
+            } catch (error) {
+                console.error('Error creating short URLs:', error);
+                // Fallback to full URLs if shortening fails
+                const baseUrl = window.location.origin.replace(/^https?:\/\//, '').replace(/^www\./, '');
+                const rsvpLink = `${baseUrl}${window.location.pathname}?rsvp=true`;
+                const eventLink = `${baseUrl}${window.location.pathname}`;
+                const eventTitle = eventData.title || 'this event';
+                const promoText = `Check out ${eventTitle}!\n\nRSVP here: ${rsvpLink}\n\nEvent Details: ${eventLink}`;
+                openComposer(promoText);
+            }
+        }
+        
+        async function postEventToBluesky() {
+            if (!eventData) return;
+            
+            if (!isAuthenticated) {
+                alert('Please log in to post to Bluesky');
+                return;
+            }
+            
+            const btn = document.getElementById('postToBlueskyBtn');
+            btn.disabled = true;
+            btn.textContent = 'Posting...';
+            
+            try {
+                const rsvpFullUrl = window.location.origin + window.location.pathname + '?rsvp=true';
+                const eventFullUrl = window.location.origin + window.location.pathname;
+                
+                const [rsvpResponse, eventResponse] = await Promise.all([
+                    fetch('/api/shorten', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: rsvpFullUrl })
+                    }),
+                    fetch('/api/shorten', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: eventFullUrl })
+                    })
+                ]);
+                
+                const rsvpData = await rsvpResponse.json();
+                const eventData_short = await eventResponse.json();
+                
+                const rsvpShortUrl = `${window.location.origin}/e/${rsvpData.shortCode}`;
+                const eventShortUrl = `${window.location.origin}/e/${eventData_short.shortCode}`;
+                
+                const eventTitle = eventData.title || 'this event';
+                const postText = `Check out ${eventTitle}!\n\nRSVP HERE\n\nEVENT DETAILS`;
+                
+                const facets = [
+                    {
+                        index: { byteStart: postText.indexOf('RSVP HERE'), byteEnd: postText.indexOf('RSVP HERE') + 9 },
+                        features: [{ $type: 'app.bsky.richtext.facet#link', uri: rsvpShortUrl }]
+                    },
+                    {
+                        index: { byteStart: postText.indexOf('EVENT DETAILS'), byteEnd: postText.indexOf('EVENT DETAILS') + 13 },
+                        features: [{ $type: 'app.bsky.richtext.facet#link', uri: eventShortUrl }]
+                    }
+                ];
+                
+                const embed = {
+                    $type: 'app.bsky.embed.external',
+                    external: {
+                        uri: eventShortUrl,
+                        title: eventData.title || 'Event',
+                        description: eventData.description || 'View event details on SkyMap'
+                    }
+                };
+                
+                if (eventData.image_url) {
+                    embed.external.thumb = eventData.image_url;
+                }
+                
+                const response = await fetch('/api/post-to-bluesky', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ text: postText, facets, embed })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Posted to Bluesky successfully!');
+                    btn.textContent = '✓ Posted';
+                    setTimeout(() => {
+                        btn.textContent = 'Post Event Directly to Bluesky';
+                        btn.disabled = false;
+                    }, 3000);
+                } else {
+                    throw new Error(result.error || 'Failed to post');
+                }
+            } catch (error) {
+                console.error('Error posting to Bluesky:', error);
+                alert(`Failed to post: ${error.message}`);
+                btn.textContent = 'Post Event Directly to Bluesky';
+                btn.disabled = false;
+            }
+        }
+        
+        function copyRSVPCommand() {
+            const text = `@${botHandle} !attend ${eventId}`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('RSVP command copied to clipboard!');
+                });
+            } else {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('RSVP command copied to clipboard!');
+            }
+        }
+        
+        function copyEventLink() {
+            const url = window.location.href;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Event link copied to clipboard!');
+                });
+            } else {
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Event link copied to clipboard!');
+            }
+        }
+        
+        function copyRsvpListUri() {
+            const uri = document.getElementById('rsvpListUri').textContent;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(uri).then(() => {
+                    alert('RSVP list URI copied to clipboard!');
+                });
+            } else {
+                const textArea = document.createElement('textarea');
+                textArea.value = uri;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('RSVP list URI copied to clipboard!');
+            }
+        }
+        
+        function viewOnMap() {
+            if (eventData && eventData.latitude && eventData.longitude) {
+                window.location.href = `/?tab=map#${eventData.latitude},${eventData.longitude},15`;
+            } else {
+                window.location.href = '/?tab=map';
+            }
+        }
+        
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').textContent = message;
+            document.getElementById('error').style.display = 'block';
+        }
+        
+        function updateMetaTags(title, description, image) {
+            const currentUrl = window.location.href.split('?')[0]; // Remove query params for clean URL
+            
+            // Update Open Graph tags
+            document.getElementById('og-title').setAttribute('content', title);
+            document.getElementById('og-description').setAttribute('content', description);
+            document.getElementById('og-url').setAttribute('content', currentUrl);
+            if (image) {
+                document.getElementById('og-image').setAttribute('content', image);
+            }
+            
+            // Update Twitter tags
+            document.getElementById('twitter-title').setAttribute('content', title);
+            document.getElementById('twitter-description').setAttribute('content', description);
+            if (image) {
+                document.getElementById('twitter-image').setAttribute('content', image);
+            }
+            
+            // Update page title
+            document.title = `${title} - SkyMap`;
+        }
+        
+        // Load bot handle and event on page load
+        (async () => {
+            await loadBotHandle();
+            await loadEvent();
+        })();
+    </script>
+</body>
+</html>

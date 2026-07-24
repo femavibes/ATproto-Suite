@@ -1,0 +1,16 @@
+# Optional merge file: serve the visual editor from the host build (no feed-api image rebuild).
+#
+# Usage (from repo root, same machine that serves feeds.fema.monster → 127.0.0.1:8001):
+#   docker compose -f docker-compose.yml -f docker-compose.live-ui.yml up -d
+#
+# After code changes:
+#   ./scripts/update-public-ui.sh
+#
+# Postgres / redis / workers are unchanged; data stays in the existing Docker volumes.
+
+services:
+  feed-api:
+    volumes:
+      - ./services/visual-editor/dist:/app/ui:ro
+    environment:
+      UI_STATIC_ROOT: /app/ui

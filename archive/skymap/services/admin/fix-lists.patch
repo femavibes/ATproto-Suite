@@ -1,0 +1,114 @@
+--- a/services/admin/server.js
++++ b/services/admin/server.js
+@@ -339,31 +339,25 @@ app.get('/api/graze-nodes/:regionCode', async (req, res) => {
+     
+     const region = regionResult.rows[0];
+     
+-    // Get all cities in region with their lists and hashtags
++    // Get all cities in region with hashtags
+     const citiesResult = await pool.query(`
+       SELECT l.*, 
+-             COALESCE(array_agg(bl.list_url ORDER BY bl.bucket_number) FILTER (WHERE bl.list_url IS NOT NULL), '{}') as list_urls,
+              COALESCE(array_agg(h.hashtag) FILTER (WHERE h.hashtag IS NOT NULL), '{}') as hashtags
+       FROM locations l
+-      LEFT JOIN bluesky_lists bl ON l.id = bl.location_id AND bl.active = true
+       LEFT JOIN hashtag_mappings h ON l.id = h.location_id
+       WHERE l.region_code = $1 AND l.population IS NOT NULL
+       GROUP BY l.id
+       ORDER BY l.population DESC
+     `, [regionCode]);
+     
+-    // Get region lists and hashtags
+-    const regionListsResult = await pool.query(
+-      'SELECT list_url FROM bluesky_lists WHERE location_id = $1 AND active = true ORDER BY bucket_number',
+-      [region.id]
+-    );
++    // Get region list URL and hashtags
++    const regionListUrl = `at://did:web:lists.fema.monster/app.bsky.graph.list/${region.key}`;
+     
+     const regionHashtagsResult = await pool.query(
+       'SELECT hashtag FROM hashtag_mappings WHERE location_id = $1',
+       [region.id]
+     );
+     
+-    const regionListUrls = regionListsResult.rows.map(row => row.list_url);
+     const regionHashtags = regionHashtagsResult.rows.map(row => row.hashtag);
+     
+     // Generate simple group IDs
+@@ -371,23 +365,13 @@ app.get('/api/graze-nodes/:regionCode', async (req, res) => {
+     const stateGroupId = 'state-group';
+     const cityGroupId = 'city-group';
+     
+-    // Default placeholder URL when no lists exist
+-    const defaultListUrl = 'https://bsky.app/profile/profiledelta.com/lists/3limj7ouwje2a';
+-    
+-    // Generate state list entries (use placeholder if no lists exist)
+-    const stateListEntries = regionListUrls.length > 0 
+-      ? regionListUrls.map((url, index) => ({
+-          metadata: {
+-            title: `STATE.${(index + 1).toString().padStart(3, '0')}`
+-          },
+-          list_member: [url, "in"]
+-        }))
+-      : [{
+-          metadata: {
+-            title: `STATE.001`
+-          },
+-          list_member: [defaultListUrl, "in"]
+-        }];
++    // Generate state list entry (single at:// list)
++    const stateListEntries = [{
++      metadata: {
++        title: `STATE.001`
++      },
++      list_member: [regionListUrl, "in"]
++    }];
+     
+     // Add hashtag matching for state if hashtags exist
+     if (regionHashtags.length > 0) {
+@@ -421,7 +405,7 @@ app.get('/api/graze-nodes/:regionCode', async (req, res) => {
+             ]
+           },
+           {
+-            list_member: [regionListUrls[0] || defaultListUrl, "in"]
++            list_member: [regionListUrl, "in"]
+           },
+           {
+             entity_matches: [
+@@ -459,20 +443,14 @@ app.get('/api/graze-nodes/:regionCode', async (req, res) => {
+             },
+             // City toggles
+             ...citiesResult.rows.map(city => {
+-              // Generate city list entries (use placeholder if no lists exist)
+-              const cityListEntries = city.list_urls.length > 0
+-                ? city.list_urls.map((url, index) => ({
+-                    metadata: {
+-                      title: `${city.key}.${(index + 1).toString().padStart(3, '0')}`
+-                    },
+-                    list_member: [url, "in"]
+-                  }))
+-                : [{
+-                    metadata: {
+-                      title: `${city.key}.001`
+-                    },
+-                    list_member: [defaultListUrl, "in"]
+-                  }];
++              const cityListUrl = `at://did:web:lists.fema.monster/app.bsky.graph.list/${city.key}`;
++              const cityListEntries = [{
++                metadata: {
++                  title: `${city.key}.001`
++                },
++                list_member: [cityListUrl, "in"]
++              }];
+               
+               // Add hashtag matching for city if hashtags exist
+               if (city.hashtags.length > 0 && city.hashtags[0] !== null) {
+@@ -500,7 +478,7 @@ app.get('/api/graze-nodes/:regionCode', async (req, res) => {
+                       ]
+                     },
+                     {
+-                      list_member: [city.list_urls[0] || defaultListUrl, "in"]
++                      list_member: [cityListUrl, "in"]
+                     },
+                     {
+                       entity_matches: [

@@ -1,0 +1,10 @@
+{
+  email {$ADMIN_EMAIL}
+}
+
+feeds.fema.monster {
+  encode gzip zstd
+
+  # App/API container exposed on host port 8001 by docker-compose.yml
+  reverse_proxy 127.0.0.1:8001
+}

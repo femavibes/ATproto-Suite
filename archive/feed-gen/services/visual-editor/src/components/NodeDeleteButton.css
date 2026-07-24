@@ -1,0 +1,33 @@
+.node-delete-button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  background: #ff4444;
+  border: 2px solid #cc0000;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  color: #fff;
+  padding: 0;
+}
+
+.node:hover .node-delete-button {
+  opacity: 1;
+}
+
+.node-delete-button:hover {
+  background: #ff6666;
+  border-color: #ff0000;
+  transform: scale(1.1);
+}
+
+.node-delete-button:active {
+  transform: scale(0.95);
+}

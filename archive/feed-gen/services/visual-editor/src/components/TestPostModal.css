@@ -1,0 +1,58 @@
+.test-post-modal {
+  max-width: 600px;
+  width: 90%;
+}
+
+.test-post-input {
+  width: 100%;
+  min-height: 200px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  padding: 12px;
+  border: 1px solid #444;
+  background: #1a1a1a;
+  color: #fff;
+  border-radius: 4px;
+  resize: vertical;
+  margin: 12px 0;
+}
+
+.test-post-input:focus {
+  outline: none;
+  border-color: #4a9eff;
+  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.btn-primary {
+  padding: 8px 16px;
+  background: #4a9eff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background: #6bb0ff;
+}
+
+.btn-secondary {
+  padding: 8px 16px;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #555;
+}

@@ -1,0 +1,255 @@
+<h2 class="page-title">AT Protocol Lists</h2>
+<p style="text-align: center; color: #525252; margin-bottom: 1.5rem;">Unlimited member lists powered by did:web:lists.fema.monster</p>
+
+<div style="margin-bottom: 1rem;">
+    <input type="text" id="listsSearchInput" placeholder="Search locations..." onkeyup="listsFilterLocations()" style="width: 100%; padding: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 12px; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); font-size: 0.9375rem;">
+</div>
+
+<div id="listsLocations">Loading...</div>
+
+<div class="pagination" id="listsPagination"></div>
+
+<div id="userModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;" onclick="listsCloseModal(event)">
+    <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2 id="modalTitle" style="font-size: 1.5rem; margin: 0;">Users in List</h2>
+            <button onclick="listsCloseModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #737373; padding: 0; width: 2rem; height: 2rem;">&times;</button>
+        </div>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+            <input type="text" id="listsHandleSearch" placeholder="Check if handle is in list (e.g., user.bsky.social)" style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;" />
+            <button onclick="listsSearchUser()" style="padding: 0.75rem 1.5rem;">Check</button>
+        </div>
+        <div id="searchResult"></div>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+    var listsAllLocations = [];
+    var filteredLocations = [];
+    var currentPage = 1;
+    var itemsPerPage = 20;
+
+    async function loadLists() {
+        try {
+            const container = document.getElementById('listsLocations');
+            if (!container) {
+                console.error('listsLocations container not found');
+                return;
+            }
+            
+            container.innerHTML = 'Loading...';
+            const response = await fetch('/api/locations', { 
+                headers: getAuthHeaders(),
+                credentials: 'include' // Include session cookies
+            });
+            
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #c62828;">Authentication required. Please <a href="/login">login</a>.</div>';
+                    return;
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            listsAllLocations = await response.json();
+            listsAllLocations = listsAllLocations.filter(loc => loc.population);
+            filteredLocations = listsAllLocations;
+            listsRenderPage();
+        } catch (error) {
+            console.error('Error loading lists:', error);
+            const container = document.getElementById('listsLocations');
+            if (container) {
+                container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #c62828;">Error loading locations: ${error.message}</div>`;
+            }
+        }
+    }
+
+    function listsFilterLocations() {
+        const searchTerm = document.getElementById('listsSearchInput').value.toLowerCase();
+        filteredLocations = listsAllLocations.filter(loc => 
+            loc.name.toLowerCase().includes(searchTerm) ||
+            loc.region_name.toLowerCase().includes(searchTerm) ||
+            loc.key.toLowerCase().includes(searchTerm)
+        );
+        currentPage = 1;
+        listsRenderPage();
+    }
+
+    function listsRenderPage() {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const pageItems = filteredLocations.slice(startIndex, endIndex);
+        
+        const container = document.getElementById('listsLocations');
+        container.innerHTML = pageItems.map(loc => {
+            const listUri = `at://did:web:lists.fema.monster/app.bsky.graph.list/${loc.key}`;
+            const userCount = loc.user_count || 0;
+            
+            return `
+                <div style="background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 16px; padding: 1rem; margin: 0.5rem 0; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <div style="font-weight: 600; font-size: 1.1rem;">${loc.name}, ${loc.region_name}</div>
+                        <button onclick="listsViewUsers('${loc.key}', '${loc.name}, ${loc.region_name}')" style="padding: 0.5rem; font-size: 0.8125rem; background: rgba(200, 200, 200, 0.8); color: #525252;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; margin: 0.5rem 0;">
+                        <div style="flex: 1; background: white; color: #525252; padding: 0.5rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem; word-break: break-all;">
+                            ${listUri}
+                        </div>
+                        <button onclick="listsCopyToClipboard('${listUri}')" style="padding: 0.5rem; font-size: 0.8125rem; background: rgba(245, 245, 245, 0.8); color: #737373; flex-shrink: 0;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div style="color: #737373; font-size: 0.9rem; margin-top: 0.5rem;">
+                        ${userCount} users • Population: ${loc.population?.toLocaleString()}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        listsRenderPagination();
+    }
+
+    function listsRenderPagination() {
+        const totalPages = Math.ceil(filteredLocations.length / itemsPerPage);
+        const pagination = document.getElementById('listsPagination');
+        
+        let html = `<button onclick="listsChangePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+        
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                html += `<button onclick="listsChangePage(${i})" style="${i === currentPage ? 'background: rgba(23, 23, 23, 0.9); color: white;' : ''}">${i}</button>`;
+            } else if (i === currentPage - 3 || i === currentPage + 3) {
+                html += `<span>...</span>`;
+            }
+        }
+        
+        html += `<button onclick="listsChangePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+        pagination.innerHTML = html;
+    }
+
+    function listsChangePage(page) {
+        const totalPages = Math.ceil(filteredLocations.length / itemsPerPage);
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            listsRenderPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function listsCopyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        });
+    }
+
+    async function listsViewUsers(locationKey, locationName) {
+        const modal = document.getElementById('userModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const searchResult = document.getElementById('searchResult');
+        
+        window.currentLocationKey = locationKey;
+        modalTitle.textContent = `Users in ${locationName}`;
+        modalBody.innerHTML = '<div style="text-align: center; padding: 2rem; color: #737373;">Loading users...</div>';
+        searchResult.innerHTML = '';
+        document.getElementById('listsHandleSearch').value = '';
+        modal.style.display = 'flex';
+        
+        try {
+            const response = await fetch(`/api/locations/${locationKey}/users`, { headers: getAuthHeaders() });
+            const users = await response.json();
+            
+            if (users.length === 0) {
+                modalBody.innerHTML = '<div style="text-align: center; padding: 2rem; color: #737373;">No users in this list yet</div>';
+            } else {
+                modalBody.innerHTML = '<div style="max-height: 300px; overflow-y: auto;">' + users.map(user => `
+                    <div style="padding: 0.75rem; border-bottom: 1px solid #f0f0f0; font-family: monospace; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>${user.handle}</span>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="https://bsky.app/profile/${user.handle}" target="_blank" style="opacity: 0.6;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                            </a>
+                            <button onclick="listsRemoveUser('${user.handle}')" style="background: none; border: none; cursor: pointer; padding: 0; opacity: 0.6; color: #c62828;" title="Remove user">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join('') + '</div>';
+            }
+        } catch (error) {
+            modalBody.innerHTML = '<div style="text-align: center; padding: 2rem; color: #737373;">Failed to load users</div>';
+        }
+    }
+
+    async function listsSearchUser() {
+        const handle = document.getElementById('listsHandleSearch').value.trim().replace('@', '');
+        const searchResult = document.getElementById('searchResult');
+        
+        if (!handle) return;
+        
+        searchResult.innerHTML = '<div style="text-align: center; padding: 1rem; color: #737373;">Checking...</div>';
+        
+        try {
+            const response = await fetch(`/api/locations/${window.currentLocationKey}/check-user?handle=${encodeURIComponent(handle)}`, { headers: getAuthHeaders() });
+            const data = await response.json();
+            
+            if (data.inList) {
+                searchResult.innerHTML = `<div style="background: #e8f5e9; color: #2e7d32; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">✓ @${handle} is in this list</div>`;
+            } else {
+                searchResult.innerHTML = `<div style="background: #ffebee; color: #c62828; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">✗ @${handle} is not in this list</div>`;
+            }
+        } catch (error) {
+            searchResult.innerHTML = '<div style="background: #ffebee; color: #c62828; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">Error checking user</div>';
+        }
+    }
+
+    function listsCloseModal(event) {
+        if (!event || event.target.id === 'userModal') {
+            document.getElementById('userModal').style.display = 'none';
+        }
+    }
+
+    async function listsRemoveUser(handle) {
+        if (!confirm(`Remove @${handle} from this list?`)) return;
+        
+        try {
+            const response = await fetch(`/api/locations/${window.currentLocationKey}/users/${encodeURIComponent(handle)}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            
+            if (response.ok) {
+                alert('User removed successfully');
+                listsViewUsers(window.currentLocationKey, document.getElementById('modalTitle').textContent.replace('Users in ', ''));
+            } else {
+                alert('Failed to remove user');
+            }
+        } catch (error) {
+            alert('Error removing user');
+        }
+    }
+
+    document.getElementById('listsHandleSearch').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') listsSearchUser();
+    });
+
+    loadLists();
+</script>

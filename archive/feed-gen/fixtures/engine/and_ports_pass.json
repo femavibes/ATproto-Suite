@@ -1,0 +1,27 @@
+{
+  "name": "and_ports_pass",
+  "graph": {
+    "nodes": [
+      { "id": "start", "type": "start", "data": {} },
+      { "id": "junction", "type": "junction", "data": {} },
+      { "id": "end-a", "type": "end", "data": {} },
+      { "id": "lang-en", "type": "language", "data": { "languages": ["en"], "scoreModifier": 2 } },
+      { "id": "text-urban", "type": "text", "data": { "keywords": ["urban"], "scoreModifier": 5 } }
+    ],
+    "edges": [
+      { "source": "start", "target": "junction", "sourceHandle": "output-right", "targetHandle": "input-left" },
+      { "source": "junction", "target": "end-a", "sourceHandle": "output-right", "targetHandle": "input-left" },
+      { "source": "lang-en", "target": "junction", "sourceHandle": "logic-right", "targetHandle": "logic-top" },
+      { "source": "text-urban", "target": "junction", "sourceHandle": "logic-right", "targetHandle": "logic-bottom" }
+    ]
+  },
+  "post": {
+    "uri": "at://did:plc:test/app.bsky.feed.post/1",
+    "text": "urban mobility update",
+    "langs": ["en-US"]
+  },
+  "expected": {
+    "js": { "endId": "end-a", "passed": true, "score": 0 },
+    "python": { "endResults": { "end-a": { "passed": true, "score": 0 } } }
+  }
+}

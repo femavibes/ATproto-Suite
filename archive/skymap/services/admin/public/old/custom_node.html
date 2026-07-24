@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Graze Integration - SkyMap Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { overflow-y: scroll; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, #f8f9fa 0%, #ffffff 50%, #f1f3f4 100%);
+            color: #171717;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem; }
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { font-size: 2.5rem; font-weight: 600; color: #171717; margin-bottom: 0.5rem; }
+        .header p { color: #737373; font-size: 1.125rem; }
+        .page-title { display: none; text-align: center; font-size: 1.5rem; font-weight: 600; color: #171717; margin: 1rem 0 0.5rem 0; }
+        @media (max-width: 768px) {
+            .header { margin-bottom: 1rem; }
+            .page-title { display: block; }
+        }
+        .section { 
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .filter { margin-bottom: 1rem; }
+        .filter select { 
+            padding: 0.875rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            transition: border-color 0.15s ease;
+            margin-right: 1rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23171717' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 3rem;
+        }
+        .filter select:focus { outline: none; border-color: #171717; }
+        select { 
+            padding: 0.875rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            transition: border-color 0.15s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23171717' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 3rem;
+        }
+        select:focus { outline: none; border-color: #171717; }
+        .graze-output { 
+            background: rgba(248, 248, 248, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 1rem;
+            border-radius: 12px;
+            font-family: ui-monospace, 'SF Mono', Monaco, monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+        .note { font-size: 0.9rem; color: #737373; font-style: italic; }
+        button { 
+            padding: 0.75rem 1.25rem;
+            background: rgba(23, 23, 23, 0.9);
+            backdrop-filter: blur(20px);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        button:hover { 
+            background: rgba(64, 64, 64, 0.9);
+            transform: translateY(-1px);
+        }
+        button:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed;
+            transform: none;
+        }
+        button:disabled:hover {
+            background: rgba(23, 23, 23, 0.9);
+            transform: none;
+        }
+        .tabs {
+            display: flex;
+            gap: 0;
+            justify-content: center;
+        }
+        .tab {
+            padding: 0.875rem 1.5rem;
+            background: rgba(23, 23, 23, 0.9);
+            backdrop-filter: blur(20px);
+            color: white;
+            border: 1px solid rgba(23, 23, 23, 0.9);
+            border-right: none;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            text-decoration: none;
+        }
+        .tab:first-child {
+            border-radius: 12px 0 0 12px;
+        }
+        .tab:last-child {
+            border-radius: 0 12px 12px 0;
+            border-right: 1px solid rgba(23, 23, 23, 0.9);
+        }
+        .tab:hover {
+            background: rgba(64, 64, 64, 0.9);
+            color: white;
+            z-index: 1;
+        }
+        .tab.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #171717;
+            border-color: rgba(255, 255, 255, 0.9);
+            z-index: 2;
+        }
+        .tab-text { display: inline; }
+        .tab-icon { display: none; }
+        @media (max-width: 768px) {
+            .tab { padding: 0.75rem; }
+            .tab-text { display: none; }
+            .tab-icon { display: block; }
+        }
+        .tab-text { display: inline; }
+        .tab-icon { display: none; }
+        @media (max-width: 768px) {
+            .tab { padding: 0.75rem; }
+            .tab-text { display: none; }
+            .tab-icon { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SkyMap Admin</h1>
+            <div class="tabs" style="margin-top: 1rem;">
+                <a href="/" class="tab"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></span><span class="tab-text">Locations</span></a>
+                <a href="/lists.html" class="tab"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span><span class="tab-text">AT Protocol Lists</span></a>
+                <a href="/feeds.html" class="tab"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></span><span class="tab-text">Feeds</span></a>
+                <a href="/custom_node.html" class="tab active"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span><span class="tab-text">Custom Node</span></a>
+                <a href="/data_sources.html" class="tab"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg></span><span class="tab-text">Data Sources</span></a>
+                <a href="/ingestion.html" class="tab"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span><span class="tab-text">Ingestion</span></a>
+                <a href="/whitelist.html" class="tab"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87m-4-12a4 4 0 0 1 0 7.75"></path></svg></span><span class="tab-text">Admin Users</span></a>
+            </div>
+        </div>
+
+        <h2 class="page-title">Custom Node</h2>
+        <p style="text-align: center; color: #525252; margin-bottom: 1.5rem;">Generate and push custom nodes to Graze</p>
+
+        <div class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="margin: 0; font-size: 1.1rem;">Select Region</h3>
+                <span id="loginStatus" style="font-size: 0.9rem;"></span>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <select id="countrySelect" style="flex: 1; min-width: 200px;">
+                    <option value="">All Countries</option>
+                </select>
+                <select id="regionSelect" style="flex: 1; min-width: 200px;">
+                    <option value="">Select Region</option>
+                </select>
+            </div>
+            <div id="grazeUrl" style="margin-top: 1rem; font-size: 0.875rem; color: #737373; font-family: ui-monospace, 'SF Mono', Monaco, monospace;"></div>
+        </div>
+
+        <div class="section">
+            <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Actions</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                <button onclick="pushToGraze()" id="pushBtn" disabled>Push Region to Graze</button>
+                <button onclick="pushHeatmapToGraze()" id="pushHeatmapBtn" disabled style="display: none;">Push Heatmap to Graze</button>
+                <button onclick="confirmPushAllToGraze()" id="pushAllBtn" disabled>Push All Regions to Graze</button>
+            </div>
+            <p class="note" style="margin-top: 1rem;">Note: Push All is not working yet. It will create/update custom nodes for all 50 states.</p>
+        </div>
+
+        <div class="section">
+            <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Generated JSON Output</h3>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <button onclick="generateCustomNode()">Generate JSON</button>
+                <button onclick="copyToClipboard()">Copy JSON</button>
+            </div>
+            <div id="grazeOutput" class="graze-output" style="min-height: 100px;"></div>
+        </div>
+    </div>
+
+    <script src="/graze-session.js"></script>
+    <script>
+        
+
+        function getAuthHeaders() {
+            return { 'Content-Type': 'application/json' };
+        }
+
+        async function loadCountries() {
+            const response = await fetch('/api/countries');
+            const countries = await response.json();
+            
+            const countrySelect = document.getElementById('countrySelect');
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.country_code;
+                option.textContent = country.country_name;
+                countrySelect.appendChild(option);
+            });
+        }
+
+        async function updateRegionFilter() {
+            const countryCode = document.getElementById('countrySelect').value;
+            const regionSelect = document.getElementById('regionSelect');
+            
+            regionSelect.innerHTML = '<option value="">Select Region</option>';
+            
+            const url = countryCode ? `/api/regions-by-country?country=${countryCode}` : '/api/regions-by-country';
+            const response = await fetch(url);
+            const regions = await response.json();
+            
+            const seen = new Set();
+            regions.forEach(region => {
+                if (!seen.has(region.region_code)) {
+                    seen.add(region.region_code);
+                    const option = document.createElement('option');
+                    option.value = region.region_code;
+                    option.textContent = region.region_name;
+                    option.dataset.componentId = region.graze_component_id || '';
+                    regionSelect.appendChild(option);
+                }
+            });
+        }
+
+        document.getElementById('countrySelect').addEventListener('change', updateRegionFilter);
+
+        document.getElementById('regionSelect').addEventListener('change', () => {
+            const regionSelect = document.getElementById('regionSelect');
+            const selectedOption = regionSelect.options[regionSelect.selectedIndex];
+            const componentId = selectedOption.dataset.componentId;
+            const grazeUrlDiv = document.getElementById('grazeUrl');
+            
+            if (componentId) {
+                grazeUrlDiv.innerHTML = `<a href="https://www.graze.social/custom-nodes/${componentId}" target="_blank" style="color: #171717;">https://www.graze.social/custom-nodes/${componentId}</a>`;
+            } else if (regionSelect.value) {
+                grazeUrlDiv.textContent = 'No custom node created yet for this region';
+            } else {
+                grazeUrlDiv.textContent = '';
+            }
+        });
+
+        async function loadRegions() {
+            await updateRegionFilter();
+        }
+
+        async function generateCustomNode() {
+            const regionCode = document.getElementById('regionSelect').value;
+            if (!regionCode) {
+                alert('Please select a region first');
+                return;
+            }
+            
+            const response = await fetch(`/api/graze-nodes/${regionCode}`);
+            const node = await response.json();
+            
+            document.getElementById('grazeOutput').textContent = JSON.stringify(node, null, 2);
+        }
+
+        async function loginToGraze() {
+            // No longer needed - auto-login on page load
+        }
+
+        async function pushToGraze() {
+            const regionCode = document.getElementById('regionSelect').value;
+            if (!regionCode) {
+                alert('Please select a region first');
+                return;
+            }
+            
+            if (!GrazeSession.sessionCookie) {
+                alert('Please login to Graze first');
+                return;
+            }
+            
+            const pushBtn = document.getElementById('pushBtn');
+            pushBtn.disabled = true;
+            pushBtn.textContent = 'Pushing...';
+            
+            try {
+                const response = await fetch(`/api/push-to-graze/${regionCode}`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ sessionCookie: GrazeSession.sessionCookie })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`Success: ${result.message}`);
+                    // Refresh region list to get updated component ID
+                    await updateRegionFilter();
+                    // Trigger change event to update URL display
+                    document.getElementById('regionSelect').dispatchEvent(new Event('change'));
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                pushBtn.disabled = false;
+                pushBtn.textContent = 'Push Region to Graze';
+            }
+        }
+
+        async function confirmPushAllToGraze() {
+            if (!GrazeSession.sessionCookie) {
+                alert('Please login to Graze first');
+                return;
+            }
+            
+            if (!confirm('⚠️ DANGER: This will create/update custom nodes for ALL 50 STATES.\n\nThis is a BULK operation that may take several minutes and cannot be easily undone.\n\nAre you absolutely sure you want to continue?')) {
+                return;
+            }
+            
+            pushAllToGraze();
+        }
+
+        async function pushAllToGraze() {
+            const pushAllBtn = document.getElementById('pushAllBtn');
+            pushAllBtn.disabled = true;
+            pushAllBtn.textContent = 'Pushing All...';
+            
+            try {
+                const response = await fetch('/api/push-all-to-graze', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ sessionCookie: GrazeSession.sessionCookie })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const summary = result.results.reduce((acc, r) => {
+                        acc[r.action] = (acc[r.action] || 0) + 1;
+                        return acc;
+                    }, {});
+                    
+                    alert(`Completed! Created: ${summary.created || 0}, Updated: ${summary.updated || 0}, Errors: ${summary.error || 0}`);
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                pushAllBtn.disabled = false;
+                pushAllBtn.textContent = 'Push All Regions to Graze';
+            }
+        }
+
+        async function pushHeatmapToGraze() {
+            if (!GrazeSession.sessionCookie) {
+                alert('Please login to Graze first');
+                return;
+            }
+            
+            const pushHeatmapBtn = document.getElementById('pushHeatmapBtn');
+            pushHeatmapBtn.disabled = true;
+            pushHeatmapBtn.textContent = 'Pushing...';
+            
+            try {
+                const response = await fetch('/api/push-heatmap-to-graze', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ sessionCookie: GrazeSession.sessionCookie })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`Success: ${result.message}\nComponent ID: ${result.componentId}`);
+                    document.getElementById('grazeOutput').textContent = JSON.stringify(result.result, null, 2);
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                pushHeatmapBtn.disabled = false;
+                pushHeatmapBtn.textContent = 'Push Heatmap to Graze';
+            }
+        }
+
+        async function copyToClipboard() {
+            const output = document.getElementById('grazeOutput').textContent;
+            if (!output) {
+                alert('Generate a custom node first');
+                return;
+            }
+            
+            try {
+                await navigator.clipboard.writeText(output);
+                alert('JSON copied to clipboard!');
+            } catch (err) {
+                const textArea = document.createElement('textarea');
+                textArea.value = output;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('JSON copied to clipboard!');
+            }
+        }
+
+        loadCountries();
+        loadRegions();
+    </script>
+</body>
+</html>

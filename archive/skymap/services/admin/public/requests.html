@@ -1,0 +1,204 @@
+<h2 class="page-title">Requests & Reports</h2>
+<p style="text-align: center; color: #525252; margin-bottom: 1.5rem;">Review incoming requests and reports from users</p>
+
+<style>
+  .rr-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid #ddd; }
+  .rr-tab { padding: 0.6rem 1.2rem; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; font-weight: 500; font-size: 0.9rem; color: #666; }
+  .rr-tab:hover { color: #333; }
+  .rr-tab.active { color: #171717; border-bottom-color: #2196f3; background: #f0f0f0; }
+  .rr-panel { display: none; }
+  .rr-panel.active { display: block; }
+  .rr-filter-btn { padding: 0.4rem 0.75rem; margin: 0; background: #eee; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: #666; }
+  .rr-filter-btn:hover { background: #e5e5e5; }
+  .rr-filter-btn.active { background: #ddd; color: #171717; font-weight: 600; }
+  .rr-card { background: white;  padding: 1.25rem; border-radius: 6px; margin-bottom: 0.75rem; }
+  .rr-status { display: inline-block; padding: 0.2rem 0.6rem; color: white; border-radius: 10px; font-size: 0.8rem; font-weight: 500; }
+  .rr-pending { background: #ff9800; }
+  .rr-approved { background: #4caf50; }
+  .rr-denied { background: #f44336; }
+</style>
+
+<div class="rr-tabs">
+  <button class="rr-tab active" onclick="rrSwitch('labels')">Label Requests</button>
+  <button class="rr-tab" onclick="rrSwitch('images')">Image Requests</button>
+  <button class="rr-tab" onclick="rrSwitch('reports')">Reported Images</button>
+</div>
+
+<!-- Label Requests -->
+<div id="rr-labels" class="rr-panel active">
+  <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+    <button class="rr-filter-btn active" onclick="rrLoadLabels('pending')">Pending</button>
+    <button class="rr-filter-btn" onclick="rrLoadLabels('approved')">Approved</button>
+    <button class="rr-filter-btn" onclick="rrLoadLabels('denied')">Denied</button>
+    <button class="rr-filter-btn" onclick="rrLoadLabels()">All</button>
+  </div>
+  <div id="rr-labels-list">Loading...</div>
+</div>
+
+<!-- Image Requests -->
+<div id="rr-images" class="rr-panel">
+  <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+    <button class="rr-filter-btn active" onclick="rrLoadImageReqs('pending')">Pending</button>
+    <button class="rr-filter-btn" onclick="rrLoadImageReqs('approved')">Approved</button>
+    <button class="rr-filter-btn" onclick="rrLoadImageReqs('denied')">Denied</button>
+    <button class="rr-filter-btn" onclick="rrLoadImageReqs()">All</button>
+  </div>
+  <div id="rr-images-list">Loading...</div>
+</div>
+
+<!-- Reported Images -->
+<div id="rr-reports" class="rr-panel">
+  <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+    <button class="rr-filter-btn active" onclick="rrLoadReports('pending')">Pending</button>
+    <button class="rr-filter-btn" onclick="rrLoadReports('approved')">Resolved</button>
+    <button class="rr-filter-btn" onclick="rrLoadReports('denied')">Denied</button>
+    <button class="rr-filter-btn" onclick="rrLoadReports()">All</button>
+  </div>
+  <div id="rr-reports-list">Loading...</div>
+</div>
+
+<script>
+  function rrSwitch(tab) {
+    document.querySelectorAll('.rr-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.rr-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('.rr-tab[onclick*="' + tab + '"]').classList.add('active');
+    document.getElementById('rr-' + tab).classList.add('active');
+    if (tab === 'labels') rrLoadLabels('pending');
+    if (tab === 'images') rrLoadImageReqs('pending');
+    if (tab === 'reports') rrLoadReports('pending');
+  }
+
+  // --- Label Requests ---
+  async function rrLoadLabels(status) {
+    var container = document.getElementById('rr-labels-list');
+    container.innerHTML = 'Loading...';
+    try {
+      var url = status ? '/api/admin/label-requests?status=' + status : '/api/admin/label-requests';
+      var res = await fetch(url, { headers: getAuthHeaders() });
+      var data = await res.json();
+      var requests = data.requests || [];
+      if (!requests.length) { container.innerHTML = '<p style="color:#999;padding:2rem;text-align:center;">No ' + (status || '') + ' requests.</p>'; return; }
+      container.innerHTML = requests.map(function(r) {
+        var isPending = r.status === 'pending';
+        return '<div class="rr-card" style="border-left: 4px solid ' + (r.status === 'approved' ? '#4caf50' : r.status === 'denied' ? '#f44336' : '#ff9800') + ';">' +
+          '<div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">' +
+          '<span style="font-weight:600;">' + (r.request_type === 'add' ? '+ Add' : '- Remove') + ' <code>' + r.location_key + '</code>' + (r.location_name ? ' <span style="color:#999;">(' + r.location_name + ')</span>' : '') + '</span>' +
+          '<span class="rr-status rr-' + r.status + '">' + r.status.toUpperCase() + '</span></div>' +
+          '<div style="font-size:0.85rem;margin-bottom:0.3rem;"><strong>Target:</strong> @' + r.target_handle + ' <span style="color:#999;font-size:0.75rem;">(' + r.target_did + ')</span></div>' +
+          '<div style="font-size:0.85rem;margin-bottom:0.3rem;"><strong>By:</strong> ' + (r.requester_handle || r.requester_did) + ' <span style="color:#999;font-size:0.75rem;">' + new Date(r.created_at).toLocaleString() + '</span></div>' +
+          '<div style="padding:0.5rem;background:#f0f0f0;border-radius:6px;margin:0.5rem 0;font-size:0.85rem;"><strong>Reason:</strong> ' + r.reason + '</div>' +
+          (r.review_notes ? '<div style="color:#666;font-style:italic;font-size:0.85rem;">Notes: ' + r.review_notes + '</div>' : '') +
+          (isPending ? '<div style="display:flex;gap:0.5rem;align-items:center;margin-top:0.5rem;">' +
+            '<input type="text" id="lr-n-' + r.id + '" placeholder="Notes (optional)" style="flex:1;padding:0.4rem;border:1px solid #ddd;border-radius:6px;font-size:0.8rem;">' +
+            '<button onclick="rrReviewLabel(' + r.id + ',\'approve\')" style="padding:0.4rem 0.75rem;background:#4caf50;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;">Approve</button>' +
+            '<button onclick="rrReviewLabel(' + r.id + ',\'deny\')" style="padding:0.4rem 0.75rem;background:#f44336;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;">Deny</button></div>' : '') +
+          '</div>';
+      }).join('');
+    } catch(e) { container.innerHTML = '<p style="color:red;">Error loading.</p>'; }
+  }
+
+  async function rrReviewLabel(id, action) {
+    var notes = document.getElementById('lr-n-' + id)?.value || '';
+    if (!confirm(action === 'approve' ? 'Approve?' : 'Deny?')) return;
+    try {
+      var res = await fetch('/api/admin/label-requests/' + id + '/review', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ action: action, notes: notes }) });
+      var data = await res.json();
+      if (res.ok) { alert(data.message || 'Done'); rrLoadLabels('pending'); } else { alert(data.error || 'Failed'); }
+    } catch(e) { alert('Error'); }
+  }
+
+  // --- Image Requests ---
+  async function rrLoadImageReqs(status) {
+    var container = document.getElementById('rr-images-list');
+    container.innerHTML = 'Loading...';
+    try {
+      var url = status ? '/api/image-requests?status=' + status : '/api/image-requests';
+      var res = await fetch(url);
+      var data = await res.json();
+      var requests = data.requests || [];
+      if (!requests.length) { container.innerHTML = '<p style="color:#999;padding:2rem;text-align:center;">No ' + (status || '') + ' requests.</p>'; return; }
+      container.innerHTML = requests.map(function(r) {
+        var isPending = r.status === 'pending';
+        return '<div class="rr-card" style="border-left: 4px solid ' + (r.status === 'approved' ? '#4caf50' : r.status === 'denied' ? '#f44336' : '#ff9800') + ';">' +
+          '<div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">' +
+          '<strong>@' + (r.handle || 'Unknown') + '</strong>' +
+          '<span class="rr-status rr-' + r.status + '">' + r.status.toUpperCase() + '</span></div>' +
+          '<div style="font-size:0.85rem;color:#737373;">DID: <span style="font-family:monospace;">' + r.did + '</span></div>' +
+          '<div style="font-size:0.85rem;color:#737373;">' + new Date(r.created_at).toLocaleString() + '</div>' +
+          (r.request_message ? '<div style="padding:0.5rem;background:#f0f8ff;border-radius:6px;margin:0.5rem 0;font-size:0.85rem;"><strong>Message:</strong> ' + r.request_message + '</div>' : '') +
+          (r.admin_notes ? '<div style="padding:0.5rem;background:#fff8f0;border-radius:6px;margin:0.5rem 0;font-size:0.85rem;"><strong>Notes:</strong> ' + r.admin_notes + '</div>' : '') +
+          (isPending ? '<div style="display:flex;gap:0.5rem;margin-top:0.5rem;">' +
+            '<button onclick="rrApproveImg(' + r.id + ')" style="padding:0.4rem 0.75rem;background:#4caf50;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;">Approve</button>' +
+            '<button onclick="rrDenyImg(' + r.id + ')" style="padding:0.4rem 0.75rem;background:#f44336;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;">Deny</button></div>' : '') +
+          '</div>';
+      }).join('');
+    } catch(e) { container.innerHTML = '<p style="color:red;">Error loading.</p>'; }
+  }
+
+  async function rrApproveImg(id) {
+    var notes = prompt('Notes (optional):');
+    if (notes === null) return;
+    try {
+      var res = await fetch('/api/image-requests/' + id + '/approve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminNotes: notes || null }) });
+      if (res.ok) { alert('Approved'); rrLoadImageReqs('pending'); } else { var d = await res.json(); alert(d.error || 'Failed'); }
+    } catch(e) { alert('Error'); }
+  }
+
+  async function rrDenyImg(id) {
+    var notes = prompt('Reason (optional):');
+    if (notes === null) return;
+    try {
+      var res = await fetch('/api/image-requests/' + id + '/deny', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminNotes: notes || null }) });
+      if (res.ok) { alert('Denied'); rrLoadImageReqs('pending'); } else { var d = await res.json(); alert(d.error || 'Failed'); }
+    } catch(e) { alert('Error'); }
+  }
+
+  // --- Reported Images ---
+  async function rrLoadReports(status) {
+    var container = document.getElementById('rr-reports-list');
+    container.innerHTML = 'Loading...';
+    try {
+      var url = status ? '/api/admin/reported-images?status=' + status : '/api/admin/reported-images';
+      var res = await fetch(url);
+      var data = await res.json();
+      var reports = data.reports || [];
+      if (!reports.length) { container.innerHTML = '<p style="color:#999;padding:2rem;text-align:center;">No ' + (status || '') + ' reports.</p>'; return; }
+      container.innerHTML = reports.map(function(r) {
+        var reasonColors = { copyright: '#2196f3', inappropriate: '#ff9800', illegal: '#f44336', spam: '#9e9e9e', other: '#737373' };
+        return '<div class="rr-card" style="border-left: 4px solid ' + (r.status === 'approved' ? '#4caf50' : r.status === 'denied' ? '#f44336' : '#ff9800') + ';">' +
+          '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.5rem;">' +
+          '<div><strong>@' + (r.reporter_handle || 'Unknown') + '</strong> ' +
+          '<span class="rr-status rr-' + r.status + '">' + r.status.toUpperCase() + '</span> ' +
+          '<span style="display:inline-block;padding:0.2rem 0.5rem;background:' + (reasonColors[r.reason] || '#737373') + ';color:white;border-radius:10px;font-size:0.75rem;">' + (r.reason || 'other') + '</span>' +
+          '<div style="font-size:0.85rem;color:#737373;margin-top:0.3rem;">Type: ' + r.image_type + ' | ' + new Date(r.created_at).toLocaleString() + '</div></div>' +
+          '<img src="' + r.image_url + '" style="width:80px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onerror="this.style.display=\'none\'">' +
+          '</div>' +
+          '<div style="font-size:0.8rem;color:#737373;word-break:break-all;margin-bottom:0.5rem;"><a href="' + r.image_url + '" target="_blank" style="color:#2196f3;">' + r.image_url + '</a></div>' +
+          (r.details ? '<div style="padding:0.5rem;background:#fff8f0;border-radius:6px;margin:0.5rem 0;font-size:0.85rem;"><strong>Details:</strong> ' + r.details + '</div>' : '') +
+          (r.review_notes ? '<div style="padding:0.5rem;background:#f0f8ff;border-radius:6px;margin:0.5rem 0;font-size:0.85rem;"><strong>Notes:</strong> ' + r.review_notes + '</div>' : '') +
+          (r.status === 'pending' ? '<div style="display:flex;gap:0.5rem;margin-top:0.5rem;">' +
+            '<button onclick="rrApproveReport(' + r.id + ')" style="padding:0.4rem 0.75rem;background:#4caf50;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;">Approve (Remove)</button>' +
+            '<button onclick="rrDenyReport(' + r.id + ')" style="padding:0.4rem 0.75rem;background:#f44336;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;">Deny</button></div>' : '') +
+          '</div>';
+      }).join('');
+    } catch(e) { container.innerHTML = '<p style="color:red;">Error loading.</p>'; }
+  }
+
+  async function rrApproveReport(id) {
+    var notes = prompt('Notes (optional):');
+    try {
+      var res = await fetch('/api/admin/reported-images/' + id + '/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'approve', notes: notes }) });
+      if (res.ok) { alert('Approved. Image removed.'); rrLoadReports('pending'); } else { var d = await res.json(); alert(d.error || 'Failed'); }
+    } catch(e) { alert('Error'); }
+  }
+
+  async function rrDenyReport(id) {
+    var notes = prompt('Notes (optional):');
+    try {
+      var res = await fetch('/api/admin/reported-images/' + id + '/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'deny', notes: notes }) });
+      if (res.ok) { alert('Denied.'); rrLoadReports('pending'); } else { var d = await res.json(); alert(d.error || 'Failed'); }
+    } catch(e) { alert('Error'); }
+  }
+
+  rrLoadLabels('pending');
+</script>

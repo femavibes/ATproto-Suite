@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ATlas Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { overflow-y: scroll; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f5f5f5; color: #171717; line-height: 1.5; min-height: 100vh; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+        .header { text-align: center; margin-bottom: 1.5rem; }
+        .header h1 { font-size: 1.8rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .header-row { display: flex; justify-content: center; align-items: center; position: relative; }
+        .header-nav { position: absolute; right: 0; font-size: 0.82rem; }
+        .header-nav a { color: #1e40af; text-decoration: none; }
+        .page-title { text-align: center; font-size: 1.3rem; font-weight: 600; margin: 1rem 0 0.5rem 0; }
+        .section { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .section h2 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .tabs { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 1rem; border-bottom: 2px solid #ddd; padding-bottom: 0.25rem; width: 100%; }
+        .tab { display: flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.8rem; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: #666; transition: color 0.15s; }
+        .tab:hover { color: #333; }
+        .tab.active { color: #171717; border-bottom-color: #333; }
+        .tab-icon { display: flex; align-items: center; }
+        .tab-icon svg { width: 16px; height: 16px; }
+        .tab-text { white-space: nowrap; }
+        .tab-content { display: none; min-height: 200px; }
+        .tab-content.active { display: block; }
+        .filter { margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .filter input, .filter select { padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; background: white; }
+        .filter input:focus, .filter select:focus { outline: none; border-color: #333; }
+        button:not(.tab):not(.more-sub-btn) { padding: 0.5rem 1rem; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; }
+        button:not(.tab):not(.more-sub-btn):hover { background: #555; }
+        input[type="text"], input[type="password"], textarea, select { padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; }
+        input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus { outline: none; border-color: #333; }
+        .pagination { display: flex; gap: 0.5rem; justify-content: center; align-items: center; margin-top: 1rem; }
+        .pagination button { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+        .pagination button:disabled { opacity: 0.4; cursor: default; }
+        .results-info { text-align: center; font-size: 0.8rem; color: #999; margin-top: 0.5rem; }
+        .stats { background: #f0f8ff; border: 1px solid #dbeafe; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: #1976d2; }
+        .stat-label { font-size: 0.85rem; color: #737373; }
+        .graze-output { background: #f8f8f8; padding: 1rem; border-radius: 8px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; border: 1px solid #eee; }
+        .location { background: white; border: 1px solid #eee; border-radius: 8px; padding: 1rem; margin: 0.5rem 0; }
+        .location:hover { border-color: #ccc; }
+        .location-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; gap: 0.5rem; }
+        .location-name { font-weight: 600; flex: 1; }
+        .location-key { font-family: monospace; background: #f5f5f5; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.85rem; }
+        .hashtags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+        .hashtag { background: #e3f2fd; color: #1976d2; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.82rem; display: flex; align-items: center; gap: 0.25rem; }
+        .hashtag .remove { cursor: pointer; color: #d32f2f; font-weight: bold; }
+        .add-hashtag { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+        .add-hashtag input { flex: 1; }
+        .img-tab-btn { padding: 0.4rem 0.75rem; background: #eee; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; color: #525252; }
+        .img-tab-btn:hover { background: #ddd; }
+        .img-tab-btn.active { background: #333; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <div class="header">
+            <div class="header-row">
+                <h1>ATlas Admin</h1>
+                <div class="header-nav"><a href="https://nearyou.atls.city/admin" target="_blank">Near You Admin &rarr;</a></div>
+            </div>
+            <div class="tabs" style="margin-top: 1rem;">
+                <button class="tab active" onclick="switchTab('dashboard')"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></span><span class="tab-text">Locations</span></button>
+                <button class="tab" onclick="switchTab('users')"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg></span><span class="tab-text">User Management</span></button>
+                <button class="tab" onclick="switchTab('interests')"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></span><span class="tab-text">Interests</span></button>
+                <button class="tab" onclick="switchTab('accountTypes')"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle><line x1="18" y1="8" x2="23" y2="8"></line><line x1="20.5" y1="5.5" x2="20.5" y2="10.5"></line></svg></span><span class="tab-text">Account Types</span></button>
+                <button class="tab" onclick="switchTab('dataSources')"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg></span><span class="tab-text">Data Sources</span></button>
+                <button class="tab" onclick="switchTab('customNode')"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span><span class="tab-text">Custom Node</span></button>
+                <button class="tab" onclick="switchTab('labelRequests')"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg></span><span class="tab-text">Requests & Reports</span></button>
+                <button class="tab" onclick="switchTab('links')"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></span><span class="tab-text">Links</span></button>
+                <button class="tab" onclick="switchTab('more')"><span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></span><span class="tab-text">More</span></button>
+            </div>
+        </div>
+        
+        <div class="tab-content active" id="dashboardTab"></div>
+        <div class="tab-content" id="usersTab"></div>
+        <div class="tab-content" id="interestsTab"></div>
+        <div class="tab-content" id="accountTypesTab"></div>
+        <div class="tab-content" id="dataSourcesTab"></div>
+        <div class="tab-content" id="customNodeTab"></div>
+        <div class="tab-content" id="labelRequestsTab"></div>
+        <div class="tab-content" id="linksTab"></div>
+        <div class="tab-content" id="moreTab">
+            <h2 class="page-title" style="margin-bottom: 1rem;">More</h2>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid #ddd; padding-bottom: 0.5rem;">
+                <button class="more-sub-btn" onclick="switchMoreSub('feeds')" style="padding: 0.5rem 1rem; background: #eee; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: 500; color: #525252;">Feeds Management</button>
+                <button class="more-sub-btn" onclick="switchMoreSub('ingestion')" style="padding: 0.5rem 1rem; background: #eee; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: 500; color: #525252;">Ingestion</button>
+                <button class="more-sub-btn" onclick="switchMoreSub('whitelist')" style="padding: 0.5rem 1rem; background: #eee; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: 500; color: #525252;">Admin Users</button>
+                <button class="more-sub-btn" onclick="switchMoreSub('eventManager')" style="padding: 0.5rem 1rem; background: #eee; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: 500; color: #525252;">Event Manager</button>
+            </div>
+            <div id="moreSubFeeds" class="more-sub-panel"></div>
+            <div id="moreSubIngestion" class="more-sub-panel" style="display:none;"></div>
+            <div id="moreSubWhitelist" class="more-sub-panel" style="display:none;"></div>
+            <div id="moreSubEventManager" class="more-sub-panel" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script src="/graze-session.js"></script>
+    <script>
+        async function loadComponent(url, containerId) {
+            try {
+                const response = await fetch(url);
+                const html = await response.text();
+                document.getElementById(containerId).innerHTML = html;
+                
+                const container = document.getElementById(containerId);
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                    script.remove();
+                });
+                
+                // Refresh GrazeSession UI if it's already initialized (for dynamically loaded content)
+                if (typeof GrazeSession !== 'undefined' && GrazeSession.initialized && GrazeSession.sessionCookie) {
+                    console.log('loadComponent: Refreshing GrazeSession UI after loading', url);
+                    // Wait a bit longer to ensure scripts have executed and DOM is ready
+                    setTimeout(() => {
+                        const loginStatus = document.getElementById('loginStatus');
+                        console.log('loadComponent: Updating UI, loginStatus found:', !!loginStatus);
+                        if (loginStatus) {
+                            console.log('loadComponent: loginStatus current text:', loginStatus.textContent);
+                        }
+                        GrazeSession.updateUI(true);
+                        // Double-check after update
+                        setTimeout(() => {
+                            const loginStatusAfter = document.getElementById('loginStatus');
+                            if (loginStatusAfter) {
+                                console.log('loadComponent: loginStatus after update:', loginStatusAfter.textContent);
+                            }
+                        }, 50);
+                    }, 200);
+                }
+            } catch (error) {
+                console.error(`Failed to load component ${url}:`, error);
+            }
+        }
+
+        async function init() {
+            await loadComponent('locations.html', 'dashboardTab');
+            loadComponent('custom_node.html', 'customNodeTab');
+            loadComponent('data_sources.html', 'dataSourcesTab');
+            loadComponent('users.html', 'usersTab');
+            loadComponent('interests.html', 'interestsTab');
+            loadComponent('account-types.html', 'accountTypesTab');
+            loadComponent('requests.html', 'labelRequestsTab');
+            loadComponent('links.html', 'linksTab');
+            loadComponent('feeds.html', 'moreSubFeeds');
+            loadComponent('ingestion.html', 'moreSubIngestion');
+            loadComponent('whitelist.html', 'moreSubWhitelist');
+            loadComponent('eventmanager.html', 'moreSubEventManager');
+        }
+
+        init();
+    </script>
+</body>
+</html>

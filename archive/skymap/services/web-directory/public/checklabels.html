@@ -1,0 +1,235 @@
+<div class="section">
+    <div id="myLabelsSection" style="display: none;">
+        <div class="section-title">My Labels</div>
+        <div id="myLabelsAuth" style="display: none;">
+            <p class="section-desc">Login to view and manage your location labels</p>
+        </div>
+        <div id="myLabelsContent" style="display: none;">
+            <p class="section-desc">Your active location labels (<span id="myLabelCount">0</span>/3). Your primary location is where you appear on the map.</p>
+            <div id="myLabelsList"></div>
+            <div style="margin-top: 1.5rem;">
+                <button onclick="checkMyBlueskyLabels()" class="btn-sm btn-secondary">Check Bluesky API</button>
+                <div style="font-size: 0.875rem; color: #737373; margin-top: 0.5rem;">Check what labels are actually applied to your account. Useful if our database is out of sync with what actually exists - you can remove labels that aren't showing in the database above. You can also use <a href="https://blue.mackuba.eu/scanner/" target="_blank">Label Scanner</a> or <a href="https://clearsky.app/" target="_blank">Clearsky</a> to check all labels on your account, not just Skymap.</div>
+            </div>
+            <div id="myBlueskyLabels" style="margin-top: 1rem; display: none;"></div>
+        </div>
+        <div class="section-title" style="margin-top: 2rem;">Check Other Users</div>
+    </div>
+    <div id="checkLabelsSection">
+        <!-- Title removed - modal header already shows "Check Labels" -->
+    </div>
+    <p class="section-desc" id="checkLabelsDescription">View and manage your location labels or view another users labels. Log in for easier management and additional features.</p>
+    
+    <div class="search-grid">
+        <input type="text" id="handleInput" placeholder="username.bsky.social" />
+        <button onclick="checkUserLabels()">Check</button>
+    </div>
+    <div id="userLabels"></div>
+</div>
+
+<script>
+async function checkUserLabels() {
+    const handle = document.getElementById('handleInput').value.trim();
+    if (!handle) return;
+    
+    const userLabelsDiv = document.getElementById('userLabels');
+    userLabelsDiv.innerHTML = '<div class="loading">Loading...</div>';
+    
+    try {
+        const response = await fetch(`/api/user-labels?handle=${encodeURIComponent(handle)}`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to fetch labels');
+        }
+        
+        const dbLabels = data.databaseLabels || [];
+        const bsLabels = data.blueskyLabels || [];
+        const dbCount = dbLabels.length;
+        const bsCount = bsLabels.length;
+        
+        let html = '';
+        
+        html += `<div style="margin-bottom: 1.5rem;"><h3 style="font-size: 1rem; font-weight: 500; margin-bottom: 0.75rem;">Database (${dbCount}/3)</h3>`;
+        if (dbCount === 0) {
+            html += '<div class="empty-state">No labels in database</div>';
+        } else {
+            html += dbLabels.map(label => {
+                const primaryBadge = label.is_primary ? '<span class="location-key" style="background: #e0e0e0;">Primary</span>' : '';
+                const setPrimaryBtn = !label.is_primary ? `
+                        <button class="btn-sm btn-secondary" onclick="openBluesky('!primary', '${label.key}')">Set Primary</button>
+                        <button class="btn-sm btn-icon" onclick="copyCommand(event, '!primary', '${label.key}')" title="Copy command">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>` : '';
+                return `
+                <div class="user-label">
+                    <div>
+                        <h4>${label.name}, ${label.region_name}</h4>
+                        <span class="location-key">${label.key}</span>
+                        ${primaryBadge}
+                    </div>
+                    <div class="location-actions">
+                        ${setPrimaryBtn}
+                        <button class="btn-sm btn-secondary" onclick="openBluesky('!remove', '${label.key}')">Remove</button>
+                        <button class="btn-sm btn-icon" onclick="copyCommand(event, '!remove', '${label.key}')" title="Copy command">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `}).join('');
+        }
+        html += '</div>';
+        
+        html += `<div><h3 style="font-size: 1rem; font-weight: 500; margin-bottom: 0.75rem;">Bluesky API (${bsCount})</h3>`;
+        if (bsCount === 0) {
+            html += '<div class="empty-state">No labels from Bluesky</div>';
+        } else {
+            html += bsLabels.map(label => `
+                <div class="user-label">
+                    <div>
+                        <h4>${label.value}</h4>
+                    </div>
+                    <div class="location-actions">
+                        <button class="btn-sm btn-secondary" onclick="openBluesky('!remove', '${label.value}')">Remove</button>
+                        <button class="btn-sm btn-icon" onclick="copyCommand(event, '!remove', '${label.value}')" title="Copy command">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        html += '</div>';
+        
+        userLabelsDiv.innerHTML = html;
+    } catch (error) {
+        userLabelsDiv.innerHTML = `<div class="empty-state">Error: ${error.message}</div>`;
+    }
+}
+
+async function loadMyLabels() {
+    const descEl = document.getElementById('checkLabelsDescription');
+    if (!isAuthenticated) {
+        document.getElementById('myLabelsSection').style.display = 'none';
+        document.getElementById('checkLabelsSection').style.display = 'block';
+        document.getElementById('myLabelsAuth').style.display = 'block';
+        document.getElementById('myLabelsContent').style.display = 'none';
+        if (descEl) {
+            descEl.textContent = 'View and manage your location labels or view another users labels, Log in for easier management and additional features.';
+        }
+        return;
+    }
+    
+    document.getElementById('myLabelsSection').style.display = 'block';
+    document.getElementById('checkLabelsSection').style.display = 'none';
+    if (descEl) {
+        descEl.textContent = 'View labels for any Bluesky user';
+    }
+    
+    try {
+        const response = await fetch('/api/labels/my-labels');
+        const data = await response.json();
+        
+        const labels = data.labels || [];
+        document.getElementById('myLabelCount').textContent = labels.length;
+        document.getElementById('myLabelsAuth').style.display = 'none';
+        document.getElementById('myLabelsContent').style.display = 'block';
+        
+        const list = document.getElementById('myLabelsList');
+        if (labels.length === 0) {
+            list.innerHTML = '<div class="empty-state">No labels yet. Search for a location and click "Add".</div>';
+        } else {
+            list.innerHTML = labels.map(label => {
+                const isPrimary = label.is_primary;
+                const setPrimaryBtn = !isPrimary ? `<button class="btn-sm btn-secondary" onclick="setPrimaryLabel('${label.key}')">Set Primary</button>` : '<span class="location-key" style="background: #e0e0e0;">Primary</span>';
+                
+                return `
+                    <div class="user-label">
+                        <div>
+                            <h4>${label.name}, ${label.region_name}</h4>
+                            <span class="location-key">${label.key}</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
+                            ${setPrimaryBtn}
+                            <button class="btn-sm btn-secondary" onclick="removeLabelDirect('${label.key}', '${label.name}')">Remove</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    } catch (error) {
+        console.error('Failed to load labels:', error);
+    }
+}
+
+async function checkMyBlueskyLabels() {
+    const container = document.getElementById('myBlueskyLabels');
+    container.innerHTML = '<div class="loading">Loading from Bluesky API...</div>';
+    container.style.display = 'block';
+    
+    try {
+        const sessionResponse = await fetch('/api/auth/session');
+        const sessionData = await sessionResponse.json();
+        
+        if (!sessionData.authenticated) {
+            container.innerHTML = '<div class="empty-state">Not authenticated</div>';
+            return;
+        }
+        
+        const response = await fetch(`/api/user-labels?handle=${encodeURIComponent(sessionData.handle)}`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to fetch labels');
+        }
+        
+        const bsLabels = data.blueskyLabels || [];
+        
+        let html = `<h3 style="font-size: 1rem; font-weight: 500; margin-bottom: 0.75rem;">Bluesky API Labels (${bsLabels.length})</h3>`;
+        if (bsLabels.length === 0) {
+            html += '<div class="empty-state">No labels from Bluesky API</div>';
+        } else {
+            html += bsLabels.map(label => `
+                <div class="user-label">
+                    <div>
+                        <h4>${label.value}</h4>
+                    </div>
+                    <button class="btn-sm btn-secondary" onclick="removeLabelDirect('${label.value}', '${label.value}')">Remove</button>
+                </div>
+            `).join('');
+        }
+        
+        container.innerHTML = html;
+    } catch (error) {
+        container.innerHTML = `<div class="empty-state">Error: ${error.message}</div>`;
+    }
+}
+
+async function setPrimaryLabel(locationKey) {
+    try {
+        const response = await fetch('/api/labels/set-primary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ locationKey })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            loadMyLabels();
+        } else {
+            alert('Failed to set primary location: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Failed to set primary location: ' + error.message);
+    }
+}
+</script>

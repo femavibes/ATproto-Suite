@@ -1,0 +1,49 @@
+/* N-of Modal Styles */
+.nof-modal {
+  max-width: 400px;
+}
+
+.nof-modal .modal-description {
+  margin-bottom: 20px;
+  color: #ccc;
+  font-size: 14px;
+}
+
+.nof-modal .form-group {
+  margin-bottom: 20px;
+}
+
+.nof-modal .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.nof-modal .form-group input {
+  width: 100%;
+  padding: 10px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 16px;
+}
+
+.nof-modal .form-group input:focus {
+  outline: none;
+  border-color: #4a9eff;
+}
+
+.nof-modal .modal-preview {
+  margin: 20px 0;
+  padding: 15px;
+  background: #1a1a1a;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.nof-modal .modal-preview strong {
+  color: #4a9eff;
+}

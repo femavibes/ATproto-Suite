@@ -1,0 +1,2 @@
+# For database/migrate.py only (async SQL migrations)
+asyncpg==0.30.0

@@ -1,0 +1,2004 @@
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+    #eventDescription:focus {
+        outline: none;
+        border-color: #171717;
+    }
+    #eventImageUrl:focus {
+        outline: none;
+        border-color: #171717;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    /* Toggle Switch Styles */
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 28px;
+        flex-shrink: 0;
+    }
+    
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(115, 115, 115, 0.3);
+        transition: 0.2s;
+        border-radius: 28px;
+    }
+    
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.2s;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .toggle-switch input:checked + .toggle-slider {
+        background-color: rgba(23, 23, 23, 0.9);
+    }
+    
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+    }
+    
+    .toggle-switch:hover .toggle-slider {
+        background-color: rgba(115, 115, 115, 0.4);
+    }
+    
+    .toggle-switch input:checked + .toggle-slider:hover {
+        background-color: rgba(23, 23, 23, 1);
+    }
+    
+    /* Event Type Button Styles */
+    .event-type-btn.active {
+        background: rgba(23, 23, 23, 0.9) !important;
+        color: white !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .event-type-btn:not(.active):hover {
+        background: rgba(255, 255, 255, 0.5) !important;
+    }
+</style>
+
+<div class="section">
+    <div class="section-title">Create Event</div>
+    <p class="section-desc">Create and discover local events on SkyMap. Events appear on the map based on RSVP popularity.</p>
+    
+    <div id="authSection" style="text-align: center; padding: 2rem; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 16px; margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem;">Login Required</h3>
+        <p style="color: #525252; margin-bottom: 1rem;">You must be logged in to create an event.</p>
+        <button onclick="if (typeof openLoginModal === 'function') openLoginModal(); else window.location.href='/manage';">Login</button>
+    </div>
+    
+    <div id="formSection" style="display: none;">
+        <form id="eventForm" onsubmit="submitEvent(event)">
+            <!-- Event Type Selection -->
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">Event Type *</label>
+                <div style="display: flex; gap: 0.5rem; background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 12px; padding: 0.375rem; flex-wrap: wrap;">
+                    <button type="button" onclick="selectEventType('physical')" id="eventTypePhysical" class="event-type-btn active" style="flex: 1; min-width: 120px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9375rem; font-weight: 500; transition: all 0.15s ease; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <span>Physical</span>
+                    </button>
+                    <button type="button" onclick="selectEventType('digital')" id="eventTypeDigital" class="event-type-btn" style="flex: 1; min-width: 120px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; background: transparent; color: #525252; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9375rem; font-weight: 500; transition: all 0.15s ease;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        <span>Digital</span>
+                    </button>
+                    <button type="button" onclick="selectEventType('hybrid')" id="eventTypeHybrid" class="event-type-btn" style="flex: 1; min-width: 120px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; background: transparent; color: #525252; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9375rem; font-weight: 500; transition: all 0.15s ease;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        <span>Hybrid</span>
+                    </button>
+                </div>
+                <input type="hidden" name="eventType" id="eventTypeInput" value="physical" />
+                <div style="font-size: 0.875rem; color: #737373; margin-top: 0.5rem;">
+                    <strong>Physical:</strong> In-person event • <strong>Digital:</strong> Online only • <strong>Hybrid:</strong> Both in-person and online
+                </div>
+                <button type="button" onclick="openVisibilityInfoModal()" style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: transparent; border: 1px solid rgba(115, 115, 115, 0.3); border-radius: 6px; color: #525252; font-size: 0.8125rem; cursor: pointer; display: flex; align-items: center; gap: 0.375rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    How event visibility works
+                </button>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="eventTitle" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">Event Title *</label>
+                <input type="text" id="eventTitle" name="title" required maxlength="200" placeholder="e.g., Bluesky Meetup" style="width: 100%;" />
+                <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">Max 200 characters</div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="eventDescription" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">Description</label>
+                <textarea id="eventDescription" name="description" placeholder="Describe your event..." style="width: 100%; min-height: 120px; padding: 0.875rem 1rem; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 12px; font-size: 0.9375rem; font-family: inherit; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); transition: border-color 0.15s ease; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); resize: vertical; outline: none;"></textarea>
+            </div>
+            
+            <!-- Event Tags (Interests) -->
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">Event Tags (Optional)</label>
+                <div id="selectedTags" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; min-height: 32px;"></div>
+                <div style="position: relative;">
+                    <input type="text" id="tagSearch" placeholder="Search interests or add custom tag..." style="width: 100%;" autocomplete="off" />
+                    <div id="tagDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 8px; margin-top: 0.25rem; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); z-index: 1000;"></div>
+                </div>
+                <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">Select up to 5 interests or add custom tags (press Enter)</div>
+            </div>
+            
+            <!-- Event Image Section -->
+            <div id="eventImageSection" style="margin-bottom: 1.5rem; display: none;">
+                <label for="eventImageUrl" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">Event Image (Optional)</label>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.25rem;">
+                    <input type="url" id="eventImageUrl" name="imageUrl" placeholder="https://example.com/event-image.jpg" style="flex: 1; padding: 0.875rem 1rem; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 12px; font-size: 0.9375rem; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); transition: border-color 0.15s ease; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); outline: none;" />
+                    <input type="file" id="eventImageUpload" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" style="display: none;" onchange="handleEventImageUpload(event)" />
+                    <button type="button" onclick="document.getElementById('eventImageUpload').click()" class="btn-secondary" style="padding: 0.875rem 1rem; font-size: 0.9375rem; white-space: nowrap;">Upload</button>
+                </div>
+                <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">Add an image to promote your event on the event detail page (800x400px recommended). Enter URL or upload (max 5MB).</div>
+                <div id="eventImageUploadStatus" style="margin-top: 0.375rem; font-size: 0.8125rem;"></div>
+                <div id="eventImagePreview" style="margin-top: 0.75rem;"></div>
+            </div>
+            
+            <!-- Event Pin/Marker Image Section -->
+            <div id="eventPinImageSection" style="margin-bottom: 1.5rem; display: none;">
+                <label for="eventPinImageUrl" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">Event Marker Image (Optional)</label>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.25rem;">
+                    <input type="url" id="eventPinImageUrl" name="pinImageUrl" placeholder="https://example.com/pin-image.jpg" style="flex: 1; padding: 0.875rem 1rem; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 12px; font-size: 0.9375rem; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); transition: border-color 0.15s ease; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); outline: none;" />
+                    <input type="file" id="eventPinImageUpload" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" style="display: none;" onchange="handleEventPinImageUpload(event)" />
+                    <button type="button" onclick="document.getElementById('eventPinImageUpload').click()" class="btn-secondary" style="padding: 0.875rem 1rem; font-size: 0.9375rem; white-space: nowrap;">Upload</button>
+                </div>
+                <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">Customize how your event appears on the map marker (48x48px recommended, square). Enter URL or upload (max 5MB).</div>
+                <div id="eventPinImageUploadStatus" style="margin-top: 0.375rem; font-size: 0.8125rem;"></div>
+                <div id="eventPinImagePreview" style="margin-top: 0.75rem;"></div>
+            </div>
+            
+            <div id="eventImagePermissionPrompt" style="margin-bottom: 1.5rem; display: none; padding: 1rem; background: rgba(255, 152, 0, 0.1); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 12px;">
+                <p style="margin: 0 0 0.75rem 0; color: #525252; font-size: 0.875rem;">
+                    <strong style="color: #ff9800;">💡 Want to add images to your event?</strong>
+                </p>
+                <p style="margin: 0 0 0.75rem 0; color: #737373; font-size: 0.875rem;">
+                    Request image permissions to upload event images, marker images, and profile images.
+                </p>
+                <button type="button" onclick="if (typeof openSettingsModal === 'function') { openSettingsModal(); } else { window.location.href = '/'; }" style="padding: 0.625rem 1rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 500;">Request Image Permissions</button>
+            </div>
+            
+            <!-- Location Section (conditional based on event type) -->
+            <div id="locationSection" style="margin-bottom: 1.5rem;">
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="eventLocationId" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">
+                        <span id="locationLabel">Location *</span>
+                    </label>
+                    <select id="eventLocationId" name="locationId" onchange="onEventCityChange()" style="width: 100%;">
+                        <option value="">Select a location...</option>
+                    </select>
+                    <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;" id="locationHelp">
+                        Select the location for your event (city, county, state, or country)
+                    </div>
+                </div>
+                
+                <!-- Map Section (only for physical/hybrid) -->
+                <div id="mapSection" style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">Event Location on Map *</label>
+                    <div style="font-size: 0.875rem; color: #737373; margin-bottom: 0.75rem;">Click on the map or enter an address to set a precise location.</div>
+                    
+                    <div style="margin-bottom: 0.75rem;">
+                        <label for="eventAddress" style="display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; color: #525252;">Address (Optional)</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="eventAddress" placeholder="e.g., 123 Main St, Portland, OR" style="flex: 1; padding: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 12px; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); font-size: 0.9375rem; outline: none;" />
+                            <button type="button" onclick="geocodeAddress()" class="btn-secondary" style="padding: 0.75rem 1.5rem; white-space: nowrap; font-size: 0.9375rem;">Find on Map</button>
+                        </div>
+                        <div style="font-size: 0.8125rem; color: #737373; margin-top: 0.5rem;">Enter an address to find its location on the map</div>
+                    </div>
+                    
+                    <div id="eventMap" style="height: 400px; width: 100%; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 12px; margin-top: 0.5rem;"></div>
+                    <div id="eventLocationSelected" style="margin-top: 0.5rem; font-size: 0.875rem; color: #0066cc; display: none;"></div>
+                </div>
+            </div>
+            
+            <!-- Join URL (for digital/hybrid) -->
+            <div id="joinUrlSection" style="margin-bottom: 1.5rem; display: none;">
+                <label for="eventJoinUrl" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">
+                    <span id="joinUrlLabel">Join URL *</span>
+                </label>
+                <input type="url" id="eventJoinUrl" name="joinUrl" placeholder="https://zoom.us/j/..., https://discord.gg/..., https://twitch.tv/..." style="width: 100%;" />
+                <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">Primary link for people to join your event (Zoom, Discord, Twitch, etc.)</div>
+            </div>
+            
+            <!-- Website URL (optional for all) -->
+            <div style="margin-bottom: 1.5rem;">
+                <label for="eventWebsiteUrl" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">Website URL (Optional)</label>
+                <input type="url" id="eventWebsiteUrl" name="websiteUrl" placeholder="https://your-event-website.com" style="width: 100%;" />
+                <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">General website, ticketing page, or more info link</div>
+            </div>
+            
+            <!-- Additional Links (optional JSON) -->
+            <div style="margin-bottom: 1.5rem;">
+                <label for="eventLinks" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">Additional Links (Optional)</label>
+                <textarea id="eventLinks" name="links" placeholder='{"discord": "https://discord.gg/...", "twitch": "https://twitch.tv/...", "tickets": "https://..."}' style="width: 100%; min-height: 80px; padding: 0.875rem 1rem; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 12px; font-size: 0.9375rem; font-family: monospace; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); resize: vertical; outline: none;"></textarea>
+                <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">JSON format: Additional links for Discord, Twitch, tickets, Instagram, etc.</div>
+            </div>
+            
+            <!-- NSFW/Content Rating -->
+            <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 12px;">
+                <div style="margin-bottom: 0.75rem;">
+                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                        <div>
+                            <span style="font-weight: 500; color: #171717;">NSFW Content</span>
+                            <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">Check if your event contains adult/explicit content</div>
+                        </div>
+                        <div class="toggle-switch" onclick="event.stopPropagation(); toggleNsfw()">
+                            <input type="checkbox" id="eventIsNsfw" name="isNsfw" onchange="onNsfwChange()" style="display: none;" />
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                </div>
+                <div id="contentRatingSection" style="display: none;">
+                    <label for="eventContentRating" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">Content Rating *</label>
+                    <select id="eventContentRating" name="contentRating" style="width: 100%;">
+                        <option value="nsfw">NSFW</option>
+                        <option value="18+">18+</option>
+                    </select>
+                    <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">Required for NSFW events</div>
+                </div>
+            </div>
+            
+            <!-- RSVP Privacy -->
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                    <div>
+                        <span style="font-weight: 500; color: #171717;">Show RSVP list to public</span>
+                        <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">Uncheck to keep attendee list private (only you can see it)</div>
+                    </div>
+                    <div class="toggle-switch" onclick="event.stopPropagation(); toggleRsvpList()">
+                        <input type="checkbox" id="eventShowRsvpList" name="showRsvpList" checked style="display: none;" />
+                        <span class="toggle-slider"></span>
+                    </div>
+                </label>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #171717;">Date & Time *</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label for="eventStartTime" style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: #525252;">Start Time</label>
+                        <input type="datetime-local" id="eventStartTime" name="startTime" required style="width: 100%;" />
+                    </div>
+                    <div>
+                        <label for="eventEndTime" style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: #525252;">End Time</label>
+                        <input type="datetime-local" id="eventEndTime" name="endTime" required style="width: 100%;" />
+                    </div>
+                </div>
+                <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">Events can be created up to 2 months in advance. Maximum duration: 24 hours.</div>
+            </div>
+            
+            <div id="eventMessage" style="margin-bottom: 1rem;"></div>
+            
+            <button type="submit" id="eventSubmitBtn" style="width: 100%;">Create Event</button>
+        </form>
+        
+        <!-- My Events Section -->
+        <div id="myEventsSection" style="margin-top: 3rem; display: none;">
+            <h3 style="margin-bottom: 1rem; font-weight: 600; color: #171717;">My Events</h3>
+            <div id="myEventsList" style="display: grid; gap: 1rem;">
+                <!-- Events will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let eventMap = null;
+let eventSelectedMarker = null;
+let eventSelectedLat = null;
+let eventSelectedLng = null;
+let cityMarker = null;
+let cityLat = null;
+let cityLng = null;
+// Global variables (declared once)
+window.allInterests = window.allInterests || [];
+let selectedTags = [];
+const MAX_TAGS = 5;
+
+// Check authentication
+async function checkEventAuth() {
+    try {
+        const response = await fetch('/api/auth/session');
+        const data = await response.json();
+        
+        if (data.authenticated) {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('formSection').style.display = 'block';
+            document.getElementById('myEventsSection').style.display = 'block';
+            await loadEventCities();
+            await checkImagePermission();
+            await loadMyEvents();
+            await loadInterests();
+            setupAddressInput();
+            setupTagSearch();
+        } else {
+            document.getElementById('authSection').style.display = 'block';
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('myEventsSection').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Auth check failed:', error);
+    }
+}
+
+// Make checkEventAuth globally accessible so it can be called after login
+window.checkEventAuth = checkEventAuth;
+
+// Check image permission and show/hide image section
+async function checkImagePermission() {
+    try {
+        const permResponse = await fetch('/api/user/permission');
+        const permData = await permResponse.json();
+        
+        const imageSection = document.getElementById('eventImageSection');
+        const pinImageSection = document.getElementById('eventPinImageSection');
+        const permissionPrompt = document.getElementById('eventImagePermissionPrompt');
+        
+        if (permData.hasImagePermission) {
+            // User has image permissions - show image inputs
+            imageSection.style.display = 'block';
+            pinImageSection.style.display = 'block';
+            permissionPrompt.style.display = 'none';
+            
+            // Add image preview listeners
+            document.getElementById('eventImageUrl')?.addEventListener('input', updateEventImagePreview);
+            document.getElementById('eventPinImageUrl')?.addEventListener('input', updateEventPinImagePreview);
+        } else {
+            // User doesn't have permissions - show prompt
+            imageSection.style.display = 'none';
+            pinImageSection.style.display = 'none';
+            permissionPrompt.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error checking image permission:', error);
+        // Hide image sections on error
+        document.getElementById('eventImageSection').style.display = 'none';
+        document.getElementById('eventPinImageSection').style.display = 'none';
+        document.getElementById('eventImagePermissionPrompt').style.display = 'block';
+    }
+}
+
+// Update event image preview
+function updateEventImagePreview() {
+    const url = document.getElementById('eventImageUrl')?.value.trim();
+    const preview = document.getElementById('eventImagePreview');
+    
+    if (!preview) return;
+    
+    if (url) {
+        preview.innerHTML = `<img src="${url}" style="max-width: 100%; height: auto; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onerror="this.style.display='none'; this.parentElement.innerHTML='<p style=\\'color: #f44336; font-size: 0.875rem;\\'>Failed to load image. Please check the URL.</p>'" />`;
+    } else {
+        preview.innerHTML = '';
+    }
+}
+
+// Update event pin image preview
+function updateEventPinImagePreview() {
+    const url = document.getElementById('eventPinImageUrl')?.value.trim();
+    const preview = document.getElementById('eventPinImagePreview');
+    
+    if (!preview) return;
+    
+    if (url) {
+        preview.innerHTML = `<div style="display: flex; align-items: center; gap: 0.75rem;">
+            <img src="${url}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #ff6b35; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" onerror="this.parentElement.innerHTML='<div style=\\'color: #f44336; font-size: 0.875rem;\\'>Failed to load image</div>'" />
+            <div style="font-size: 0.875rem; color: #737373;">This is how your event marker will appear on the map</div>
+        </div>`;
+    } else {
+        preview.innerHTML = '';
+    }
+}
+
+// Handle event image upload
+async function handleEventImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const statusDiv = document.getElementById('eventImageUploadStatus');
+    const fileInput = event.target;
+    
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+        statusDiv.innerHTML = '<span style="color: #f44336;">✗ Image too large (max 5MB)</span>';
+        fileInput.value = '';
+        return;
+    }
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        statusDiv.innerHTML = '<span style="color: #f44336;">✗ Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.</span>';
+        fileInput.value = '';
+        return;
+    }
+    
+    statusDiv.innerHTML = '<span style="color: #737373;">⏳ Uploading image...</span>';
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+        const response = await fetch('/api/upload-image', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.imageUrl) {
+            // Set the URL in the input field
+            document.getElementById('eventImageUrl').value = data.imageUrl;
+            updateEventImagePreview();
+            statusDiv.innerHTML = '<span style="color: #4caf50;">✓ Image uploaded successfully!</span>';
+            setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
+        } else {
+            statusDiv.innerHTML = `<span style="color: #f44336;">✗ ${data.error || 'Upload failed'}</span>`;
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        statusDiv.innerHTML = '<span style="color: #f44336;">✗ Failed to upload image</span>';
+    }
+    
+    // Reset file input
+    fileInput.value = '';
+}
+
+// Handle event pin image upload
+async function handleEventPinImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const statusDiv = document.getElementById('eventPinImageUploadStatus');
+    const fileInput = event.target;
+    
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+        statusDiv.innerHTML = '<span style="color: #f44336;">✗ Image too large (max 5MB)</span>';
+        fileInput.value = '';
+        return;
+    }
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        statusDiv.innerHTML = '<span style="color: #f44336;">✗ Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.</span>';
+        fileInput.value = '';
+        return;
+    }
+    
+    statusDiv.innerHTML = '<span style="color: #737373;">⏳ Uploading image...</span>';
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+        const response = await fetch('/api/upload-image', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.imageUrl) {
+            // Set the URL in the input field
+            document.getElementById('eventPinImageUrl').value = data.imageUrl;
+            updateEventPinImagePreview();
+            statusDiv.innerHTML = '<span style="color: #4caf50;">✓ Image uploaded successfully!</span>';
+            setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
+        } else {
+            statusDiv.innerHTML = `<span style="color: #f44336;">✗ ${data.error || 'Upload failed'}</span>`;
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        statusDiv.innerHTML = '<span style="color: #f44336;">✗ Failed to upload image</span>';
+    }
+    
+    // Reset file input
+    fileInput.value = '';
+}
+
+// Select event type (button group)
+function selectEventType(type) {
+    // Update hidden input
+    const input = document.getElementById('eventTypeInput');
+    if (input) {
+        input.value = type;
+    }
+    
+    // Update button states
+    document.querySelectorAll('.event-type-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.background = 'transparent';
+        btn.style.color = '#525252';
+        btn.style.boxShadow = 'none';
+    });
+    
+    const activeBtn = document.getElementById(`eventType${type.charAt(0).toUpperCase() + type.slice(1)}`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.style.background = 'rgba(23, 23, 23, 0.9)';
+        activeBtn.style.color = 'white';
+        activeBtn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+    }
+    
+    onEventTypeChange();
+}
+
+// Make function globally accessible
+window.selectEventType = selectEventType;
+
+// Handle event type change
+function onEventTypeChange() {
+    const eventType = document.getElementById('eventTypeInput')?.value || 'physical';
+    const locationSection = document.getElementById('locationSection');
+    const mapSection = document.getElementById('mapSection');
+    const joinUrlSection = document.getElementById('joinUrlSection');
+    const locationSelect = document.getElementById('eventLocationId');
+    const locationLabel = document.getElementById('locationLabel');
+    const locationHelp = document.getElementById('locationHelp');
+    const joinUrlLabel = document.getElementById('joinUrlLabel');
+    const joinUrlInput = document.getElementById('eventJoinUrl');
+    
+    if (eventType === 'digital') {
+        // Digital: location optional, no map, joinUrl required
+        locationSelect.removeAttribute('required');
+        locationLabel.innerHTML = 'Location (Optional)';
+        locationHelp.textContent = 'Optional: Select a location (city, county, state, or country) or leave blank for global';
+        mapSection.style.display = 'none';
+        joinUrlSection.style.display = 'block';
+        joinUrlLabel.textContent = 'Join URL *';
+        joinUrlInput.setAttribute('required', 'required');
+        // Clear coordinates
+        eventSelectedLat = null;
+        eventSelectedLng = null;
+        if (eventSelectedMarker) {
+            eventMap?.removeLayer(eventSelectedMarker);
+            eventSelectedMarker = null;
+        }
+        updateEventLocationText();
+    } else if (eventType === 'physical') {
+        // Physical: location required, map required, joinUrl optional
+        locationSelect.setAttribute('required', 'required');
+        locationLabel.innerHTML = 'Location *';
+        locationHelp.textContent = 'Select the location for your event (city, county, state, or country)';
+        mapSection.style.display = 'block';
+        joinUrlSection.style.display = 'none';
+        joinUrlInput.removeAttribute('required');
+    } else if (eventType === 'hybrid') {
+        // Hybrid: location required, map required, joinUrl required
+        locationSelect.setAttribute('required', 'required');
+        locationLabel.innerHTML = 'Location *';
+        locationHelp.textContent = 'Select the location for your event (city, county, state, or country)';
+        mapSection.style.display = 'block';
+        joinUrlSection.style.display = 'block';
+        joinUrlLabel.textContent = 'Join URL *';
+        joinUrlInput.setAttribute('required', 'required');
+    }
+}
+
+// Toggle NSFW switch
+function toggleNsfw() {
+    const checkbox = document.getElementById('eventIsNsfw');
+    if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+        onNsfwChange();
+    }
+}
+
+// Toggle RSVP list switch
+function toggleRsvpList() {
+    const checkbox = document.getElementById('eventShowRsvpList');
+    if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+    }
+}
+
+// Make toggle functions globally accessible
+window.toggleNsfw = toggleNsfw;
+window.toggleRsvpList = toggleRsvpList;
+
+// Handle NSFW checkbox change
+function onNsfwChange() {
+    const isNsfw = document.getElementById('eventIsNsfw').checked;
+    const contentRatingSection = document.getElementById('contentRatingSection');
+    const contentRatingSelect = document.getElementById('eventContentRating');
+    
+    if (isNsfw) {
+        contentRatingSection.style.display = 'block';
+        contentRatingSelect.setAttribute('required', 'required');
+    } else {
+        contentRatingSection.style.display = 'none';
+        contentRatingSelect.removeAttribute('required');
+        contentRatingSelect.value = 'general';
+    }
+}
+
+// Load locations for dropdown (all types: city, county, state, country)
+async function loadEventCities() {
+    try {
+        const response = await fetch('/api/map-locations');
+        const locations = await response.json();
+        
+        const select = document.getElementById('eventLocationId');
+        select.innerHTML = '<option value="">Select a location...</option>';
+        
+        // Group by location type
+        const cities = [];
+        const counties = [];
+        const states = [];
+        const countries = [];
+        
+        locations.forEach(loc => {
+            if (!loc.location_type) return;
+            const item = {
+                id: loc.id,
+                name: loc.name,
+                region_name: loc.region_name,
+                location_type: loc.location_type,
+                population: loc.population,
+                lat: loc.latitude,
+                lng: loc.longitude
+            };
+            
+            if (loc.location_type === 'city') cities.push(item);
+            else if (loc.location_type === 'county') counties.push(item);
+            else if (loc.location_type === 'state') states.push(item);
+            else if (loc.location_type === 'country') countries.push(item);
+        });
+        
+        // Sort each group
+        cities.sort((a, b) => (b.population || 0) - (a.population || 0));
+        counties.sort((a, b) => (b.population || 0) - (a.population || 0));
+        states.sort((a, b) => (b.population || 0) - (a.population || 0));
+        countries.sort((a, b) => (b.population || 0) - (a.population || 0));
+        
+        // Add optgroups
+        if (cities.length > 0) {
+            const cityGroup = document.createElement('optgroup');
+            cityGroup.label = 'Cities';
+            cities.forEach(loc => {
+                if (loc.lat && loc.lng) {
+                    const option = document.createElement('option');
+                    option.value = loc.id;
+                    option.textContent = `${loc.name}, ${loc.region_name}${loc.population ? ` (${loc.population.toLocaleString()})` : ''}`;
+                    option.dataset.lat = loc.lat;
+                    option.dataset.lng = loc.lng;
+                    option.dataset.type = 'city';
+                    cityGroup.appendChild(option);
+                }
+            });
+            select.appendChild(cityGroup);
+        }
+        
+        if (counties.length > 0) {
+            const countyGroup = document.createElement('optgroup');
+            countyGroup.label = 'Counties';
+            counties.forEach(loc => {
+                const option = document.createElement('option');
+                option.value = loc.id;
+                option.textContent = `${loc.name}${loc.region_name ? `, ${loc.region_name}` : ''}${loc.population ? ` (${loc.population.toLocaleString()})` : ''}`;
+                option.dataset.lat = loc.lat || null;
+                option.dataset.lng = loc.lng || null;
+                option.dataset.type = 'county';
+                countyGroup.appendChild(option);
+            });
+            select.appendChild(countyGroup);
+        }
+        
+        if (states.length > 0) {
+            const stateGroup = document.createElement('optgroup');
+            stateGroup.label = 'States/Regions';
+            states.forEach(loc => {
+                const option = document.createElement('option');
+                option.value = loc.id;
+                option.textContent = `${loc.name}${loc.population ? ` (${loc.population.toLocaleString()})` : ''}`;
+                option.dataset.lat = loc.lat || null;
+                option.dataset.lng = loc.lng || null;
+                option.dataset.type = 'state';
+                stateGroup.appendChild(option);
+            });
+            select.appendChild(stateGroup);
+        }
+        
+        if (countries.length > 0) {
+            const countryGroup = document.createElement('optgroup');
+            countryGroup.label = 'Countries';
+            countries.forEach(loc => {
+                const option = document.createElement('option');
+                option.value = loc.id;
+                option.textContent = `${loc.name}${loc.population ? ` (${loc.population.toLocaleString()})` : ''}`;
+                option.dataset.lat = loc.lat || null;
+                option.dataset.lng = loc.lng || null;
+                option.dataset.type = 'country';
+                countryGroup.appendChild(option);
+            });
+            select.appendChild(countryGroup);
+        }
+        
+        // Initialize map lazily - only when tab becomes visible
+        // Store the initialization function globally so it can be called when tab is switched
+        window.initEventMapIfNeeded = function() {
+            if (!eventMap && document.getElementById('eventsTab') && document.getElementById('eventsTab').classList.contains('active')) {
+                setTimeout(() => initEventMap(), 100);
+            } else if (eventMap) {
+                setTimeout(() => eventMap.invalidateSize(), 100);
+            }
+        };
+        
+        // Try to initialize if tab is already visible
+        setTimeout(() => {
+            if (window.initEventMapIfNeeded) window.initEventMapIfNeeded();
+        }, 500);
+    } catch (error) {
+        console.error('Failed to load cities:', error);
+    }
+}
+
+// Initialize map
+function initEventMap() {
+    // Check if map already exists
+    if (eventMap) {
+        eventMap.invalidateSize();
+        return;
+    }
+    
+    // Check if Leaflet is loaded
+    if (typeof L === 'undefined') {
+        console.error('Leaflet is not loaded');
+        return;
+    }
+    
+    const mapContainer = document.getElementById('eventMap');
+    if (!mapContainer) {
+        console.error('Map container not found');
+        return;
+    }
+    
+    // Initialize map
+    eventMap = L.map('eventMap').setView([39.8283, -98.5795], 4);
+    
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri',
+        maxZoom: 16
+    }).addTo(eventMap);
+    
+    // Ensure map size is correct after initialization
+    setTimeout(() => {
+        if (eventMap) eventMap.invalidateSize();
+    }, 200);
+    
+    // Handle map clicks
+    eventMap.on('click', function(e) {
+        eventSelectedLat = e.latlng.lat;
+        eventSelectedLng = e.latlng.lng;
+        
+        // Remove previous marker
+        if (eventSelectedMarker) {
+            eventMap.removeLayer(eventSelectedMarker);
+        }
+        
+        // Add new marker
+        eventSelectedMarker = L.marker([eventSelectedLat, eventSelectedLng], {
+            draggable: true,
+            icon: L.icon({
+                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34]
+            })
+        }).addTo(eventMap);
+        
+        // Allow dragging
+        eventSelectedMarker.on('dragend', function(e) {
+            const pos = eventSelectedMarker.getLatLng();
+            eventSelectedLat = pos.lat;
+            eventSelectedLng = pos.lng;
+            updateEventLocationText();
+        });
+        
+        updateEventLocationText();
+    });
+}
+
+// Update location text
+function updateEventLocationText() {
+    const locationDiv = document.getElementById('eventLocationSelected');
+    if (eventSelectedLat && eventSelectedLng) {
+        // Check if coordinates match city coordinates (using city as default)
+        const isUsingCityDefault = cityLat && cityLng && 
+                                   Math.abs(eventSelectedLat - cityLat) < 0.0001 && 
+                                   Math.abs(eventSelectedLng - cityLng) < 0.0001;
+        
+        if (isUsingCityDefault && (!eventSelectedMarker || eventSelectedMarker._latlng === null)) {
+            // Using city center as default
+            locationDiv.textContent = `📍 Using city center location (${eventSelectedLat.toFixed(6)}, ${eventSelectedLng.toFixed(6)})`;
+            locationDiv.style.color = '#737373';
+        } else {
+            // Custom location set
+            locationDiv.textContent = `📍 Location: ${eventSelectedLat.toFixed(6)}, ${eventSelectedLng.toFixed(6)}`;
+            locationDiv.style.color = '#0066cc';
+        }
+        locationDiv.style.display = 'block';
+    } else {
+        locationDiv.style.display = 'none';
+    }
+}
+
+// When city changes, center map on that city and show city marker
+function onEventCityChange() {
+    const select = document.getElementById('eventLocationId');
+    const selectedOption = select.options[select.selectedIndex];
+    
+    if (selectedOption.value && selectedOption.dataset.lat && selectedOption.dataset.lng) {
+        const lat = parseFloat(selectedOption.dataset.lat);
+        const lng = parseFloat(selectedOption.dataset.lng);
+        const cityName = selectedOption.textContent.split(' (')[0]; // Remove population from text
+        
+        // Store city coordinates as fallback
+        cityLat = lat;
+        cityLng = lng;
+        
+        // If no specific location is set yet, use city coordinates as default
+        if (!eventSelectedLat || !eventSelectedLng) {
+            eventSelectedLat = lat;
+            eventSelectedLng = lng;
+            updateEventLocationText();
+        }
+        
+        if (eventMap) {
+            // Zoom to city with better zoom level (12 is good for city-level)
+            eventMap.setView([lat, lng], 12);
+            
+            // Remove previous city marker if exists
+            if (cityMarker) {
+                eventMap.removeLayer(cityMarker);
+            }
+            
+            // Add city marker with custom icon (blue/cyan color to differentiate from event marker)
+            const cityIcon = L.divIcon({
+                className: 'city-selected-marker',
+                html: `<div style="width: 32px; height: 32px; border-radius: 50%; border: 3px solid #0066cc; background: #0066cc; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">📍</div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+            
+            cityMarker = L.marker([lat, lng], { icon: cityIcon, zIndexOffset: 1000 })
+                .bindPopup(`<strong>${cityName}</strong><br>City center`).addTo(eventMap);
+            
+            // Open popup briefly to show city
+            cityMarker.openPopup();
+            setTimeout(() => {
+                if (cityMarker) cityMarker.closePopup();
+            }, 2000);
+        }
+    } else {
+        // Remove city marker if no city selected
+        cityLat = null;
+        cityLng = null;
+        if (cityMarker) {
+            eventMap.removeLayer(cityMarker);
+            cityMarker = null;
+        }
+    }
+}
+
+// Geocode address and update map
+async function geocodeAddress() {
+    const addressInput = document.getElementById('eventAddress');
+    const address = addressInput.value.trim();
+    
+    if (!address) {
+        alert('Please enter an address');
+        return;
+    }
+    
+    const statusDiv = document.getElementById('eventLocationSelected');
+    statusDiv.style.color = '#737373';
+    statusDiv.textContent = 'Searching for address...';
+    statusDiv.style.display = 'block';
+    
+    try {
+        // Use Nominatim (OpenStreetMap) for geocoding
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
+            { 
+                headers: { 'User-Agent': 'SkyMap/1.0' }
+            }
+        );
+        
+        const data = await response.json();
+        
+        if (data.length > 0) {
+            const { lat, lon, display_name } = data[0];
+            const latitude = parseFloat(lat);
+            const longitude = parseFloat(lon);
+            
+            // Update map view
+            if (eventMap) {
+                eventMap.setView([latitude, longitude], 14);
+                
+                // Remove previous event marker if exists
+                if (eventSelectedMarker) {
+                    eventMap.removeLayer(eventSelectedMarker);
+                }
+                
+                // Add marker at geocoded location
+                eventSelectedMarker = L.marker([latitude, longitude], {
+                    draggable: true,
+                    icon: L.icon({
+                        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34]
+                    })
+                }).addTo(eventMap);
+                
+                // Allow dragging
+                eventSelectedMarker.on('dragend', function(e) {
+                    const pos = eventSelectedMarker.getLatLng();
+                    eventSelectedLat = pos.lat;
+                    eventSelectedLng = pos.lng;
+                    updateEventLocationText();
+                });
+            }
+            
+            // Update coordinates
+            eventSelectedLat = latitude;
+            eventSelectedLng = longitude;
+            
+            // Update location text
+            statusDiv.style.color = '#0066cc';
+            statusDiv.textContent = `📍 ${display_name}`;
+            
+            // Clear address input after successful geocoding
+            addressInput.value = '';
+        } else {
+            statusDiv.style.color = '#f44336';
+            statusDiv.textContent = 'Address not found. Please try a different address or click on the map.';
+        }
+    } catch (error) {
+        console.error('Geocoding error:', error);
+        statusDiv.style.color = '#f44336';
+        statusDiv.textContent = 'Failed to geocode address. Please try again or click on the map.';
+    }
+}
+
+// Setup address input Enter key handler
+function setupAddressInput() {
+    const addressInput = document.getElementById('eventAddress');
+    if (addressInput && !addressInput.dataset.listenerAdded) {
+        addressInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                geocodeAddress();
+            }
+        });
+        addressInput.dataset.listenerAdded = 'true';
+    }
+}
+
+// Store original submit function
+let originalSubmitEvent;
+
+// Load interests for tag selector
+async function loadInterests() {
+    try {
+        const response = await fetch('/api/interests/public');
+        allInterests = await response.json();
+        console.log('Loaded interests:', allInterests.length);
+    } catch (error) {
+        console.error('Failed to load interests:', error);
+    }
+}
+
+// Render selected tags
+function renderSelectedTags() {
+    const container = document.getElementById('selectedTags');
+    if (!container) return;
+    
+    if (selectedTags.length === 0) {
+        container.innerHTML = '<span style="color: #737373; font-size: 0.875rem;">No tags selected</span>';
+        return;
+    }
+    
+    container.innerHTML = selectedTags.map((tag, idx) => `
+        <div style="display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 0.75rem; background: rgba(23, 23, 23, 0.9); color: white; border-radius: 8px; font-size: 0.875rem;">
+            <span>${escapeHtml(tag.name)}</span>
+            <button type="button" onclick="removeTag(${idx})" style="background: none; border: none; color: white; cursor: pointer; padding: 0; display: flex; align-items: center; opacity: 0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+    `).join('');
+}
+
+// Remove tag
+function removeTag(idx) {
+    selectedTags.splice(idx, 1);
+    renderSelectedTags();
+}
+
+window.removeTag = removeTag;
+
+// Show tag dropdown
+function showTagDropdown(matches) {
+    const dropdown = document.getElementById('tagDropdown');
+    if (!dropdown) return;
+    
+    if (matches.length === 0) {
+        dropdown.style.display = 'none';
+        return;
+    }
+    
+    dropdown.innerHTML = matches.map(interest => `
+        <div onclick="addInterestTag(${interest.id}, '${escapeHtml(interest.key)}', '${escapeHtml(interest.name)}')" style="padding: 0.75rem 1rem; cursor: pointer; font-size: 0.875rem; color: #525252; border-bottom: 1px solid rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center;" onmouseover="this.style.background='rgba(23, 23, 23, 0.05)'" onmouseout="this.style.background='transparent'">
+            <div>
+                <div style="font-weight: 500;">${escapeHtml(interest.name)}</div>
+                <div style="font-size: 0.8125rem; color: #737373;">${escapeHtml(interest.category_name)}</div>
+            </div>
+        </div>
+    `).join('');
+    dropdown.style.display = 'block';
+}
+
+// Hide tag dropdown
+function hideTagDropdown() {
+    const dropdown = document.getElementById('tagDropdown');
+    if (dropdown) dropdown.style.display = 'none';
+}
+
+// Add interest tag
+function addInterestTag(interestId, key, name) {
+    if (selectedTags.length >= MAX_TAGS) {
+        alert(`Maximum ${MAX_TAGS} tags allowed`);
+        return;
+    }
+    
+    if (selectedTags.some(t => t.interestId === interestId)) {
+        return;
+    }
+    
+    selectedTags.push({ interestId, key, name, isCustom: false });
+    renderSelectedTags();
+    document.getElementById('tagSearch').value = '';
+    hideTagDropdown();
+}
+
+window.addInterestTag = addInterestTag;
+
+// Add custom tag
+function addCustomTag(tagText) {
+    if (selectedTags.length >= MAX_TAGS) {
+        alert(`Maximum ${MAX_TAGS} tags allowed`);
+        return;
+    }
+    
+    const normalized = tagText.toLowerCase().trim();
+    if (!normalized || normalized.length < 2) return;
+    
+    if (selectedTags.some(t => t.name.toLowerCase() === normalized)) {
+        return;
+    }
+    
+    selectedTags.push({ interestId: null, key: null, name: tagText.trim(), isCustom: true });
+    renderSelectedTags();
+    document.getElementById('tagSearch').value = '';
+    hideTagDropdown();
+}
+
+// Setup tag search
+function setupTagSearch() {
+    const input = document.getElementById('tagSearch');
+    if (!input) return;
+    
+    input.addEventListener('input', (e) => {
+        const value = e.target.value.toLowerCase().trim();
+        if (!value) {
+            hideTagDropdown();
+            return;
+        }
+        
+        const matches = allInterests.filter(interest => 
+            interest.name.toLowerCase().includes(value) ||
+            interest.key.toLowerCase().includes(value) ||
+            (interest.aliases && interest.aliases.some(a => a.toLowerCase().includes(value)))
+        ).slice(0, 10);
+        
+        showTagDropdown(matches);
+    });
+    
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const value = input.value.trim();
+            if (value) {
+                addCustomTag(value);
+            }
+        }
+    });
+    
+    input.addEventListener('blur', () => setTimeout(hideTagDropdown, 200));
+}
+
+// Submit event (create or update)
+async function submitEvent(e) {
+    e.preventDefault();
+    
+    const form = document.getElementById('eventForm');
+    const isEditMode = form.dataset.editMode === 'true';
+    const eventId = form.dataset.eventId;
+    
+    if (isEditMode && eventId) {
+        // Update existing event
+        await updateEvent(e, eventId);
+        return;
+    }
+    
+    // Otherwise create new event (continue with original logic)
+    
+    const title = document.getElementById('eventTitle').value.trim();
+    const description = document.getElementById('eventDescription').value.trim();
+    const eventType = document.getElementById('eventTypeInput')?.value || 'physical';
+    const locationId = document.getElementById('eventLocationId').value;
+    const startTime = document.getElementById('eventStartTime').value;
+    const endTime = document.getElementById('eventEndTime').value;
+    const joinUrl = document.getElementById('eventJoinUrl')?.value.trim() || null;
+    const websiteUrl = document.getElementById('eventWebsiteUrl')?.value.trim() || null;
+    const linksText = document.getElementById('eventLinks')?.value.trim() || null;
+    const isNsfw = document.getElementById('eventIsNsfw')?.checked || false;
+    const contentRating = document.getElementById('eventContentRating')?.value || 'general';
+    const showRsvpList = document.getElementById('eventShowRsvpList')?.checked !== false;
+    
+    // Parse links JSON
+    let links = null;
+    if (linksText) {
+        try {
+            links = JSON.parse(linksText);
+        } catch (error) {
+            showEventMessage('Invalid links JSON format. Please check your syntax.', 'error');
+            return;
+        }
+    }
+    
+    // Validation based on event type
+    if (eventType === 'physical' || eventType === 'hybrid') {
+        if (!locationId) {
+            showEventMessage('Please select a location', 'error');
+            return;
+        }
+        
+        // Use location coordinates as fallback if no specific location is set
+        if (!eventSelectedLat || !eventSelectedLng) {
+            const select = document.getElementById('eventLocationId');
+            const selectedOption = select.options[select.selectedIndex];
+            if (selectedOption.dataset.lat && selectedOption.dataset.lng) {
+                eventSelectedLat = parseFloat(selectedOption.dataset.lat);
+                eventSelectedLng = parseFloat(selectedOption.dataset.lng);
+            } else if (cityLat && cityLng) {
+                // Use city coordinates as default
+                eventSelectedLat = cityLat;
+                eventSelectedLng = cityLng;
+            } else {
+                showEventMessage('Please set a location on the map', 'error');
+                return;
+            }
+        }
+    } else if (eventType === 'digital') {
+        // Digital: location optional, coordinates must be null
+        eventSelectedLat = null;
+        eventSelectedLng = null;
+        if (!joinUrl) {
+            showEventMessage('Digital events require a join URL', 'error');
+            return;
+        }
+    }
+    
+    // Hybrid requires joinUrl
+    if (eventType === 'hybrid' && !joinUrl) {
+        showEventMessage('Hybrid events require a join URL', 'error');
+        return;
+    }
+    
+    // Validate dates
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const now = new Date();
+    
+    const twoMonthsFromNow = new Date(now);
+    twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+    
+    if (start > twoMonthsFromNow) {
+        showEventMessage('Events can only be created up to 2 months in advance', 'error');
+        return;
+    }
+    
+    const durationHours = (end - start) / (1000 * 60 * 60);
+    if (durationHours > 24) {
+        showEventMessage('Events cannot exceed 24 hours', 'error');
+        return;
+    }
+    
+    if (start >= end) {
+        showEventMessage('Start time must be before end time', 'error');
+        return;
+    }
+    
+    const submitBtn = document.getElementById('eventSubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating...';
+    
+    try {
+        // Convert datetime-local to ISO string
+        const startISO = new Date(startTime).toISOString();
+        const endISO = new Date(endTime).toISOString();
+        
+        // Get image URLs if user has permissions
+        const imageUrlInput = document.getElementById('eventImageUrl');
+        const imageUrl = imageUrlInput ? imageUrlInput.value.trim() : null;
+        
+        const pinImageUrlInput = document.getElementById('eventPinImageUrl');
+        const pinImageUrl = pinImageUrlInput ? pinImageUrlInput.value.trim() : null;
+        
+        const response = await fetch('/api/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title,
+                description: description || null,
+                eventType,
+                locationId: locationId ? parseInt(locationId) : null,
+                latitude: eventSelectedLat,
+                longitude: eventSelectedLng,
+                startTime: startISO,
+                endTime: endISO,
+                imageUrl: imageUrl || null,
+                pinImageUrl: pinImageUrl || null,
+                joinUrl: joinUrl || null,
+                websiteUrl: websiteUrl || null,
+                links: links,
+                isNsfw: isNsfw,
+                contentRating: isNsfw ? contentRating : 'general',
+                tags: selectedTags,
+                showRsvpList: showRsvpList
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.event && data.eventId) {
+            showEventMessage(`Event created successfully! Event ID: ${data.eventId}. Redirecting...`, 'success');
+            // Reload my events to show the new one
+            await loadMyEvents();
+            // Redirect to event page (when it's created)
+            setTimeout(() => {
+                window.location.href = `/event/${data.eventId}`;
+            }, 2000);
+        } else {
+            showEventMessage(data.error || 'Failed to create event', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Create Event';
+        }
+    } catch (error) {
+        console.error('Error creating event:', error);
+        showEventMessage('Failed to create event. Please try again.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Event';
+    }
+}
+
+function showEventMessage(text, type) {
+    const messageDiv = document.getElementById('eventMessage');
+    const color = type === 'error' ? 'red' : 'green';
+    messageDiv.innerHTML = `<div style="color: ${color}; font-size: 0.875rem;">${text}</div>`;
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Make functions globally accessible
+window.handleEventImageUpload = handleEventImageUpload;
+window.handleEventPinImageUpload = handleEventPinImageUpload;
+window.onEventCityChange = onEventCityChange;
+window.onNsfwChange = onNsfwChange;
+window.geocodeAddress = geocodeAddress;
+window.openVisibilityInfoModal = openVisibilityInfoModal;
+window.closeVisibilityInfoModal = closeVisibilityInfoModal;
+window.editEvent = editEvent;
+window.deleteEvent = deleteEvent;
+window.submitEvent = submitEvent;
+
+// Initialize on load
+// Load user's events
+async function loadMyEvents() {
+    try {
+        const response = await fetch('/api/events/my-events');
+        if (!response.ok) {
+            console.error('Failed to load my events');
+            return;
+        }
+        
+        const data = await response.json();
+        const events = data.events || [];
+        const eventsList = document.getElementById('myEventsList');
+        
+        if (events.length === 0) {
+            eventsList.innerHTML = '<p style="color: #737373; font-size: 0.875rem;">You haven\'t created any events yet.</p>';
+            return;
+        }
+        
+        // Group events by status
+        const now = new Date();
+        const upcoming = [];
+        const live = [];
+        const past = [];
+        
+        // Debug: log all event IDs to see what we're getting
+        console.log('All event IDs:', events.map(e => e.event_id));
+        
+        events.forEach(event => {
+            const startTime = new Date(event.start_time);
+            const endTime = new Date(event.end_time);
+            
+            // Debug logging for the problematic event (check both formats)
+            const eventIdMatch = event.event_id === 'UBVA5N' || 
+                                event.event_id === 'EVT-UBVA5N' ||
+                                event.event_id?.includes('UBVA5N');
+            
+            if (eventIdMatch) {
+                console.log('Event UBVA5N status check:', {
+                    event_id: event.event_id,
+                    start_time_db: event.start_time,
+                    end_time_db: event.end_time,
+                    startTime_iso: startTime.toISOString(),
+                    endTime_iso: endTime.toISOString(),
+                    now_iso: now.toISOString(),
+                    startTime_local: startTime.toLocaleString(),
+                    endTime_local: endTime.toLocaleString(),
+                    now_local: now.toLocaleString(),
+                    startTimeMs: startTime.getTime(),
+                    endTimeMs: endTime.getTime(),
+                    nowMs: now.getTime(),
+                    endTimeLessThanNow: endTime.getTime() < now.getTime(),
+                    timeDiffMs: now.getTime() - endTime.getTime(),
+                    timeDiffSeconds: (now.getTime() - endTime.getTime()) / 1000,
+                    timeDiffHours: (now.getTime() - endTime.getTime()) / (1000 * 60 * 60),
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                });
+            }
+            
+            // Use strict comparison - if end_time has passed (even by 1ms), event is past
+            // Check if end_time is in the past
+            const endTimeMs = endTime.getTime();
+            const nowMs = now.getTime();
+            const startTimeMs = startTime.getTime();
+            
+            if (endTimeMs < nowMs) {
+                // Event has ended
+                past.push(event);
+            } else if (startTimeMs <= nowMs && endTimeMs >= nowMs) {
+                // Event is currently happening (started but not ended)
+                live.push(event);
+            } else {
+                // Event hasn't started yet
+                upcoming.push(event);
+            }
+        });
+        
+        let html = '';
+        
+        if (live.length > 0) {
+            const liveIcon = '<svg width="12" height="12" viewBox="0 0 12 12" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;"><circle cx="6" cy="6" r="6" fill="#f44336"/></svg>';
+            html += `<div style="margin-bottom: 2rem;"><h4 style="margin-bottom: 1rem; font-weight: 600; color: #171717; font-size: 1rem; display: flex; align-items: center;">${liveIcon} Live Events</h4>`;
+            live.forEach(event => {
+                html += renderEventCard(event, false, true);
+            });
+            html += '</div>';
+        }
+        
+        if (upcoming.length > 0) {
+            html += '<div style="margin-bottom: 2rem;"><h4 style="margin-bottom: 1rem; font-weight: 600; color: #171717; font-size: 1rem;">Upcoming Events</h4>';
+            upcoming.forEach(event => {
+                html += renderEventCard(event, false, false);
+            });
+            html += '</div>';
+        }
+        
+        if (past.length > 0) {
+            html += '<div><h4 style="margin-bottom: 1rem; font-weight: 600; color: #171717; font-size: 1rem;">Past Events</h4>';
+            past.forEach(event => {
+                html += renderEventCard(event, true, false);
+            });
+            html += '</div>';
+        }
+        
+        eventsList.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading my events:', error);
+    }
+}
+
+// Render event card
+function renderEventCard(event, isPast, isLive) {
+    const start = new Date(event.start_time);
+    const end = new Date(event.end_time);
+    const now = new Date();
+    const hasStarted = start <= now;
+    const canEdit = !hasStarted && !isPast;
+    
+    const dateStr = start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const timeStr = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+    const endTimeStr = end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+    
+    // Check if start and end are on different days
+    const startDateOnly = start.toDateString();
+    const endDateOnly = end.toDateString();
+    const isMultiDay = startDateOnly !== endDateOnly;
+    
+    // Format end date if different from start date
+    const endDateStr = isMultiDay 
+        ? end.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+        : '';
+    
+    const locationStr = event.location_name || `${event.city_name}, ${event.region_name}`;
+    const rsvpCount = event.rsvp_count || 0;
+    
+    let statusBadge;
+    if (isPast) {
+        statusBadge = '<span style="background: #737373; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500;">Ended</span>';
+    } else if (isLive) {
+        const liveIcon = '<svg width="8" height="8" viewBox="0 0 8 8" style="display: inline-block; vertical-align: middle; margin-right: 0.25rem;"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>';
+        statusBadge = `<span style="background: #f44336; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500; animation: pulse 2s infinite; display: inline-flex; align-items: center;">${liveIcon} LIVE</span>`;
+    } else {
+        statusBadge = '<span style="background: #4caf50; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500;">Upcoming</span>';
+    }
+    
+    const editButton = canEdit 
+        ? `<button onclick="editEvent('${event.event_id}')" style="padding: 0.5rem 1rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 500; margin-right: 0.5rem;">Edit</button>`
+        : '';
+    
+    const deleteButton = `<button onclick="deleteEvent('${event.event_id}', '${escapeHtml(event.title)}')" style="padding: 0.5rem 1rem; background: rgba(244, 67, 54, 0.9); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 500;">Delete</button>`;
+    
+    return `
+        <div id="event-card-${event.event_id}" style="background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 12px; padding: 1.25rem; ${isPast ? 'opacity: 0.8;' : ''}">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                <h4 style="margin: 0; font-weight: 600; color: #171717; font-size: 1.125rem;">${escapeHtml(event.title)}</h4>
+                ${statusBadge}
+            </div>
+            <div style="color: #737373; font-size: 0.875rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; color: #737373;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>${dateStr} at ${timeStr} - ${isMultiDay ? endDateStr + ' at ' : ''}${endTimeStr}</span>
+            </div>
+            <div style="color: #737373; font-size: 0.875rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; color: #737373;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span>${escapeHtml(locationStr)}</span>
+            </div>
+            ${event.description ? `<div style="color: #525252; font-size: 0.875rem; margin-bottom: 0.75rem; white-space: pre-wrap;">${escapeHtml(event.description)}</div>` : ''}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                <div style="color: #737373; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; color: #737373;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>${rsvpCount} RSVP${rsvpCount === 1 ? '' : 's'}</span>
+                </div>
+                <a href="/event/${event.event_id}" style="color: #0066cc; text-decoration: none; font-size: 0.875rem; font-weight: 500; margin-right: 0.75rem;">View Details →</a>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(0, 0, 0, 0.1);">
+                ${editButton}
+                ${deleteButton}
+            </div>
+        </div>
+    `;
+}
+
+// Simple HTML escape function
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Edit event
+async function editEvent(eventId) {
+    try {
+        // Fetch event details
+        const response = await fetch(`/api/events/${eventId}`);
+        if (!response.ok) {
+            alert('Failed to load event details');
+            return;
+        }
+        
+        const event = await response.json();
+        
+        // Check if event has started
+        const startTime = new Date(event.start_time);
+        if (startTime <= new Date()) {
+            alert('Cannot edit event after it has started');
+            return;
+        }
+        
+        // Populate form with event data
+        document.getElementById('eventTitle').value = event.title;
+        document.getElementById('eventDescription').value = event.description || '';
+        
+        // Set event type
+        const eventType = event.event_type || 'physical';
+        selectEventType(eventType); // Update button group and form visibility
+        
+        // Set location
+        document.getElementById('eventLocationId').value = event.location_id || '';
+        
+        // Set date/time (convert ISO to datetime-local format)
+        const start = new Date(event.start_time);
+        const end = new Date(event.end_time);
+        const startLocal = new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        const endLocal = new Date(end.getTime() - end.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        document.getElementById('eventStartTime').value = startLocal;
+        document.getElementById('eventEndTime').value = endLocal;
+        
+        // Set coordinates (if physical/hybrid)
+        if (event.latitude && event.longitude) {
+            eventSelectedLat = parseFloat(event.latitude);
+            eventSelectedLng = parseFloat(event.longitude);
+        } else {
+            eventSelectedLat = null;
+            eventSelectedLng = null;
+        }
+        
+        // Set new fields
+        const joinUrlInput = document.getElementById('eventJoinUrl');
+        const websiteUrlInput = document.getElementById('eventWebsiteUrl');
+        const linksInput = document.getElementById('eventLinks');
+        if (isNsfwInput) {
+            isNsfwInput.checked = event.is_nsfw || false;
+            onNsfwChange();
+        }
+        if (contentRatingInput) contentRatingInput.value = event.content_rating || 'general';
+        if (showRsvpListInput) showRsvpListInput.checked = event.show_rsvp_list !== false;
+        
+        // Set images if user has permissions
+        const imageUrlInput = document.getElementById('eventImageUrl');
+        const pinImageUrlInput = document.getElementById('eventPinImageUrl');
+        if (imageUrlInput) imageUrlInput.value = event.image_url || '';
+        if (pinImageUrlInput) pinImageUrlInput.value = event.pin_image_url || '';
+        if (imageUrlInput && event.image_url) updateEventImagePreview();
+        if (pinImageUrlInput && event.pin_image_url) updateEventPinImagePreview();
+        
+        // Update map marker (only for physical/hybrid)
+        if (eventMap && eventSelectedLat && eventSelectedLng && (eventType === 'physical' || eventType === 'hybrid')) {
+            if (eventSelectedMarker) {
+                eventMap.removeLayer(eventSelectedMarker);
+            }
+            eventSelectedMarker = L.marker([eventSelectedLat, eventSelectedLng], {
+                draggable: true,
+                icon: L.icon({
+                    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34]
+                })
+            }).addTo(eventMap);
+            
+            eventMap.setView([eventSelectedLat, eventSelectedLng], 13);
+            
+            eventSelectedMarker.on('dragend', function(e) {
+                const pos = eventSelectedMarker.getLatLng();
+                eventSelectedLat = pos.lat;
+                eventSelectedLng = pos.lng;
+                updateEventLocationText();
+            });
+            
+            updateEventLocationText();
+        }
+        
+        // Load cities and trigger city change
+        await loadEventCities();
+        onEventCityChange();
+        
+        // Update form to edit mode
+        const form = document.getElementById('eventForm');
+        const submitBtn = document.getElementById('eventSubmitBtn');
+        submitBtn.textContent = 'Update Event';
+        form.dataset.editMode = 'true';
+        form.dataset.eventId = eventId;
+        
+        // Scroll to form
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+    } catch (error) {
+        console.error('Error loading event for edit:', error);
+        alert('Failed to load event details');
+    }
+}
+
+// Delete event
+async function deleteEvent(eventId, eventTitle) {
+    if (!confirm(`Are you sure you want to delete "${eventTitle}"? This action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/events/${eventId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            const data = await response.json();
+            alert(data.error || 'Failed to delete event');
+            return;
+        }
+        
+        // Remove event card from UI
+        const eventCard = document.getElementById(`event-card-${eventId}`);
+        if (eventCard) {
+            eventCard.style.transition = 'opacity 0.3s';
+            eventCard.style.opacity = '0';
+            setTimeout(() => {
+                eventCard.remove();
+                // Reload events to refresh the list
+                loadMyEvents();
+            }, 300);
+        } else {
+            // If card not found, just reload
+            await loadMyEvents();
+        }
+        
+    } catch (error) {
+        console.error('Error deleting event:', error);
+        alert('Failed to delete event');
+    }
+}
+
+// Update event function
+async function updateEvent(e, eventId) {
+    e.preventDefault();
+    
+    const title = document.getElementById('eventTitle').value.trim();
+    const description = document.getElementById('eventDescription').value.trim();
+    const eventType = document.getElementById('eventTypeInput')?.value || 'physical';
+    const locationId = document.getElementById('eventLocationId').value;
+    const startTime = document.getElementById('eventStartTime').value;
+    const endTime = document.getElementById('eventEndTime').value;
+    const joinUrl = document.getElementById('eventJoinUrl')?.value.trim() || null;
+    const websiteUrl = document.getElementById('eventWebsiteUrl')?.value.trim() || null;
+    const linksText = document.getElementById('eventLinks')?.value.trim() || null;
+    const isNsfw = document.getElementById('eventIsNsfw')?.checked || false;
+    const contentRating = document.getElementById('eventContentRating')?.value || 'general';
+    const showRsvpList = document.getElementById('eventShowRsvpList')?.checked !== false;
+    
+    // Parse links JSON
+    let links = null;
+    if (linksText) {
+        try {
+            links = JSON.parse(linksText);
+        } catch (error) {
+            showEventMessage('Invalid links JSON format. Please check your syntax.', 'error');
+            return;
+        }
+    }
+    
+    // Validation based on event type
+    if (eventType === 'physical' || eventType === 'hybrid') {
+        if (!locationId) {
+            showEventMessage('Please select a location', 'error');
+            return;
+        }
+        
+        if (!eventSelectedLat || !eventSelectedLng) {
+            const select = document.getElementById('eventLocationId');
+            const selectedOption = select.options[select.selectedIndex];
+            if (selectedOption.dataset.lat && selectedOption.dataset.lng) {
+                eventSelectedLat = parseFloat(selectedOption.dataset.lat);
+                eventSelectedLng = parseFloat(selectedOption.dataset.lng);
+            } else if (cityLat && cityLng) {
+                eventSelectedLat = cityLat;
+                eventSelectedLng = cityLng;
+            } else {
+                showEventMessage('Please set a location on the map', 'error');
+                return;
+            }
+        }
+    } else if (eventType === 'digital') {
+        eventSelectedLat = null;
+        eventSelectedLng = null;
+    }
+    
+    // Hybrid requires joinUrl
+    if (eventType === 'hybrid' && !joinUrl) {
+        showEventMessage('Hybrid events require a join URL', 'error');
+        return;
+    }
+    
+    // Validate dates
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const now = new Date();
+    
+    const twoMonthsFromNow = new Date(now);
+    twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+    
+    if (start > twoMonthsFromNow) {
+        showEventMessage('Events can only be created up to 2 months in advance', 'error');
+        return;
+    }
+    
+    if (start >= end) {
+        showEventMessage('Start time must be before end time', 'error');
+        return;
+    }
+    
+    const durationHours = (end - start) / (1000 * 60 * 60);
+    if (durationHours > 24) {
+        showEventMessage('Events cannot exceed 24 hours', 'error');
+        return;
+    }
+    
+    const submitBtn = document.getElementById('eventSubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Updating...';
+    
+    try {
+        const startISO = new Date(startTime).toISOString();
+        const endISO = new Date(endTime).toISOString();
+        
+        // Get image URLs if user has permissions
+        const imageUrlInput = document.getElementById('eventImageUrl');
+        const imageUrl = imageUrlInput ? imageUrlInput.value.trim() : null;
+        
+        const pinImageUrlInput = document.getElementById('eventPinImageUrl');
+        const pinImageUrl = pinImageUrlInput ? pinImageUrlInput.value.trim() : null;
+        
+        const response = await fetch(`/api/events/${eventId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title,
+                description: description || null,
+                startTime: startISO,
+                endTime: endISO,
+                latitude: eventSelectedLat,
+                longitude: eventSelectedLng,
+                imageUrl: imageUrl || null,
+                pinImageUrl: pinImageUrl || null,
+                joinUrl: joinUrl || null,
+                websiteUrl: websiteUrl || null,
+                links: links,
+                isNsfw: isNsfw,
+                contentRating: isNsfw ? contentRating : 'general',
+                tags: selectedTags,
+                showRsvpList: showRsvpList
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.event) {
+            showEventMessage('Event updated successfully!', 'success');
+            
+            // Reset form
+            const form = document.getElementById('eventForm');
+            form.reset();
+            form.dataset.editMode = 'false';
+            form.dataset.eventId = '';
+            submitBtn.textContent = 'Create Event';
+            
+            // Clear map marker
+            if (eventSelectedMarker) {
+                eventMap.removeLayer(eventSelectedMarker);
+                eventSelectedMarker = null;
+            }
+            eventSelectedLat = null;
+            eventSelectedLng = null;
+            updateEventLocationText();
+            
+            // Reload events
+            await loadMyEvents();
+            
+            // Scroll to top
+            setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 1000);
+        } else {
+            showEventMessage(data.error || 'Failed to update event', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Update Event';
+        }
+    } catch (error) {
+        console.error('Error updating event:', error);
+        showEventMessage('Failed to update event. Please try again.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Update Event';
+    }
+}
+
+// Open visibility info modal
+function openVisibilityInfoModal() {
+    const modal = document.getElementById('visibilityInfoModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+// Close visibility info modal
+function closeVisibilityInfoModal() {
+    const modal = document.getElementById('visibilityInfoModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('visibilityInfoModal');
+    if (event.target === modal) {
+        closeVisibilityInfoModal();
+    }
+}
+
+// Category autocomplete
+let allCategories = [];
+
+</script>
+
+<!-- Visibility Info Modal -->
+<div id="visibilityInfoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 16px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+        <div style="padding: 2rem; position: relative;">
+            <button onclick="closeVisibilityInfoModal()" style="position: absolute; top: 1.5rem; right: 1.5rem; background: transparent; border: none; cursor: pointer; padding: 0.5rem; color: #737373; border-radius: 6px; transition: all 0.15s ease;" onmouseover="this.style.background='rgba(0,0,0,0.05)'" onmouseout="this.style.background='transparent'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            
+            <h2 style="margin: 0 0 1.5rem 0; font-size: 1.5rem; font-weight: 600; color: #171717;">Event Visibility & Competition</h2>
+            
+            <div style="color: #525252; line-height: 1.6;">
+                <p style="margin: 0 0 1.5rem 0; font-size: 0.9375rem;">
+                    Events compete for visibility on the map based on their location type and RSVP popularity. Only the top events in each location are shown at any given time.
+                </p>
+                
+                <h3 style="margin: 0 0 0.75rem 0; font-size: 1.125rem; font-weight: 600; color: #171717;">How It Works</h3>
+                <ol style="margin: 0 0 1.5rem 0; padding-left: 1.5rem; font-size: 0.9375rem;">
+                    <li style="margin-bottom: 0.5rem;">Events are scored using a hybrid formula (see <strong>"Scoring Formula"</strong> below)</li>
+                    <li style="margin-bottom: 0.5rem;">Events compete within their location (city, county, state, or country)</li>
+                    <li style="margin-bottom: 0.5rem;">Only the top-scoring events up to the location's limit are visible on the map. Scores are recalculated every 5 minutes, so events can shift in and out of visibility as RSVPs change.</li>
+                    <li style="margin-bottom: 0.5rem;">RSVPs created before the event starts count fully; RSVPs after start count 0.5× weight</li>
+                </ol>
+                
+                <h3 style="margin: 0 0 0.75rem 0; font-size: 1.125rem; font-weight: 600; color: #171717;">Visibility Limits by Location Type</h3>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600; color: #171717;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>Cities</h4>
+                    <div style="background: rgba(59, 130, 246, 0.08); padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.875rem;">
+                        <div style="margin-bottom: 0.25rem;"><strong>&lt; 50K population:</strong> 2 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>50K - 100K:</strong> 5 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>100K - 250K:</strong> 10 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>250K - 500K:</strong> 15 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>500K - 1M:</strong> 20 events</div>
+                        <div><strong>1M+:</strong> 25 events</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600; color: #171717;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line><line x1="10" y1="3" x2="10" y2="21"></line></svg>Counties</h4>
+                    <div style="background: rgba(115, 115, 115, 0.08); padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.875rem;">
+                        <div style="margin-bottom: 0.25rem;"><strong>&lt; 100K population:</strong> 5 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>100K - 250K:</strong> 10 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>250K - 500K:</strong> 15 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>500K - 1M:</strong> 20 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>1M - 2.5M:</strong> 30 events</div>
+                        <div><strong>2.5M+:</strong> 40 events</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600; color: #171717;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>States/Regions</h4>
+                    <div style="background: rgba(34, 197, 94, 0.08); padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.875rem;">
+                        <div style="margin-bottom: 0.25rem;"><strong>&lt; 500K population:</strong> 10 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>500K - 1M:</strong> 20 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>1M - 5M:</strong> 30 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>5M - 10M:</strong> 40 events</div>
+                        <div><strong>10M+:</strong> 50 events</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600; color: #171717;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>Countries</h4>
+                    <div style="background: rgba(168, 85, 247, 0.08); padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.875rem;">
+                        <div style="margin-bottom: 0.25rem;"><strong>&lt; 10M population:</strong> 30 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>10M - 50M:</strong> 50 events</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>50M - 100M:</strong> 75 events</div>
+                        <div><strong>100M+:</strong> 100 events</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600; color: #171717;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>Digital Events</h4>
+                    <div style="background: rgba(34, 197, 94, 0.08); padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.875rem;">
+                        <div>Digital events compete <strong>globally</strong> (no location): <strong>50 events</strong> visible worldwide</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600; color: #171717;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>Hybrid Events</h4>
+                    <div style="background: rgba(168, 85, 247, 0.08); padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.875rem;">
+                        <div>Hybrid events compete in their <strong>physical location</strong> using the same limits as physical events (based on location type and population)</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin: 0 0 0.75rem 0; font-size: 1.125rem; font-weight: 600; color: #171717;">Scoring Formula</h3>
+                <div style="background: rgba(23, 23, 23, 0.05); padding: 1rem; border-radius: 8px; font-size: 0.875rem; margin-bottom: 1.5rem;">
+                    <div style="margin-bottom: 0.75rem; font-weight: 600;">Step 1: Calculate Weighted RSVPs</div>
+                    <div style="margin-left: 1rem; margin-bottom: 0.75rem; font-family: monospace; font-size: 0.8125rem;">
+                        Weighted RSVPs = RSVPs<sub>before</sub> + (RSVPs<sub>after</sub> × 0.5)
+                    </div>
+                    <div style="color: #737373; font-size: 0.8125rem; margin-left: 1rem; margin-bottom: 1rem;">
+                        RSVPs before event start count fully; RSVPs after start count 0.5×
+                    </div>
+                    
+                    <div style="margin-bottom: 0.75rem; font-weight: 600;">Step 2: Calculate Density Score</div>
+                    <div style="margin-left: 1rem; margin-bottom: 0.75rem; font-family: monospace; font-size: 0.8125rem;">
+                        Density = Weighted RSVPs ÷ √Duration
+                    </div>
+                    <div style="color: #737373; font-size: 0.8125rem; margin-left: 1rem; margin-bottom: 1rem;">
+                        Using square root means longer events aren't penalized as harshly
+                    </div>
+                    
+                    <div style="margin-bottom: 0.75rem; font-weight: 600;">Step 3: Calculate Final Score</div>
+                    <div style="margin-left: 1rem; margin-bottom: 0.75rem; font-family: monospace; font-size: 0.8125rem;">
+                        Score = (Absolute Weight × Weighted RSVPs) + (Density Weight × Density)
+                    </div>
+                    <div style="color: #737373; font-size: 0.8125rem; margin-left: 1rem; margin-bottom: 0.5rem;">
+                        Default weights: <strong>30% absolute</strong> + <strong>70% density</strong>
+                    </div>
+                    <div style="color: #737373; font-size: 0.8125rem; margin-left: 1rem;">
+                        This balances total popularity (absolute) with engagement intensity (density)
+                    </div>
+                </div>
+                
+                <div style="background: rgba(115, 115, 115, 0.08); padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.875rem; margin-bottom: 1.5rem;">
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">Example:</div>
+                    <div style="margin-bottom: 0.25rem;">Event A: 20 RSVPs (all before start), 4 hours</div>
+                    <div style="margin-left: 1rem; margin-bottom: 0.5rem; font-size: 0.8125rem; color: #737373;">
+                        Weighted = 20, Density = 20 ÷ √4 = 10, Score = (0.3 × 20) + (0.7 × 10) = <strong>13.0</strong>
+                    </div>
+                    <div style="margin-bottom: 0.25rem;">Event B: 15 RSVPs (all before start), 1 hour</div>
+                    <div style="margin-left: 1rem; margin-bottom: 0.75rem; font-size: 0.8125rem; color: #737373;">
+                        Weighted = 15, Density = 15 ÷ √1 = 15, Score = (0.3 × 15) + (0.7 × 15) = <strong>15.0</strong>
+                    </div>
+                    <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(115, 115, 115, 0.2); font-size: 0.8125rem; color: #525252; line-height: 1.5;">
+                        <strong>Why square root?</strong> This approach prevents long events from dominating the map and blocking other events from visibility, while allowing popular shorter events to also show up. The balance tries to not penalize long events too much for being long while giving a variety of event lengths a fair chance. The logic will be tuned over time based on usage patterns.
+                    </div>
+                </div>
+                
+                <div style="background: rgba(255, 152, 0, 0.1); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 8px; padding: 1rem; margin-top: 1.5rem;">
+                    <p style="margin: 0; font-size: 0.875rem; color: #525252;">
+                        <strong style="color: #ff9800; display: inline-flex; align-items: center; gap: 0.375rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>Tip:</strong> To maximize visibility, encourage early RSVPs and keep your event duration reasonable. Events with high RSVP density (many RSVPs in a short time) rank higher.
+                    </p>
+                </div>
+            </div>
+            
+            <button onclick="closeVisibilityInfoModal()" style="margin-top: 1.5rem; width: 100%; padding: 0.875rem 1rem; background: rgba(23, 23, 23, 0.9); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9375rem; font-weight: 500; transition: all 0.15s ease;" onmouseover="this.style.background='rgba(23, 23, 23, 1)'" onmouseout="this.style.background='rgba(23, 23, 23, 0.9)'">
+                Got it
+            </button>
+        </div>
+    </div>
+</div>

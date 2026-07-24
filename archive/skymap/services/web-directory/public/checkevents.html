@@ -1,0 +1,162 @@
+<div class="section">
+    <div id="myEventsSection" style="display: none;">
+        <div class="section-title">My Events</div>
+        <div id="myEventsAuth" style="display: none;">
+            <p class="section-desc">Login to view and manage your events</p>
+        </div>
+        <div id="myEventsContent" style="display: none;">
+            <p class="section-desc">Your created events (current and past).</p>
+            <div id="myEventsListCheck"></div>
+        </div>
+        <div class="section-title" style="margin-top: 2rem;">Check Other Users</div>
+    </div>
+    <div id="checkEventsSection">
+        <!-- Title removed - modal header already shows "Check Events" -->
+    </div>
+    <p class="section-desc" id="checkEventsDescription">View and manage your events or view another user's events. Log in for easier management and additional features.</p>
+    
+    <div class="search-grid">
+        <input type="text" id="handleInputEvents" placeholder="username.bsky.social" />
+        <button onclick="checkUserEvents()">Check</button>
+    </div>
+    <div id="userEvents"></div>
+</div>
+
+<script>
+async function checkUserEvents() {
+    const handle = document.getElementById('handleInputEvents').value.trim();
+    if (!handle) return;
+    
+    const userEventsDiv = document.getElementById('userEvents');
+    userEventsDiv.innerHTML = '<div class="loading">Loading...</div>';
+    
+    try {
+        // First resolve handle to DID
+        const resolveResponse = await fetch(`https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(handle)}`);
+        if (!resolveResponse.ok) {
+            throw new Error('User not found');
+        }
+        const resolveData = await resolveResponse.json();
+        const did = resolveData.did;
+        
+        // Then fetch events - use the my-events endpoint with DID parameter
+        const response = await fetch(`/api/events/my-events?did=${encodeURIComponent(did)}`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to fetch events');
+        }
+        
+        const events = data.events || [];
+        const count = events.length;
+        
+        let html = `<div style="margin-bottom: 1.5rem;"><h3 style="font-size: 1rem; font-weight: 500; margin-bottom: 0.75rem;">Events (${count})</h3>`;
+        if (count === 0) {
+            html += '<div class="empty-state">No events found</div>';
+        } else {
+            html += events.map(event => {
+                const startTime = new Date(event.start_time);
+                const endTime = new Date(event.end_time);
+                const now = new Date();
+                
+                let status = 'upcoming';
+                if (endTime < now) {
+                    status = 'past';
+                } else if (startTime <= now && endTime >= now) {
+                    status = 'live';
+                }
+                
+                const startDate = startTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                return `
+                    <div class="user-label" style="cursor: pointer;" onclick="window.location.href='/event/${event.event_id}'">
+                        <div>
+                            <h4>${escapeHtml(event.title)}</h4>
+                            <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">
+                                ${startDate} • ${status.charAt(0).toUpperCase() + status.slice(1)} • ${event.rsvp_count || 0} RSVPs
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        html += '</div>';
+        
+        userEventsDiv.innerHTML = html;
+    } catch (error) {
+        userEventsDiv.innerHTML = `<div class="empty-state">Error: ${error.message}</div>`;
+    }
+}
+
+async function loadMyEventsCheck() {
+    const descEl = document.getElementById('checkEventsDescription');
+    if (!isAuthenticated) {
+        document.getElementById('myEventsSection').style.display = 'none';
+        document.getElementById('checkEventsSection').style.display = 'block';
+        document.getElementById('myEventsAuth').style.display = 'block';
+        document.getElementById('myEventsContent').style.display = 'none';
+        if (descEl) {
+            descEl.textContent = 'View and manage your events or view another user\'s events. Log in for easier management and additional features.';
+        }
+        return;
+    }
+    
+    document.getElementById('myEventsSection').style.display = 'block';
+    document.getElementById('checkEventsSection').style.display = 'none';
+    if (descEl) {
+        descEl.textContent = 'View events for any Bluesky user';
+    }
+    
+    try {
+        const response = await fetch('/api/events/my-events', {
+            credentials: 'same-origin'
+        });
+        const data = await response.json();
+        
+        const events = data.events || [];
+        document.getElementById('myEventsAuth').style.display = 'none';
+        document.getElementById('myEventsContent').style.display = 'block';
+        
+        const list = document.getElementById('myEventsListCheck');
+        if (events.length === 0) {
+            list.innerHTML = '<div class="empty-state">No events yet. Create your first event!</div>';
+        } else {
+            const now = new Date();
+            list.innerHTML = events.map(event => {
+                const startTime = new Date(event.start_time);
+                const endTime = new Date(event.end_time);
+                
+                let status = 'upcoming';
+                if (endTime < now) {
+                    status = 'past';
+                } else if (startTime <= now && endTime >= now) {
+                    status = 'live';
+                }
+                
+                const startDate = startTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                return `
+                    <div class="user-label" style="cursor: pointer;" onclick="window.location.href='/event/${event.event_id}'">
+                        <div>
+                            <h4>${escapeHtml(event.title)}</h4>
+                            <div style="font-size: 0.875rem; color: #737373; margin-top: 0.25rem;">
+                                ${startDate} • ${status.charAt(0).toUpperCase() + status.slice(1)} • ${event.rsvp_count || 0} RSVPs
+                            </div>
+                        </div>
+                        <button class="btn-sm btn-secondary" onclick="event.stopPropagation(); window.location.href='/event/${event.event_id}'">View</button>
+                    </div>
+                `;
+            }).join('');
+        }
+    } catch (error) {
+        console.error('Failed to load events:', error);
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>

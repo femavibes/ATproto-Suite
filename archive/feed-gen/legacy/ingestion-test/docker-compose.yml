@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ingestion-test-db
+    environment:
+      POSTGRES_DB: firehose_test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema.sql:/schema.sql
+    command: postgres -c shared_buffers=256MB -c max_connections=100
+
+volumes:
+  postgres_data:

@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Feed Settings - ATlas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/styles.css">
+    <style>
+        body {
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            
+            }
+        h1 { margin-bottom: 0.5rem; }
+        .subtitle { color: #666; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .auth-section, .settings-section {
+            background: rgba(255,255,255,0.85);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(4px);
+        }
+        .setting-group {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid #eee;
+        }
+        .setting-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .setting-label {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .setting-desc {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+        .setting-keys {
+            font-size: 0.7rem;
+            color: #999;
+            margin-bottom: 0.5rem;
+            font-family: monospace;
+            line-height: 1.5;
+        }
+        .setting-keys span { color: #777; font-family: system-ui, sans-serif; }
+        .feed-tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+            font-weight: 500;
+            margin-left: 0.4rem;
+            vertical-align: middle;
+        }
+        .tag-both { background: #e0e0e0; color: #333; }
+        .tag-scored { background: #dbeafe; color: #1e40af; }
+        .tag-chrono { background: #a7f3d0; color: #064e3b; }
+        select, input[type="number"] {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 0.95rem;
+            background: white;
+        }
+        input { padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; width: 100%; margin-bottom: 0.5rem; }
+        button {
+            padding: 0.75rem 1.5rem;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        button:hover { background: #333; }
+        .save-btn { width: 100%; margin-top: 1rem; }
+        .section-header { font-size: 0.85rem; font-weight: 600; color: #555; margin-top: 1.25rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .status { margin-top: 0.75rem; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .hidden { display: none; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: #333; text-decoration: none; font-size: 0.9rem; }
+        .back-link:hover { text-decoration: underline; }
+        .advanced-setting.hidden { display: none; }
+        .advanced-tag { display: inline-block; font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 500; margin-left: 0.4rem; vertical-align: middle; background: #fecaca; color: #991b1b; }
+        .advanced-toggle { background: rgba(255,255,255,0.85); border: 1px solid #ddd; color: #555; font-size: 0.8rem; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; margin-bottom: 1rem; display: block; width: auto; backdrop-filter: blur(4px); }
+        .advanced-toggle:hover { background: rgba(255,255,255,1); color: #333; border-color: #bbb; }
+        .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0; }
+        .toggle-row + .toggle-row { border-top: 1px solid #f0f0f0; }
+        .toggle-label { font-size:0.9rem; }
+        .toggle-switch { position:relative; width:36px; height:20px; flex-shrink:0; }
+        .toggle-switch input { opacity:0; width:0; height:0; }
+        .toggle-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; border-radius:20px; transition:0.2s; }
+        .toggle-slider:before { position:absolute; content:""; height:14px; width:14px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.2s; }
+        .toggle-switch input:checked + .toggle-slider { background:#166534; }
+        .toggle-switch input:checked + .toggle-slider:before { transform:translateX(16px); }
+        .feed-tab-btn.active { color:#333 !important; border-bottom-color:#333 !important; }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">Back to ATlas</a>
+    <div style="background:#fef2f2;border:2px solid #f87171;border-radius:8px;padding:1.25rem;margin-bottom:1.5rem;text-align:center;">
+        <h2 style="color:#991b1b;margin:0 0 0.5rem 0;font-size:1.1rem;">⚠️ LEGACY PAGE — DO NOT USE</h2>
+        <p style="color:#666;margin:0 0 0.75rem 0;font-size:0.88rem;">This settings page is outdated. Please use the new settings page instead.</p>
+        <a href="https://nearyou.atls.city/" style="display:inline-block;padding:0.6rem 1.5rem;background:#333;color:white;text-decoration:none;border-radius:6px;font-size:0.9rem;font-weight:500;">Go to Near You Settings →</a>
+    </div>
+    <h1>Near You Feed Settings</h1>
+    <p class="subtitle">Customize how the Near You feeds work for you. These settings apply to both the chronological and For You feeds unless marked otherwise.</p>
+    <button class="advanced-toggle" onclick="document.querySelectorAll('.advanced-setting').forEach(el => el.classList.toggle('hidden')); this.textContent = this.textContent.includes('Show') ? 'Hide advanced settings' : 'Show advanced settings'">Show advanced settings</button>
+
+    <div id="authSection" class="auth-section">
+        <p>Log in to manage your feed settings.</p>
+        <br>
+        <input type="text" id="handle" placeholder="Bluesky handle (e.g. you.bsky.social)">
+        <button onclick="oauthLoginFS()" id="oauthBtnFS" style="margin-top:0.5rem;">Sign in with Bluesky</button>
+        <div style="font-size:0.8rem;color:#888;margin-top:0.3rem;">You'll be redirected to your Bluesky server to authorize.</div>
+        <div style="display:flex;align-items:center;gap:0.5rem;margin:0.75rem 0;color:#999;font-size:0.8rem;"><div style="flex:1;border-top:1px solid #ddd;"></div>or<div style="flex:1;border-top:1px solid #ddd;"></div></div>
+        <button onclick="document.getElementById('apFallbackFS').style.display=document.getElementById('apFallbackFS').style.display==='block'?'none':'block'" style="background:none;border:1px solid #ddd;border-radius:6px;padding:0.4rem 0.8rem;font-size:0.8rem;color:#666;cursor:pointer;">Use an app password instead</button>
+        <div id="apFallbackFS" style="display:none;margin-top:0.75rem;">
+            <input type="text" id="apHandleFS" placeholder="Bluesky handle">
+            <input type="password" id="password" placeholder="App password">
+            <button onclick="login()">Log In</button>
+        </div>
+        <div id="loginError" class="status error hidden"></div>
+    </div>
+
+    <div id="settingsSection" class="hidden">
+        <div id="feedTabBar" style="display:flex;gap:0;margin-bottom:1rem;border-bottom:2px solid #ddd;">
+            <button class="feed-tab-btn active" onclick="switchFeedTab('global')" id="ftab-global" style="padding:0.5rem 1rem;border:none;background:none;font-size:0.9rem;cursor:pointer;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px;font-weight:500;">Global</button>
+            <button class="feed-tab-btn" onclick="switchFeedTab('near-you-live')" id="ftab-near-you-live" style="padding:0.5rem 1rem;border:none;background:none;font-size:0.9rem;cursor:pointer;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px;font-weight:500;">Live</button>
+            <button class="feed-tab-btn" onclick="switchFeedTab('near-you-video')" id="ftab-near-you-video" style="padding:0.5rem 1rem;border:none;background:none;font-size:0.9rem;cursor:pointer;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px;font-weight:500;">Video</button>
+            <button class="feed-tab-btn" onclick="switchFeedTab('near-you')" id="ftab-near-you" style="padding:0.5rem 1rem;border:none;background:none;font-size:0.9rem;cursor:pointer;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px;font-weight:500;">Near You</button>
+        </div>
+        <div id="feedTabInfo" style="font-size:0.78rem;color:#1e40af;margin-bottom:0.75rem;padding:0.4rem 0.6rem;background:rgba(30,64,175,0.05);border-radius:4px;">Global settings apply to all feeds. Switch to a specific feed to override individual settings for that feed only.</div>
+        <div class="section-header">Location</div>
+        <div style="font-size:0.75rem;color:#888;margin-bottom:0.5rem;">All settings on this page take effect instantly. Your primary city is managed on your <a href="/" style="color:#1e40af;">ATlas profile</a> and may take up to 5 minutes to update in the feed due to caching.</div>
+        <div class="settings-section">
+        <div class="setting-group">
+            <div class="setting-label">Which Cities <span class="feed-tag tag-both">All feeds</span></div>
+            <div class="setting-desc">Choose which of your tagged cities to include in the feed. "Primary city" uses only your main city. "All my cities" includes every city you've tagged in ATlas (up to 3).</div>
+            <div class="setting-keys"><span>User:</span> city_scope | <span>Admin default:</span> default_city_scope</div>
+            <select id="cityScope">
+                <option value="">System default</option>
+                <option value="primary">Primary city</option>
+                <option value="all">All my tagged cities</option>
+            </select>
+        </div>
+
+        <div class="setting-group">
+            <div class="setting-label">Include Nearby Cities <span class="feed-tag tag-both">All feeds</span></div>
+            <div class="setting-desc">When enabled, the feed also includes posts from cities near your tagged cities (within the system radius, currently ~250km). When disabled, you only see posts from your exact tagged cities.</div>
+            <div class="setting-keys"><span>User:</span> include_nearby | <span>Admin default:</span> default_include_nearby</div>
+            <select id="includeNearby">
+                <option value="">System default</option>
+                <option value="yes">Yes, include nearby cities</option>
+                <option value="no">No, only my tagged cities</option>
+            </select>
+        </div>
+
+        <div class="setting-group">
+            <div class="setting-label">Custom Radius <span class="feed-tag tag-both">All feeds</span></div>
+            <div class="setting-desc">Override the maximum distance for nearby city posts. Posts from cities beyond this radius will be excluded (scored feeds) or not included in the candidate set (chronological). Leave blank to use the system default. Your tagged cities are always included regardless of radius.</div>
+            <div class="setting-keys"><span>User:</span> cutoff_radius_km | <span>Admin default:</span> default_cutoff_radius_km</div>
+            <select id="customRadiusKm">
+                <option value="">System default</option>
+                <option value="25">25 km</option>
+                <option value="50">50 km</option>
+                <option value="75">75 km</option>
+                <option value="100">100 km</option>
+                <option value="150">150 km</option>
+                <option value="200">200 km</option>
+                <option value="250">250 km (max)</option>
+            </select>
+        </div>
+
+        </div>
+
+        <div class="section-header">Post Sources & Hashtags</div>
+        <div class="settings-section">
+        <div class="setting-group">
+            <div class="setting-label">Post Sources <span class="feed-tag tag-both">All feeds</span></div>
+            <div class="setting-desc">Control which types of posts appear in your feed. Each source represents a different way posts are matched to your area.</div>
+            <div id="sourceTogglesContainer" style="margin-top:0.3rem;">
+                <div class="toggle-row"><div style="flex:1;"><span class="toggle-label">ATlas Users</span><div style="font-size:0.7rem;color:#888;line-height:1.3;">Posts from people who tagged their city in ATlas.</div></div><label class="toggle-switch"><input type="checkbox" id="sourceAtlasUsers" class="source-toggle-cb" data-key="source_atlas_users"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><div style="flex:1;"><span class="toggle-label">Hashtag Authors</span><div style="font-size:0.7rem;color:#888;line-height:1.3;">Accounts that consistently use city hashtags. City placement earned via rolling 30-day hashtag count.</div></div><label class="toggle-switch"><input type="checkbox" id="sourceHashtagAuthors" class="source-toggle-cb" data-key="source_hashtag_authors"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><div style="flex:1;"><span class="toggle-label">Follow Graph</span><div style="font-size:0.7rem;color:#888;line-height:1.3;">Accounts placed in a city based on follower network concentration among ATlas users.</div></div><label class="toggle-switch"><input type="checkbox" id="sourceFollowGraph" class="source-toggle-cb" data-key="source_follow_graph"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><div style="flex:1;"><span class="toggle-label">Hashtag Posts</span><div style="font-size:0.7rem;color:#888;line-height:1.3;">Individual posts matching a city hashtag. One-off matches from anyone — may be less accurate.</div></div><label class="toggle-switch"><input type="checkbox" id="sourceHashtagPosts" class="source-toggle-cb" data-key="source_hashtag_posts"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><div style="flex:1;"><span class="toggle-label">Community Surfaced</span><div style="font-size:0.7rem;color:#888;line-height:1.3;">Posts pulled in because many local ATlas users engaged with them (liked, reposted, replied).</div></div><label class="toggle-switch"><input type="checkbox" id="sourceCommunitySurfaced" class="source-toggle-cb" data-key="source_community_surfaced"><span class="toggle-slider"></span></label></div>
+            </div>
+        </div>
+
+        <div class="setting-group advanced-setting hidden">
+            <div class="setting-label">Max Hashtag Count <span class="feed-tag tag-chrono">Chronological</span> <span class="advanced-tag">Advanced</span></div>
+            <div class="setting-desc">Filters out hashtag-matched posts that use too many hashtags. Posts from ATlas users are not affected. City hashtags mapped to the same city are grouped and counted as 1 (up to the group limit).</div>
+            <div class="setting-keys"><span>User:</span> max_hashtag_count | <span>Admin default:</span> default_max_hashtag_count</div>
+            <select id="maxHashtagCount">
+                <option value="">System default</option>
+                <option value="0">No limit</option>
+                <option value="1">1 hashtag max</option>
+                <option value="2">2 hashtags max</option>
+                <option value="3">3 hashtags max</option>
+                <option value="4">4 hashtags max</option>
+                <option value="5">5 hashtags max</option>
+                <option value="6">6 hashtags max</option>
+                <option value="7">7 hashtags max</option>
+                <option value="8">8 hashtags max</option>
+                <option value="9">9 hashtags max</option>
+                <option value="10">10 hashtags max</option>
+                <option value="15">15 hashtags max</option>
+            </select>
+        </div>
+
+        <div class="setting-group advanced-setting hidden">
+            <div class="setting-label">City Hashtag Group Limit <span class="feed-tag tag-chrono">Chronological</span> <span class="advanced-tag">Advanced</span></div>
+            <div class="setting-desc">When counting hashtags, multiple hashtags mapped to the same city (e.g. #nyc #manhattan #bigapple all map to New York) are grouped and count as 1. This setting controls how many city hashtags get grouped before additional ones start adding to the count. Set to 0 to disable grouping entirely.</div>
+            <div class="setting-keys"><span>User:</span> hashtag_city_group_limit | <span>Admin default:</span> default_hashtag_city_group_limit</div>
+            <select id="hashtagCityGroupLimit">
+                <option value="">System default</option>
+                <option value="0">0 (no grouping)</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+
+        </div>
+
+        <div class="section-header">Content Filters</div>
+        <div class="settings-section">
+        <div class="setting-group">
+            <div class="setting-label">Show My Posts <span class="feed-tag tag-both">All feeds</span></div>
+            <div class="setting-desc">Whether your own posts appear when you browse the feed. Hiding them can make the feed feel more like a discovery tool since you already know what you posted.</div>
+            <div class="setting-keys"><span>User:</span> self_post_visibility | <span>Admin default:</span> default_self_post_visibility</div>
+            <select id="selfPostVisibility">
+                <option value="">System default</option>
+                <option value="show">Show my posts</option>
+                <option value="hide">Hide my posts</option>
+            </select>
+        </div>
+
+        <div class="setting-group">
+            <div class="setting-label">Content Types <span class="feed-tag tag-both">All feeds</span></div>
+            <div class="setting-desc">Choose which types of content appear in your feed. Toggle off any type to hide it.</div>
+            <div class="setting-keys"><span>User:</span> media_types | <span>Admin default:</span> default_media_types</div>
+            <div id="mediaTypesDefault" style="font-size:0.75rem;color:#1e40af;margin-bottom:0.4rem;"></div>
+            <div id="mediaTypesContainer" style="margin-top:0.3rem;">
+                <div class="toggle-row"><span class="toggle-label">Text posts</span><label class="toggle-switch"><input type="checkbox" value="0" class="media-type-cb"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><span class="toggle-label">Images</span><label class="toggle-switch"><input type="checkbox" value="1" class="media-type-cb"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><span class="toggle-label">Video</span><label class="toggle-switch"><input type="checkbox" value="2" class="media-type-cb"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><span class="toggle-label">GIFs</span><label class="toggle-switch"><input type="checkbox" value="3" class="media-type-cb"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><span class="toggle-label">Link cards</span><label class="toggle-switch"><input type="checkbox" value="4" class="media-type-cb"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><span class="toggle-label">Quote posts</span><label class="toggle-switch"><input type="checkbox" value="5" class="media-type-cb"><span class="toggle-slider"></span></label></div>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <div class="setting-label">Minimum Engagement <span class="feed-tag tag-both">All feeds</span></div>
+            <div class="setting-desc">Sets a minimum like count for posts to appear in your feed. Higher values filter out posts with less engagement, which can reduce noise but may hide new posts that haven't had time to get likes yet.</div>
+            <div class="setting-keys"><span>User:</span> min_engagement | <span>Admin default:</span> default_min_engagement</div>
+            <select id="minEngagement">
+                <option value="">System default</option>
+                <option value="0">No minimum</option>
+                <option value="1">1+ likes</option>
+                <option value="2">2+ likes</option>
+                <option value="3">3+ likes</option>
+                <option value="4">4+ likes</option>
+                <option value="5">5+ likes</option>
+                <option value="6">6+ likes</option>
+                <option value="7">7+ likes</option>
+                <option value="8">8+ likes</option>
+                <option value="9">9+ likes</option>
+                <option value="10">10+ likes</option>
+            </select>
+        </div>
+
+        <div class="setting-group scored-only">
+            <div class="setting-label">No Alt Text Penalty <span class="feed-tag tag-scored">Scored feeds</span></div>
+            <div class="setting-desc">Controls how much image posts without alt text are demoted in the For You feed. Your setting overrides the system default. Setting this to "Hide completely" will remove all image posts that lack alt text descriptions from your For You feed.</div>
+            <div class="setting-keys"><span>User:</span> alt_text_penalty | <span>Admin default:</span> default_alt_text_penalty</div>
+            <select id="altTextPenalty">
+                <option value="">System default</option>
+                <option value="1">None (1.0)</option>
+                <option value="0.9">0.9x penalty</option>
+                <option value="0.8">0.8x penalty (moderate)</option>
+                <option value="0.7">0.7x penalty</option>
+                <option value="0.6">0.6x penalty</option>
+                <option value="0.5">0.5x penalty (strict)</option>
+                <option value="0.4">0.4x penalty</option>
+                <option value="0.3">0.3x penalty</option>
+                <option value="0.2">0.2x penalty (very strict)</option>
+                <option value="0.1">0.1x penalty</option>
+                <option value="0">Hide posts without alt text (0.0)</option>
+            </select>
+        </div>
+
+        </div>
+
+        <div class="section-header">Topic Filters</div>
+        <div class="settings-section">
+        <div class="setting-group">
+            <div class="setting-label">Hide Topics <span class="feed-tag tag-both">All feeds</span></div>
+            <div class="setting-desc">Hide posts related to specific topics. This filters out posts from accounts categorized under these topics and posts whose content matches topic keywords. Changes take effect on your next feed refresh.</div>
+            <div class="setting-keys"><span>User:</span> hidden_interests</div>
+            <div id="topicFiltersContainer" style="margin-top:0.3rem;"><span style="font-size:0.8rem;color:#999;">Loading...</span></div>
+        </div>
+        </div>
+
+        <div class="section-header">Personalization</div>
+        <div class="settings-section">
+        <div class="setting-group">
+            <div class="setting-label">Interest Learning <span class="feed-tag tag-scored">Scored feeds</span></div>
+            <div class="setting-desc">When enabled, the feed learns your interests from your likes over time. Posts matching topics you frequently like get a small boost, and topics you consistently skip get slightly deprioritized. This never overrides your explicit topic settings above.</div>
+            <div class="setting-keys"><span>User:</span> inferred_interests_enabled | <span>Admin default:</span> default_inferred_interests_enabled</div>
+            <select id="inferredInterestsEnabled">
+                <option value="">System default (On)</option>
+                <option value="true">On</option>
+                <option value="false">Off</option>
+            </select>
+        </div>
+        </div>
+
+        <div class="section-header scored-only">Scoring Weights</div>
+        <div class="settings-section scored-only">
+        <div class="setting-group scored-only">
+            <div class="setting-label">Like Weight <span class="feed-tag tag-scored">Scored feeds</span></div>
+            <div class="setting-desc">How much likes contribute to a post's score. Higher values mean posts with more likes rank higher. Set to 0 to ignore likes entirely.</div>
+            <div class="setting-keys"><span>User:</span> like_weight | <span>Admin default:</span> default_like_weight</div>
+            <select id="likeWeight">
+                <option value="">System default (1.0)</option>
+                <option value="0">Off (0.0)</option>
+                <option value="0.5">Low (0.5x)</option>
+                <option value="1">Normal (1.0x)</option>
+                <option value="2">High (2.0x)</option>
+            </select>
+        </div>
+
+        <div class="setting-group scored-only">
+            <div class="setting-label">Repost Weight <span class="feed-tag tag-scored">Scored feeds</span></div>
+            <div class="setting-desc">How much reposts contribute to a post's score. By default reposts are ignored (0x). Enable this if you want reposted content to rank higher.</div>
+            <div class="setting-keys"><span>User:</span> repost_weight | <span>Admin default:</span> default_repost_weight</div>
+            <select id="repostWeight">
+                <option value="">System default (0)</option>
+                <option value="0">Off (0.0)</option>
+                <option value="0.5">Low (0.5x)</option>
+                <option value="1">Normal (1.0x)</option>
+                <option value="2">High (2.0x)</option>
+            </select>
+        </div>
+
+        <div class="setting-group scored-only">
+            <div class="setting-label">Reply Weight <span class="feed-tag tag-scored">Scored feeds</span></div>
+            <div class="setting-desc">How much replies contribute to a post's score. By default replies are ignored (0x). Enable this if you want posts with lots of discussion to rank higher.</div>
+            <div class="setting-keys"><span>User:</span> reply_weight | <span>Admin default:</span> default_reply_weight</div>
+            <select id="replyWeight">
+                <option value="">System default (0)</option>
+                <option value="0">Off (0.0)</option>
+                <option value="0.5">Low (0.5x)</option>
+                <option value="1">Normal (1.0x)</option>
+                <option value="2">High (2.0x)</option>
+            </select>
+        </div>
+
+        <div class="setting-group scored-only">
+            <div class="setting-label">Freshness Preference <span class="feed-tag tag-scored">Scored feeds</span></div>
+            <div class="setting-desc">Controls how quickly posts lose ranking power as they age in the For You feed. "Recent" heavily favors posts from the last few hours. "Balanced" is the default middle ground. "Relaxed" gives older posts more staying power, useful if you check the feed less frequently. This does not affect the chronological feed which always sorts by time.</div>
+            <div class="setting-keys"><span>User:</span> freshness_halflife | <span>Admin default:</span> default_freshness_halflife</div>
+            <select id="freshnessPreference">
+                <option value="">System default</option>
+                <option value="fresh">Recent (6h)</option>
+                <option value="today">Balanced (24h)</option>
+                <option value="catchup">Relaxed (48h)</option>
+            </select>
+        </div>
+
+        <div class="setting-group advanced-setting hidden scored-only">
+            <div class="setting-label">Freshness Half-Life (Hours) <span class="feed-tag tag-scored">Scored feeds</span> <span class="advanced-tag">Advanced</span></div>
+            <div class="setting-desc">Direct control over the freshness half-life in hours. This overrides the preset above. The half-life is the number of hours until a post's freshness score drops to roughly 50%.</div>
+            <div class="setting-keys"><span>User:</span> freshness_halflife | <span>Admin default:</span> default_freshness_halflife</div>
+            <select id="freshnessHalflifeAdvanced">
+                <option value="">Use preset above</option>
+                <option value="3">3 hours</option>
+                <option value="6">6 hours</option>
+                <option value="8">8 hours</option>
+                <option value="12">12 hours</option>
+                <option value="18">18 hours</option>
+                <option value="24">24 hours</option>
+                <option value="36">36 hours</option>
+                <option value="48">48 hours</option>
+                <option value="72">72 hours</option>
+            </select>
+        </div>
+
+        <div class="setting-group advanced-setting hidden scored-only">
+            <div class="setting-label">Freshness Exponent <span class="feed-tag tag-scored">Scored feeds</span> <span class="advanced-tag">Advanced</span></div>
+            <div class="setting-desc">Controls the shape of the decay curve. Lower values = gradual steady decay. Higher values = posts hold value longer when young, then drop sharply around the half-life.</div>
+            <div class="setting-keys"><span>User:</span> freshness_exponent | <span>Admin default:</span> default_freshness_exponent</div>
+            <select id="freshnessExponent">
+                <option value="">System default</option>
+                <option value="0.5">0.5 (very gradual)</option>
+                <option value="0.75">0.75</option>
+                <option value="1">1.0 (linear decay)</option>
+                <option value="1.25">1.25</option>
+                <option value="1.5">1.5 (default)</option>
+                <option value="1.75">1.75</option>
+                <option value="2">2.0 (sharp)</option>
+                <option value="2.5">2.5</option>
+                <option value="3">3.0 (very sharp)</option>
+            </select>
+        </div>
+
+        <div class="advanced-setting hidden scored-only" style="background:rgba(255,255,255,0.85);padding:1rem 1.25rem;border-radius:8px;margin-bottom:1rem;margin-top:-0.5rem;backdrop-filter:blur(4px);">
+            <div style="font-size:0.82rem;font-weight:500;margin-bottom:0.5rem;">Freshness Decay Preview</div>
+            <canvas id="userFreshnessCanvas" style="width:100%;height:auto;"></canvas>
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#888;margin-top:0.25rem;"><span>0h</span><span>12h</span><span>24h</span><span>36h</span><span>48h</span><span>60h</span><span>72h</span></div>
+        </div>
+
+        </div>
+
+        <div class="section-header scored-only">Social Boosts</div>
+        <div class="settings-section scored-only">
+        <div class="setting-group scored-only">
+            <div class="setting-label">Mutual Boost <span class="feed-tag tag-scored">Scored feeds</span></div>
+            <div class="setting-desc">Controls how much posts from people you mutually follow are boosted in the For You feed. Mutuals are people you follow who also follow you back. A higher value means their posts rank higher relative to posts from people you don't follow. Set to "Off" to disable the boost entirely. If your following boost is set higher than this, the higher value is used (no double dipping).</div>
+            <div class="setting-keys"><span>User:</span> mutual_boost_multiplier | <span>Admin default:</span> default_mutual_boost_multiplier</div>
+            <select id="mutualBoostOverride">
+                <option value="">System default (1.5x)</option>
+                <option value="1">Off (no boost)</option>
+                <option value="1.3">Slight boost (1.3x)</option>
+                <option value="1.5">Normal boost (1.5x)</option>
+                <option value="2">Strong boost (2x)</option>
+                <option value="3">Very strong boost (3x)</option>
+            </select>
+        </div>
+
+        <div class="setting-group scored-only">
+            <div class="setting-label">Following Boost <span class="feed-tag tag-scored">Scored feeds</span></div>
+            <div class="setting-desc">Controls how much posts from people you follow (one-way, not mutual) are boosted in the For You feed. This is separate from the mutual boost above. Set to "Off" to disable the boost for non-mutual follows. Note: if you set this higher than the mutual boost, mutuals will use whichever value is higher (they won't get a worse boost just because someone followed you back).</div>
+            <div class="setting-keys"><span>User:</span> following_boost_multiplier | <span>Admin default:</span> default_following_boost_multiplier</div>
+            <select id="followingBoostMultiplier">
+                <option value="">System default (1.2x)</option>
+                <option value="1">Off (no boost)</option>
+                <option value="1.1">Slight boost (1.1x)</option>
+                <option value="1.2">Normal boost (1.2x)</option>
+                <option value="1.5">Strong boost (1.5x)</option>
+                <option value="2">Very strong boost (2x)</option>
+            </select>
+        </div>
+
+        <div class="setting-group scored-only">
+            <div class="setting-label">Shared Interests Boost <span class="feed-tag tag-scored">Scored feeds</span></div>
+            <div class="setting-desc">Boosts posts from authors who share interests with you. Interests are based on your ATlas profile tags. When you and a post author have overlapping interests, their posts get a score boost. Set to "Off" if you prefer not to factor interests into ranking.</div>
+            <div class="setting-keys"><span>User:</span> interest_boost_multiplier | <span>Admin default:</span> default_interest_boost_multiplier</div>
+            <select id="interestBoostMultiplier">
+                <option value="">System default (1.3x)</option>
+                <option value="1">Off (no boost)</option>
+                <option value="1.1">Slight boost (1.1x)</option>
+                <option value="1.3">Normal boost (1.3x)</option>
+                <option value="1.5">Strong boost (1.5x)</option>
+                <option value="2">Very strong boost (2x)</option>
+                <option value="3">Very strong boost (3x)</option>
+            </select>
+        </div>
+
+        <div class="setting-group scored-only">
+            <div class="setting-label">Interaction Affinity Boost <span class="feed-tag tag-scored">Scored feeds</span></div>
+            <div class="setting-desc">Boosts posts from authors whose content you have previously liked or reposted. The more you interact with someone, the stronger the boost (up to the max). Uses a logarithmic curve so a few interactions give a noticeable effect but it plateaus quickly to prevent filter bubbles. Set to "Off" to disable.</div>
+            <div class="setting-keys"><span>User:</span> affinity_boost_max | <span>Admin default:</span> affinity_boost_max</div>
+            <select id="affinityBoostMax">
+                <option value="">System default (1.3x)</option>
+                <option value="1">Off (no boost)</option>
+                <option value="1.1">Subtle (1.1x max)</option>
+                <option value="1.2">Mild (1.2x max)</option>
+                <option value="1.3">Normal (1.3x max)</option>
+                <option value="1.5">Strong (1.5x max)</option>
+                <option value="2">Very strong (2x max)</option>
+            </select>
+        </div>
+
+        </div>
+
+        <div class="section-header lists-section">User Lists <span style="font-size:0.65rem;color:#1e40af;background:#dbeafe;padding:0.1rem 0.4rem;border-radius:3px;margin-left:0.3rem;vertical-align:middle;">All feeds</span></div>
+        <div class="settings-section lists-section">
+            <p style="font-size:0.8rem;color:#666;margin-bottom:0.75rem;">Add a Bluesky list to include those users' posts in your feed. Posts from list members will appear as if they are in the city you assign. Your primary city is used by default.</p>
+            <div id="listContainer"></div>
+            <div id="memberBrowser" style="display:none;margin-top:0.5rem;padding:0.75rem;background:#f9f9f9;border-radius:6px;border:1px solid #eee;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <span style="font-size:0.85rem;font-weight:500;" id="memberBrowserTitle">Members</span>
+                    <button onclick="closeMemberBrowser()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:#888;">&times;</button>
+                </div>
+                <div id="forceIngestInfo" style="display:none;font-size:0.72rem;color:#1e40af;margin-bottom:0.5rem;padding:0.3rem 0.5rem;background:#dbeafe;border-radius:4px;"></div>
+                <div id="memberList" style="max-height:300px;overflow-y:auto;"></div>
+            </div>
+            <div id="listLimitMsg" style="display:none;margin-top:0.5rem;padding:0.5rem 0.75rem;background:#fef2f2;border:1px solid #fca5a5;border-radius:4px;font-size:0.78rem;color:#991b1b;">You can only have 1 list. Remove your current list to add a different one, or upgrade to tier 3 for multiple lists.</div>
+            <div id="listAddForm" style="display:flex;flex-direction:column;gap:0.4rem;margin-top:0.5rem;">
+                <input id="listUri" placeholder="at://did:plc:.../app.bsky.graph.list/... or bsky.app URL" style="padding:0.4rem 0.5rem;border:1px solid #ddd;border-radius:4px;font-size:0.82rem;font-family:monospace;">
+                <div style="display:flex;gap:0.4rem;align-items:center;">
+                    <div style="flex:1;position:relative;">
+                        <select id="listCitySelect" style="width:100%;padding:0.4rem 0.5rem;border:1px solid #ddd;border-radius:4px;font-size:0.82rem;">
+                            <option value="">Loading cities...</option>
+                        </select>
+                        <div style="margin-top:0.3rem;">
+                            <input id="citySearchInput" placeholder="Search other cities..." style="width:100%;padding:0.3rem 0.5rem;border:1px solid #ddd;border-radius:4px;font-size:0.75rem;">
+                        </div>
+                        <div id="citySearchResults" style="display:none;position:absolute;left:0;right:0;background:white;border:1px solid #ddd;border-radius:4px;max-height:150px;overflow-y:auto;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.1);"></div>
+                    </div>
+                    <button onclick="addList()" style="padding:0.4rem 0.75rem;background:#333;color:white;border:none;border-radius:4px;cursor:pointer;font-size:0.82rem;">Add List</button>
+                </div>
+            </div>
+            <div id="listStatus" style="font-size:0.78rem;color:#666;margin-top:0.3rem;"></div>
+        </div>
+
+        <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+        <div id="saveStatus" class="status hidden"></div>
+    </div>
+
+    <script>
+        let userDid = null;
+        let activeFeedTab = 'global';
+        let userOverrides = {}; // { feedName: { key: value } }
+        let filterableInterests = [];
+        let hiddenInterestIds = [];
+
+        // Load filterable interests from Near You API
+        fetch('https://nearyou.atls.city/api/filterable-interests')
+            .then(r => r.json())
+            .then(data => {
+                filterableInterests = data.interests || [];
+                renderTopicFilters();
+            }).catch(() => {});
+
+        function renderTopicFilters() {
+            var container = document.getElementById('topicFiltersContainer');
+            if (filterableInterests.length === 0) { container.innerHTML = '<span style="font-size:0.8rem;color:#999;">No topic filters available.</span>'; return; }
+            var html = '';
+            filterableInterests.forEach(function(interest) {
+                var checked = hiddenInterestIds.includes(interest.id) ? ' checked' : '';
+                html += '<div class="toggle-row"><span class="toggle-label">Hide ' + interest.name + '</span><label class="toggle-switch"><input type="checkbox" value="' + interest.id + '" class="topic-filter-cb"' + checked + '><span class="toggle-slider"></span></label></div>';
+            });
+            container.innerHTML = html;
+        }
+
+        function switchFeedTab(tab) {
+            activeFeedTab = tab;
+            document.querySelectorAll('.feed-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('ftab-' + tab).classList.add('active');
+            var info = document.getElementById('feedTabInfo');
+            if (tab === 'global') {
+                info.textContent = 'Global settings apply to all feeds. Switch to a specific feed to override individual settings for that feed only.';
+                info.style.background = 'rgba(30,64,175,0.05)';
+            } else {
+                var names = { 'near-you': 'Near You', 'near-you-video': 'Video', 'near-you-live': 'Live' };
+                info.innerHTML = 'Editing overrides for <b>' + names[tab] + '</b> feed. Only changed settings will override your global defaults. Clear a field to remove the override.';
+                info.style.background = 'rgba(22,101,52,0.05)';
+            }
+            var isChrono = tab === 'near-you-live';
+            var isGlobal = tab === 'global';
+            document.querySelectorAll('.scored-only').forEach(function(el) {
+                if (isChrono) { el.style.display = 'none'; } else { el.style.display = ''; }
+            });
+            applyFeedTabToForm();
+        }
+
+        function applyFeedTabToForm() {
+            // Map of form element IDs to override keys
+            var fieldMap = {
+                'cityScope': 'city_scope', 'includeNearby': 'include_nearby', 'customRadiusKm': 'cutoff_radius_km',
+                'selfPostVisibility': 'self_post_visibility', 'freshnessPreference': 'freshness_halflife',
+                'freshnessHalflifeAdvanced': 'freshness_halflife', 'freshnessExponent': 'freshness_exponent',
+                'likeWeight': 'like_weight', 'repostWeight': 'repost_weight', 'replyWeight': 'reply_weight',
+                'minEngagement': 'min_engagement', 'altTextPenalty': 'alt_text_penalty',
+                'mutualBoostOverride': 'mutual_boost_multiplier', 'followingBoostMultiplier': 'following_boost_multiplier',
+                'interestBoostMultiplier': 'interest_boost_multiplier',
+                'affinityBoostMax': 'affinity_boost_max',
+                'maxHashtagCount': 'max_hashtag_count', 'hashtagCityGroupLimit': 'hashtag_city_group_limit',
+            };
+            if (activeFeedTab === 'global') {
+                // Reload global settings
+                loadSettings();
+                return;
+            }
+            var overrides = userOverrides[activeFeedTab] || {};
+            // Reset all selects to empty (system default) then apply overrides
+            for (var [elId, key] of Object.entries(fieldMap)) {
+                var el = document.getElementById(elId);
+                if (el) el.value = overrides[key] || '';
+            }
+            // Media types toggles
+            var mt = overrides['media_types'];
+            if (mt) {
+                var vals = mt.split(',');
+                document.querySelectorAll('.media-type-cb').forEach(function(cb) { cb.checked = vals.includes(cb.value); });
+            } else {
+                document.querySelectorAll('.media-type-cb').forEach(function(cb) { cb.checked = true; });
+            }
+            // Source toggles
+            var sourceKeys = ['source_atlas_users','source_hashtag_authors','source_follow_graph','source_hashtag_posts','source_community_surfaced'];
+            var sourceIds = ['sourceAtlasUsers','sourceHashtagAuthors','sourceFollowGraph','sourceHashtagPosts','sourceCommunitySurfaced'];
+            for (var si = 0; si < sourceKeys.length; si++) {
+                var el = document.getElementById(sourceIds[si]);
+                if (el) el.checked = overrides[sourceKeys[si]] !== undefined ? overrides[sourceKeys[si]] === 'true' : true;
+            }
+        }
+
+        fetch('/api/auth/session')
+            .then(r => r.json())
+            .then(data => {
+                if (data.authenticated) {
+                    userDid = data.did;
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('settingsSection').classList.remove('hidden');
+                    loadSettings();
+                }
+                var urlParams = new URLSearchParams(window.location.search);
+                var oauthError = urlParams.get('oauthError');
+                if (oauthError) {
+                    var err = document.getElementById('loginError');
+                    err.textContent = oauthError;
+                    err.classList.remove('hidden');
+                    window.history.replaceState({}, '', window.location.pathname);
+                }
+            });
+
+        function oauthLoginFS() {
+            var handle = document.getElementById('handle').value.trim();
+            if (!handle) { alert('Please enter your handle'); return; }
+            var btn = document.getElementById('oauthBtnFS');
+            btn.disabled = true; btn.textContent = 'Redirecting...';
+            window.location.href = '/oauth/authorize?handle=' + encodeURIComponent(handle) + '&returnTo=/feed-settings';
+        }
+
+        function login() {
+            var handle = (document.getElementById('apHandleFS').value || document.getElementById('handle').value).trim();
+            const password = document.getElementById('password').value;
+            if (!handle || !password) return;
+
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ handle, password })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    userDid = data.did;
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('settingsSection').classList.remove('hidden');
+                    loadSettings();
+                } else {
+                    const err = document.getElementById('loginError');
+                    err.textContent = data.error || 'Login failed';
+                    err.classList.remove('hidden');
+                }
+            })
+            .catch(() => {
+                const err = document.getElementById('loginError');
+                err.textContent = 'Connection error';
+                err.classList.remove('hidden');
+            });
+        }
+
+        // Friendly display names per setting for config values
+        const displayNamesPerSetting = {
+            'cityScope': { 'primary': 'Primary city', 'all': 'All tagged cities' },
+            'includeNearby': { 'true': 'Yes', 'false': 'No' },
+            'customRadiusKm': { '25': '25 km', '50': '50 km', '75': '75 km', '100': '100 km', '150': '150 km', '200': '200 km', '250': '250 km' },
+            // source toggles don't need display names — they're checkboxes
+            'selfPostVisibility': { 'show': 'Show', 'hide': 'Hide' },
+            'mediaFilter': { 'all': 'All posts', 'media_only': 'Media only', 'text_only': 'Text only' },
+            'minEngagement': { '0': 'No minimum', 'all': 'No minimum', 'some': '2+ likes', 'popular': '5+ likes' },
+            'freshnessPreference': { '24': '24h half-life', '6': '6h', '12': '12h', '18': '18h', '36': '36h', '48': '48h', '72': '72h' },
+            'freshnessExponent': { '0.5': '0.5 (very gradual)', '1': '1.0 (linear)', '1.5': '1.5', '2': '2.0 (sharp)', '3': '3.0 (very sharp)' },
+        };
+        // Map: select element ID -> admin config key
+        const defaultKeyMap = {
+            'cityScope': 'default_city_scope',
+            'includeNearby': 'default_include_nearby',
+            'customRadiusKm': 'default_cutoff_radius_km',
+            'selfPostVisibility': 'default_self_post_visibility',
+            'mediaFilter': 'default_media_filter',
+            'freshnessPreference': 'default_freshness_halflife',
+            'freshnessHalflifeAdvanced': 'default_freshness_halflife',
+            'freshnessExponent': 'default_freshness_exponent',
+            'likeWeight': 'default_like_weight',
+            'repostWeight': 'default_repost_weight',
+            'replyWeight': 'default_reply_weight',
+            'minEngagement': 'default_min_engagement',
+            'altTextPenalty': 'default_alt_text_penalty',
+            'mutualBoostOverride': 'default_mutual_boost_multiplier',
+            'followingBoostMultiplier': 'default_following_boost_multiplier',
+            'interestBoostMultiplier': 'default_interest_boost_multiplier',
+            'affinityBoostMax': 'affinity_boost_max',
+            'maxHashtagCount': 'default_max_hashtag_count',
+            'hashtagCityGroupLimit': 'default_hashtag_city_group_limit',
+        };
+
+        // Fetch live admin defaults and update System default option text
+        fetch('https://nearyou.atls.city/api/public-config')
+            .then(r => r.json())
+            .then(config => {
+                const configMap = {};
+                config.forEach(row => { configMap[row.key] = row.value; });
+                for (const [selectId, configKey] of Object.entries(defaultKeyMap)) {
+                    const sel = document.getElementById(selectId);
+                    const val = configMap[configKey];
+                    if (sel && val !== undefined) {
+                        const opt = sel.querySelector('option[value=""]');
+                        if (opt) {
+                            const perSetting = displayNamesPerSetting[selectId];
+                            const friendly = (perSetting && perSetting[val]) || val;
+                            opt.textContent = 'System default (currently: ' + friendly + ')';
+                        }
+                    }
+                }
+                // Show media types default
+                var mtDefault = configMap['default_media_types'] || '0,1,2,3,4,5';
+                var mtNames = { '0':'Text', '1':'Images', '2':'Video', '3':'GIFs', '4':'Link cards', '5':'Quote posts' };
+                var enabledNames = mtDefault.split(',').map(function(v) { return mtNames[v.trim()] || v; });
+                var el = document.getElementById('mediaTypesDefault');
+                if (el) el.textContent = 'System default: ' + (enabledNames.length === 6 ? 'All types enabled' : enabledNames.join(', '));
+            }).catch(() => {});
+
+        function loadSettings() {
+            fetch('/api/user/feed-settings')
+                .then(r => r.json())
+                .then(data => {
+                    if (activeFeedTab !== 'global') return; // Don't overwrite per-feed view
+                    document.getElementById('cityScope').value = data.city_scope || '';
+                    document.getElementById('includeNearby').value = data.include_nearby || '';
+                    document.getElementById('customRadiusKm').value = data.cutoff_radius_km !== null && data.cutoff_radius_km !== undefined ? String(data.cutoff_radius_km) : '';
+                    document.getElementById('sourceAtlasUsers').checked = data.source_atlas_users !== false;
+                    document.getElementById('sourceHashtagAuthors').checked = data.source_hashtag_authors !== false;
+                    document.getElementById('sourceFollowGraph').checked = data.source_follow_graph !== false;
+                    document.getElementById('sourceHashtagPosts').checked = data.source_hashtag_posts !== false;
+                    document.getElementById('sourceCommunitySurfaced').checked = data.source_community_surfaced !== false;
+                    document.getElementById('selfPostVisibility').value = data.self_post_visibility || '';
+                    // Load media types toggles — if user has no setting, turn all on (matches global default)
+                    var mt = data.media_types ? String(data.media_types).split(',') : [];
+                    document.querySelectorAll('.media-type-cb').forEach(function(cb) {
+                        cb.checked = mt.length > 0 ? mt.includes(cb.value) : true;
+                    });
+                    document.getElementById('freshnessPreference').value = data.freshness_halflife === 'default' ? '' : (data.freshness_halflife || '');
+                    var fhVal = data.freshness_halflife;
+                    if (fhVal && !isNaN(parseFloat(fhVal)) && !['default','fresh','today','catchup'].includes(fhVal)) {
+                        document.getElementById('freshnessHalflifeAdvanced').value = fhVal;
+                        document.getElementById('freshnessPreference').value = '';
+                    } else {
+                        document.getElementById('freshnessHalflifeAdvanced').value = '';
+                    }
+                    document.getElementById('freshnessExponent').value = data.freshness_exponent !== null && data.freshness_exponent !== undefined ? String(data.freshness_exponent) : '';
+                    drawUserFreshnessCurve();
+                    document.getElementById('likeWeight').value = data.like_weight !== null && data.like_weight !== undefined ? String(data.like_weight) : '';
+                    document.getElementById('repostWeight').value = data.repost_weight !== null && data.repost_weight !== undefined ? String(data.repost_weight) : '';
+                    document.getElementById('replyWeight').value = data.reply_weight !== null && data.reply_weight !== undefined ? String(data.reply_weight) : '';
+                    document.getElementById('minEngagement').value = data.min_engagement === 'all' ? '0' : (data.min_engagement === 'some' ? '2' : data.min_engagement === 'popular' ? '5' : data.min_engagement || '');
+                    document.getElementById('altTextPenalty').value = data.alt_text_penalty !== null && data.alt_text_penalty !== undefined ? String(data.alt_text_penalty) : '';
+                    document.getElementById('mutualBoostOverride').value = data.mutual_boost_multiplier !== null && data.mutual_boost_multiplier !== undefined ? String(data.mutual_boost_multiplier) : '';
+                    document.getElementById('followingBoostMultiplier').value = data.following_boost_multiplier !== null && data.following_boost_multiplier !== undefined ? String(data.following_boost_multiplier) : '';
+                    document.getElementById('interestBoostMultiplier').value = data.interest_boost_multiplier !== null && data.interest_boost_multiplier !== undefined ? String(data.interest_boost_multiplier) : '';
+                    document.getElementById('affinityBoostMax').value = data.affinity_boost_max !== null && data.affinity_boost_max !== undefined ? String(data.affinity_boost_max) : '';
+                    document.getElementById('maxHashtagCount').value = data.max_hashtag_count !== null && data.max_hashtag_count !== undefined ? String(data.max_hashtag_count) : '';
+                    document.getElementById('hashtagCityGroupLimit').value = data.hashtag_city_group_limit !== null && data.hashtag_city_group_limit !== undefined ? String(data.hashtag_city_group_limit) : '';
+                    // Load hidden interests
+                    hiddenInterestIds = data.hidden_interests ? String(data.hidden_interests).split(',').map(Number).filter(function(n) { return !isNaN(n); }) : [];
+                    renderTopicFilters();
+                    // Load inferred interests setting
+                    if (data.inferred_interests_enabled === false || data.inferred_interests_enabled === 'false') {
+                        document.getElementById('inferredInterestsEnabled').value = 'false';
+                    } else if (data.inferred_interests_enabled === true || data.inferred_interests_enabled === 'true') {
+                        document.getElementById('inferredInterestsEnabled').value = 'true';
+                    } else {
+                        document.getElementById('inferredInterestsEnabled').value = '';
+                    }
+                });
+            loadLists();
+            // Load per-feed overrides
+            fetch('/api/user/feed-settings/overrides')
+                .then(r => r.json())
+                .then(data => { userOverrides = data || {}; })
+                .catch(() => {});
+        }
+
+        function loadLists() {
+            fetch('https://nearyou.atls.city/api/lists/' + userDid)
+                .then(r => r.json())
+                .then(data => {
+                    var container = document.getElementById('listContainer');
+                    if (!data.lists || data.lists.length === 0) { container.innerHTML = '<p style="font-size:0.8rem;color:#999;">No lists added yet.</p>'; }
+                    else {
+                        var html = '';
+                        data.lists.forEach(function(l) {
+                            var cityName = '';
+                            if (data.cities) { var c = data.cities.find(function(c) { return c.id === l.city_id; }); if (c) cityName = c.name; }
+                            html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid #eee;">';
+                            html += '<div style="flex:1;min-width:0;"><div style="font-size:0.85rem;font-weight:500;">' + (l.list_name || 'Unnamed list') + ' <span style="font-size:0.72rem;color:#888;">(' + (l.member_count || 0) + ' members)</span></div>';
+                            html += '<div style="font-size:0.72rem;color:#888;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + l.list_uri + '</div>';
+                            if (cityName) html += '<div style="font-size:0.72rem;color:#1e40af;">' + cityName + '</div>';
+                            if (l.last_synced_at) html += '<div style="font-size:0.68rem;color:#888;">Synced ' + new Date(l.last_synced_at).toLocaleDateString() + '</div>';
+                            html += '</div>';
+                            html += '<div style="display:flex;gap:0.3rem;flex-shrink:0;margin-left:0.5rem;">';
+                            html += '<button onclick="openMemberBrowser(' + l.id + ',\'' + (l.list_name || 'List').replace(/'/g, "\\'") + '\')" style="padding:0.2rem 0.5rem;background:#555;color:white;border:none;border-radius:3px;cursor:pointer;font-size:0.72rem;">Members</button>';
+                            html += '<button onclick="syncUserList(' + l.id + ')" style="padding:0.2rem 0.5rem;background:#1e40af;color:white;border:none;border-radius:3px;cursor:pointer;font-size:0.72rem;">Sync</button>';
+                            html += '<button onclick="deleteUserList(' + l.id + ')" style="padding:0.2rem 0.5rem;background:#991b1b;color:white;border:none;border-radius:3px;cursor:pointer;font-size:0.72rem;">Remove</button>';
+                            html += '</div></div>';
+                        });
+                        container.innerHTML = html;
+                    }
+                    // Populate city picker
+                    var sel = document.getElementById('listCitySelect');
+                    if (sel && data.cities && data.cities.length > 0) {
+                        sel.innerHTML = '';
+                        data.cities.forEach(function(c) {
+                            var opt = document.createElement('option');
+                            opt.value = c.id;
+                            opt.textContent = c.name + (c.is_primary ? ' (primary)' : '');
+                            sel.appendChild(opt);
+                        });
+                    }
+                    // Hide add form if at list limit
+                    var atLimit = data.lists && data.lists.length >= 1 && (data.tier || 1) < 3;
+                    var addForm = document.getElementById('listAddForm');
+                    if (addForm) addForm.style.display = atLimit ? 'none' : '';
+                    var limitMsg = document.getElementById('listLimitMsg');
+                    if (limitMsg) limitMsg.style.display = atLimit ? '' : 'none';
+                }).catch(function() {
+                    document.getElementById('listContainer').innerHTML = '<p style="font-size:0.8rem;color:#c00;">Failed to load lists.</p>';
+                });
+        }
+
+        function addList() {
+            var uri = document.getElementById('listUri').value.trim();
+            if (!uri) return alert('List URI required');
+            var m = uri.match(/bsky\.app\/profile\/([^/]+)\/lists\/([^/?#]+)/);
+            if (m) uri = 'at://' + m[1] + '/app.bsky.graph.list/' + m[2];
+            var cityId = document.getElementById('listCitySelect').value;
+            if (!cityId) return alert('No city selected. Tag a city in ATlas first.');
+            document.getElementById('listStatus').textContent = 'Adding and syncing list...';
+            fetch('https://nearyou.atls.city/api/lists/' + userDid, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ list_uri: uri, city_id: parseInt(cityId) })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    document.getElementById('listUri').value = '';
+                    document.getElementById('listStatus').textContent = 'Added "' + (data.list_name || 'list') + '" with ' + data.members_synced + ' members.';
+                    loadLists();
+                } else {
+                    document.getElementById('listStatus').textContent = data.error || 'Failed';
+                }
+            });
+        }
+
+        function syncUserList(id) {
+            document.getElementById('listStatus').textContent = 'Syncing...';
+            fetch('https://nearyou.atls.city/api/lists/' + userDid + '/' + id + '/sync', { method: 'POST' })
+                .then(r => r.json()).then(data => {
+                    document.getElementById('listStatus').textContent = data.success ? 'Synced! ' + data.members_synced + ' members.' : 'Sync failed.';
+                    loadLists();
+                });
+        }
+
+        function deleteUserList(id) {
+            if (!confirm('Remove this list?')) return;
+            fetch('https://nearyou.atls.city/api/lists/' + userDid + '/' + id, { method: 'DELETE' })
+                .then(r => r.json()).then(data => {
+                    if (data.success) { loadLists(); closeMemberBrowser(); }
+                });
+        }
+
+        var currentBrowserListId = null;
+
+        function openMemberBrowser(listId, listName) {
+            currentBrowserListId = listId;
+            document.getElementById('memberBrowserTitle').textContent = listName + ' — Members';
+            document.getElementById('memberList').innerHTML = '<span style="font-size:0.8rem;color:#999;">Loading members...</span>';
+            document.getElementById('memberBrowser').style.display = '';
+            fetch('https://nearyou.atls.city/api/my-lists/' + listId + '/members', { credentials: 'include' })
+                .then(function(r) {
+                    if (!r.ok) throw new Error('Not authenticated on nearyou.atls.city');
+                    return r.json();
+                })
+                .then(function(data) {
+                    var info = document.getElementById('forceIngestInfo');
+                    if (data.tier >= 3) {
+                        info.style.display = '';
+                        info.textContent = 'Force ingest: ' + data.force_ingest_used + '/' + data.force_ingest_cap + ' slots used.';
+                    } else { info.style.display = 'none'; }
+                    var html = '';
+                    if (!data.members || data.members.length === 0) {
+                        html = '<span style="font-size:0.8rem;color:#999;">No members synced. Try syncing the list.</span>';
+                    } else {
+                        data.members.forEach(function(m) {
+                            var statusColor = m.already_ingested ? '#166534' : '#888';
+                            var statusText = m.already_ingested ? 'ingested' : 'not ingested';
+                            var forceBtn = '';
+                            if (data.tier >= 3 && !m.already_ingested) {
+                                var btnStyle = m.force_ingest ? 'background:#166534;color:white;' : 'background:white;color:#333;border:1px solid #ccc;';
+                                var btnText = m.force_ingest ? '✓ Forced' : 'Force';
+                                forceBtn = '<button onclick="toggleForceIngest(' + listId + ',\'' + m.did + '\',this)" style="padding:0.15rem 0.4rem;border:none;border-radius:3px;cursor:pointer;font-size:0.68rem;' + btnStyle + '">' + btnText + '</button>';
+                            } else if (m.force_ingest) {
+                                forceBtn = '<span style="font-size:0.68rem;color:#166534;font-weight:500;">✓ forced</span>';
+                            }
+                            html += '<div style="display:flex;align-items:center;padding:0.3rem 0;border-bottom:1px solid #f5f5f5;gap:0.5rem;">';
+                            html += '<div style="flex:1;min-width:0;"><span style="font-size:0.8rem;">' + (m.handle || m.did.slice(0, 20) + '...') + '</span>';
+                            html += ' <span style="font-size:0.68rem;color:' + statusColor + ';">' + statusText + '</span></div>';
+                            html += forceBtn + '</div>';
+                        });
+                    }
+                    document.getElementById('memberList').innerHTML = html;
+                }).catch(function(e) {
+                    document.getElementById('memberList').innerHTML = '<span style="font-size:0.8rem;color:#c00;">Failed to load members. You may need to log in at nearyou.atls.city first.</span>';
+                });
+        }
+
+        function closeMemberBrowser() {
+            document.getElementById('memberBrowser').style.display = 'none';
+            currentBrowserListId = null;
+        }
+
+        function toggleForceIngest(listId, memberDid, btn) {
+            btn.disabled = true; btn.textContent = '...';
+            fetch('https://nearyou.atls.city/api/my-lists/' + listId + '/members/' + encodeURIComponent(memberDid) + '/force', { method: 'POST', credentials: 'include' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) { openMemberBrowser(listId, document.getElementById('memberBrowserTitle').textContent.replace(' — Members', '')); }
+                    else { alert(data.error || 'Failed'); btn.disabled = false; btn.textContent = 'Force'; }
+                });
+        }
+
+        // City search for list picker
+        (function() {
+            var input = document.getElementById('citySearchInput');
+            var results = document.getElementById('citySearchResults');
+            var timer = null;
+            if (!input || !results) return;
+            input.addEventListener('input', function() {
+                clearTimeout(timer);
+                var q = input.value.trim();
+                if (q.length < 2) { results.style.display = 'none'; return; }
+                timer = setTimeout(function() {
+                    fetch('https://nearyou.atls.city/api/cities/search?q=' + encodeURIComponent(q)).then(function(r) { return r.json(); }).then(function(data) {
+                        if (!data.cities || data.cities.length === 0) { results.style.display = 'none'; return; }
+                        var html = '';
+                        data.cities.forEach(function(c) {
+                            html += '<div style="padding:0.4rem 0.6rem;cursor:pointer;font-size:0.8rem;border-bottom:1px solid #f0f0f0;" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'\'" onclick="selectSearchCity(' + c.id + ',\'' + c.name.replace(/'/g, "\\'") + '\')"> ' + c.name + '</div>';
+                        });
+                        results.innerHTML = html;
+                        results.style.display = 'block';
+                    });
+                }, 300);
+            });
+            input.addEventListener('blur', function() { setTimeout(function() { results.style.display = 'none'; }, 200); });
+        })();
+
+        function selectSearchCity(id, name) {
+            var sel = document.getElementById('listCitySelect');
+            var exists = false;
+            for (var i = 0; i < sel.options.length; i++) {
+                if (sel.options[i].value == id) { exists = true; sel.selectedIndex = i; break; }
+            }
+            if (!exists) {
+                var opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = name;
+                sel.appendChild(opt);
+                sel.value = id;
+            }
+            document.getElementById('citySearchInput').value = '';
+            document.getElementById('citySearchResults').style.display = 'none';
+        }
+
+        function saveSettings() {
+            const body = {
+                city_scope: document.getElementById('cityScope').value || null,
+                include_nearby: document.getElementById('includeNearby').value || null,
+                cutoff_radius_km: document.getElementById('customRadiusKm').value ? parseInt(document.getElementById('customRadiusKm').value) : null,
+                source_atlas_users: document.getElementById('sourceAtlasUsers').checked,
+                source_hashtag_authors: document.getElementById('sourceHashtagAuthors').checked,
+                source_follow_graph: document.getElementById('sourceFollowGraph').checked,
+                source_hashtag_posts: document.getElementById('sourceHashtagPosts').checked,
+                source_community_surfaced: document.getElementById('sourceCommunitySurfaced').checked,
+                self_post_visibility: document.getElementById('selfPostVisibility').value || null,
+                media_types: (function() { var checked = []; document.querySelectorAll('.media-type-cb:checked').forEach(function(cb) { checked.push(cb.value); }); return checked.length > 0 && checked.length < 6 ? checked.join(',') : null; })(),
+                freshness_halflife: document.getElementById('freshnessPreference').value || null,
+                min_engagement: document.getElementById('minEngagement').value || null,
+            };
+
+            // Per-feed override mode: save to overrides endpoint instead
+            if (activeFeedTab !== 'global') {
+                var radiusVal = document.getElementById('customRadiusKm').value;
+                if (radiusVal) body.cutoff_radius_km = radiusVal;
+                var advHl = document.getElementById('freshnessHalflifeAdvanced').value;
+                if (advHl) body.freshness_halflife = advHl;
+                var expVal = document.getElementById('freshnessExponent').value;
+                if (expVal) body.freshness_exponent = expVal;
+                var likeVal = document.getElementById('likeWeight').value;
+                if (likeVal) body.like_weight = likeVal;
+                var repostVal = document.getElementById('repostWeight').value;
+                if (repostVal) body.repost_weight = repostVal;
+                var replyVal = document.getElementById('replyWeight').value;
+                if (replyVal) body.reply_weight = replyVal;
+                var altVal = document.getElementById('altTextPenalty').value;
+                if (altVal) body.alt_text_penalty = altVal;
+                var mutualVal = document.getElementById('mutualBoostOverride').value;
+                if (mutualVal) body.mutual_boost_multiplier = mutualVal;
+                var followingVal = document.getElementById('followingBoostMultiplier').value;
+                if (followingVal) body.following_boost_multiplier = followingVal;
+                var interestVal = document.getElementById('interestBoostMultiplier').value;
+                if (interestVal) body.interest_boost_multiplier = interestVal;
+                var affinityVal = document.getElementById('affinityBoostMax').value;
+                if (affinityVal) body.affinity_boost_max = affinityVal;
+                var maxHcVal = document.getElementById('maxHashtagCount').value;
+                if (maxHcVal) body.max_hashtag_count = maxHcVal;
+                var hcglVal = document.getElementById('hashtagCityGroupLimit').value;
+                if (hcglVal) body.hashtag_city_group_limit = hcglVal;
+                // Source toggles for per-feed overrides
+                body.source_atlas_users = String(document.getElementById('sourceAtlasUsers').checked);
+                body.source_hashtag_authors = String(document.getElementById('sourceHashtagAuthors').checked);
+                body.source_follow_graph = String(document.getElementById('sourceFollowGraph').checked);
+                body.source_hashtag_posts = String(document.getElementById('sourceHashtagPosts').checked);
+                body.source_community_surfaced = String(document.getElementById('sourceCommunitySurfaced').checked);
+                // Filter out nulls — only send non-empty values as overrides
+                var settings = {};
+                for (var [k, v] of Object.entries(body)) { if (v !== null && v !== undefined) settings[k] = v; }
+                fetch('/api/user/feed-settings/overrides', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ feed_name: activeFeedTab, settings: settings })
+                }).then(r => r.json()).then(data => {
+                    var status = document.getElementById('saveStatus');
+                    if (data.success) {
+                        status.textContent = 'Overrides saved for this feed! ' + data.overrides_count + ' setting(s) overridden.';
+                        status.className = 'status success';
+                        userOverrides[activeFeedTab] = settings;
+                    } else {
+                        status.textContent = data.error || 'Failed to save';
+                        status.className = 'status error';
+                    }
+                    status.classList.remove('hidden');
+                    setTimeout(() => status.classList.add('hidden'), 5000);
+                });
+                return;
+            }
+            var advHl = document.getElementById('freshnessHalflifeAdvanced').value;
+            if (advHl) body.freshness_halflife = advHl;
+            var expVal = document.getElementById('freshnessExponent').value;
+            body.freshness_exponent = expVal === '' ? null : parseFloat(expVal);
+
+            var likeVal = document.getElementById('likeWeight').value;
+            body.like_weight = likeVal === '' ? null : parseFloat(likeVal);
+            var repostVal = document.getElementById('repostWeight').value;
+            body.repost_weight = repostVal === '' ? null : parseFloat(repostVal);
+            var replyVal = document.getElementById('replyWeight').value;
+            body.reply_weight = replyVal === '' ? null : parseFloat(replyVal);
+
+            var altVal = document.getElementById('altTextPenalty').value;
+            body.alt_text_penalty = altVal === '' ? null : parseFloat(altVal);
+
+            var mutualVal = document.getElementById('mutualBoostOverride').value;
+            body.mutual_boost_multiplier = mutualVal === '' ? null : parseFloat(mutualVal);
+
+            var followingVal = document.getElementById('followingBoostMultiplier').value;
+            body.following_boost_multiplier = followingVal === '' ? null : parseFloat(followingVal);
+
+            var interestVal = document.getElementById('interestBoostMultiplier').value;
+            body.interest_boost_multiplier = interestVal === '' ? null : parseFloat(interestVal);
+
+            var affinityVal = document.getElementById('affinityBoostMax').value;
+            body.affinity_boost_max = affinityVal === '' ? null : parseFloat(affinityVal);
+
+            var maxHcVal = document.getElementById('maxHashtagCount').value;
+            body.max_hashtag_count = maxHcVal === '' ? null : parseInt(maxHcVal);
+            var hcglVal = document.getElementById('hashtagCityGroupLimit').value;
+            body.hashtag_city_group_limit = hcglVal === '' ? null : parseInt(hcglVal);
+
+            // Hidden interests (topic filters)
+            var hiddenIds = [];
+            document.querySelectorAll('.topic-filter-cb:checked').forEach(function(cb) { hiddenIds.push(cb.value); });
+            body.hidden_interests = hiddenIds.length > 0 ? hiddenIds.join(',') : null;
+
+            // Inferred interests
+            var inferredVal = document.getElementById('inferredInterestsEnabled').value;
+            body.inferred_interests_enabled = inferredVal === '' ? null : inferredVal === 'true';
+
+            fetch('/api/user/feed-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
+            .then(r => r.json())
+            .then(data => {
+                const status = document.getElementById('saveStatus');
+                if (data.success) {
+                    status.textContent = 'Settings saved! Changes take effect on your next feed refresh.';
+                    status.className = 'status success';
+                } else {
+                    status.textContent = (data.error || 'Failed to save');
+                    status.className = 'status error';
+                }
+                status.classList.remove('hidden');
+                setTimeout(() => status.classList.add('hidden'), 5000);
+            });
+        }
+        function drawUserFreshnessCurve() {
+            var canvas = document.getElementById('userFreshnessCanvas');
+            if (!canvas) return;
+            var dpr = window.devicePixelRatio || 1;
+            if (!canvas.dataset.scaled) {
+                canvas.width = 500 * dpr;
+                canvas.height = 200 * dpr;
+                canvas.style.width = '100%';
+                canvas.style.height = 'auto';
+                canvas.dataset.scaled = '1';
+            }
+            var ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            var w = 500, h = 200;
+            var presetMap = { 'fresh': 6, 'today': 24, 'catchup': 48 };
+            var advVal = document.getElementById('freshnessHalflifeAdvanced').value;
+            var presetVal = document.getElementById('freshnessPreference').value;
+            var halflife = advVal ? parseFloat(advVal) : (presetMap[presetVal] || 24);
+            var expEl = document.getElementById('freshnessExponent');
+            var exponent = expEl.value ? parseFloat(expEl.value) : 1.5;
+            var maxHours = 72;
+            ctx.clearRect(0, 0, w, h);
+            ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1;
+            for (var pct of [0.25, 0.5, 0.75]) { var y = h - pct * h; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+            ctx.fillStyle = '#aaa'; ctx.font = '10px system-ui';
+            ctx.fillText('100%', 2, 12); ctx.fillText('75%', 2, h*0.25+4); ctx.fillText('50%', 2, h*0.5+4); ctx.fillText('25%', 2, h*0.75+4); ctx.fillText('0%', 2, h-2);
+            ctx.strokeStyle = '#166534'; ctx.lineWidth = 2.5; ctx.beginPath();
+            for (var px = 0; px <= w; px++) { var hrs = (px/w)*maxHours; var score = 1/(1+Math.pow(hrs/halflife, exponent)); var y = h-score*h; if(px===0) ctx.moveTo(px,y); else ctx.lineTo(px,y); }
+            ctx.stroke();
+            ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+            var hlX = (halflife/maxHours)*w; var hlScore = 1/(1+Math.pow(1, exponent)); var hlY = h-hlScore*h;
+            ctx.beginPath(); ctx.moveTo(hlX,0); ctx.lineTo(hlX,h); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0,hlY); ctx.lineTo(w,hlY); ctx.stroke();
+            ctx.setLineDash([]); ctx.fillStyle = '#f59e0b'; ctx.font = '11px system-ui';
+            ctx.fillText(halflife+'h = '+Math.round(hlScore*100)+'%', hlX+4, hlY-6);
+        }
+        document.addEventListener('change', function(e) {
+            if (['freshnessPreference','freshnessHalflifeAdvanced','freshnessExponent'].includes(e.target.id)) drawUserFreshnessCurve();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SkyMap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, #f8f9fa 0%, #ffffff 50%, #f1f3f4 100%);
+            color: #171717;
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow-y: scroll;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+        
+        .header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .info {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info p {
+            color: #525252;
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+        
+        .info p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #171717;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .header h1 svg {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+        
+        .header p {
+            color: #737373;
+            font-size: 1.125rem;
+        }
+        
+        .section {
+            margin-bottom: 3rem;
+        }
+        
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: #171717;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-desc {
+            color: #525252;
+            margin-bottom: 2rem;
+        }
+        
+        .search-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        input, select {
+            padding: 0.875rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            transition: border-color 0.15s ease;
+            flex: 1;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #171717;
+        }
+        
+        button {
+            padding: 0.875rem 1.5rem;
+            background: rgba(23, 23, 23, 0.9);
+            backdrop-filter: blur(20px);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover {
+            background: rgba(64, 64, 64, 0.9);
+            transform: translateY(-1px);
+        }
+        
+        .location {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            padding: 0.75rem 1.5rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            transition: all 0.15s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .location:hover {
+            border-color: #d4d4d4;
+        }
+        
+        .location-info h4 {
+            font-weight: 500;
+            color: #171717;
+            margin-bottom: 0.125rem;
+            font-size: 0.9375rem;
+            display: block;
+        }
+        
+        .location-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .location-right {
+            display: flex;
+            align-items: center;
+            margin-left: 1rem;
+        }
+        
+        .location-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.125rem;
+            font-size: 0.875rem;
+            color: #737373;
+            margin-bottom: 0;
+        }
+        
+        .location-key {
+            font-family: ui-monospace, 'SF Mono', Monaco, monospace;
+            background: #f5f5f5;
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            font-size: 0.8125rem;
+        }
+        
+        .location-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-sm {
+            padding: 0.5rem 0.875rem;
+            font-size: 0.8125rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0;
+        }
+        
+        .btn-icon {
+            padding: 0.5rem;
+            background: rgba(245, 245, 245, 0.8);
+            color: #737373;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-icon:hover {
+            background: rgba(229, 229, 229, 0.9);
+            color: #171717;
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary {
+            background: rgba(23, 23, 23, 0.9);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: rgba(64, 64, 64, 0.9);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: rgba(245, 245, 245, 0.8);
+            color: #737373;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(229, 229, 229, 0.9);
+            color: #171717;
+            transform: translateY(-1px);
+        }
+        
+        .user-labels {
+            margin-top: 1.5rem;
+        }
+        
+        .user-label {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-label h4 {
+            font-weight: 500;
+            color: #171717;
+            font-size: 0.9375rem;
+        }
+        
+        .autocomplete {
+            position: relative;
+        }
+        
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .autocomplete-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: background-color 0.15s ease;
+        }
+        
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background: rgba(23, 23, 23, 0.05);
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-item-name {
+            font-weight: 500;
+            color: #171717;
+        }
+        
+        .autocomplete-item-meta {
+            font-size: 0.875rem;
+            color: #737373;
+        }
+        
+        .label-count {
+            background: rgba(23, 23, 23, 0.1);
+            color: #171717;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+        
+        .usage-stats {
+            font-size: 0.8125rem;
+            color: #737373;
+            white-space: nowrap;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .pagination button {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #737373;
+        }
+        
+        .loading {
+            color: #737373;
+            font-style: italic;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+        
+        .tab {
+            padding: 0.875rem 1.5rem;
+            background: rgba(245, 245, 245, 0.8);
+            backdrop-filter: blur(20px);
+            color: #737373;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-right: none;
+            border-radius: 0;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+        
+        .tab-text { display: inline; }
+        .tab-icon { display: none; }
+        
+        .tab:first-child {
+            border-radius: 12px 0 0 12px;
+        }
+        
+        .tab:last-child {
+            border-radius: 0 12px 12px 0;
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .tab:hover {
+            background: rgba(229, 229, 229, 0.9);
+            color: #171717;
+            z-index: 1;
+        }
+        
+        .tab.active {
+            background: rgba(23, 23, 23, 0.9);
+            color: white;
+            border-color: rgba(23, 23, 23, 0.9);
+            z-index: 2;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .api-endpoint {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .api-endpoint h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .method {
+            font-family: ui-monospace, 'SF Mono', Monaco, monospace;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .method.get { background: #dbeafe; color: #1e40af; }
+        
+        .api-endpoint p {
+            color: #525252;
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+        
+        .code-block {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: ui-monospace, 'SF Mono', Monaco, monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #171717;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #737373;
+            cursor: pointer;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+        }
+        
+        .modal-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #171717;
+            transform: none;
+        }
+        
+        .modal-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: rgba(245, 245, 245, 0.5);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-list-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .login-benefits {
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            color: #525252;
+        }
+        
+        .login-benefits ul {
+            margin: 0.5rem 0 0 1.25rem;
+            padding: 0;
+        }
+        
+        .login-benefits li {
+            margin-bottom: 0.25rem;
+        }
+        
+        #map {
+            height: 600px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .map-container {
+            position: relative;
+        }
+        
+        .map-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: white;
+        }
+        
+        .map-container.fullscreen #map {
+            height: 100%;
+            border-radius: 0;
+        }
+        
+        .fullscreen-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .fullscreen-btn:hover {
+            background: rgba(255, 255, 255, 1);
+        }
+        
+        .fullscreen-btn svg {
+            display: block;
+            color: #171717;
+        }
+        
+        .leaflet-popup-content-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+        }
+        
+        .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+            background: rgba(23, 23, 23, 0.6);
+            backdrop-filter: blur(10px);
+        }
+        
+        .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
+            background: rgba(23, 23, 23, 0.8);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .grayscale-tiles {
+            filter: grayscale(100%);
+        }
+        
+        .lighter-grayscale-tiles {
+            filter: grayscale(100%) opacity(0.5) brightness(1.2);
+        }
+        
+        @media (max-width: 640px) {
+            .container { padding: 2rem 1rem; }
+            .header { margin-bottom: 1rem; }
+            .header h1 { font-size: 2rem; }
+            .header p { font-size: 0.875rem; }
+            .search-grid { grid-template-columns: 1fr; }
+            .input-group { flex-direction: column; }
+            .input-group input,
+            .input-group select,
+            .input-group .autocomplete { width: 100%; flex: none; }
+            .location { flex-direction: row; align-items: flex-start; gap: 0.75rem; }
+            .location-right { margin-left: 0; }
+            .location-right > div { display: flex; flex-direction: column; gap: 0.5rem; width: 100%; }
+            .location-actions { justify-content: center; }
+            #feedmakersTab .custom-node-desktop { display: none; }
+            #feedmakersTab .custom-node-mobile { display: flex !important; }
+            #feedmakersTab .location-info > div:last-child { flex-direction: column; }
+            #feedmakersTab .location-info > div:last-child > div:first-child { width: 100%; }
+            .tabs { overflow-x: auto; margin-bottom: 0.5rem; }
+            .tab { padding: 0.75rem; }
+            .tab-text { display: none; }
+            .tab-icon { display: block; }
+            .section { padding: 1rem; }
+            .section-title { font-size: 1rem; margin-bottom: 0.75rem; }
+            .section-desc { font-size: 0.875rem; margin-bottom: 1rem; line-height: 1.4; }
+            #map { height: 400px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                </svg>
+                SkyMap
+            </h1>
+            <div id="authWidget" style="margin-top: 1rem; padding-bottom: 1.5rem;">
+                <div id="loginPrompt" style="display: flex; gap: 0.5rem; justify-content: center;">
+                    <div style="display: flex; align-items: flex-start;">
+                        <button onclick="openAboutModal()" class="btn-sm btn-secondary">About</button>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.25rem; position: relative;">
+                        <button onclick="openLoginModal()" class="btn-sm btn-primary">Login</button>
+                        <span style="color: #737373; font-size: 0.75rem; position: absolute; top: 100%; margin-top: 0.25rem; white-space: nowrap;">Not Required</span>
+                    </div>
+                </div>
+                <div id="loggedInStatus" style="display: none;">
+                    <div style="display: flex; gap: 0.5rem; justify-content: center; position: relative;">
+                        <div style="display: flex; align-items: flex-start;">
+                            <button onclick="openAboutModal()" class="btn-sm btn-secondary">About</button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <button onclick="quickLogout()" class="btn-sm btn-primary">Logout</button>
+                        </div>
+                        <span style="color: #737373; font-size: 0.75rem; position: absolute; top: 100%; margin-top: 0.25rem; white-space: nowrap; left: 50%; transform: translateX(-50%);"><span id="loggedInHandle"></span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('locations')">
+                <span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></span>
+                <span class="tab-text">Locations</span>
+            </button>
+            <button class="tab" onclick="switchTab('map')">
+                <span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"></path></svg></span>
+                <span class="tab-text">Map</span>
+            </button>
+            <button class="tab" onclick="switchTab('labels')">
+                <span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span>
+                <span class="tab-text">Check Labels</span>
+            </button>
+            <button class="tab" onclick="switchTab('feedmakers')">
+                <span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></span>
+                <span class="tab-text">Feedmakers</span>
+            </button>
+            <button class="tab" onclick="switchTab('developers')">
+                <span class="tab-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></span>
+                <span class="tab-text">Developers</span>
+            </button>
+        </div>
+        
+        <div class="tab-content" id="mapTab">
+            <div class="section">
+                <div class="section-title">SkyMap</div>
+                <p class="section-desc">View cities and heatmap based on location hashtags</p>
+                
+                <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+                    <button onclick="toggleHeatmap()" id="heatmapBtn" class="btn-sm btn-secondary">Show Activity Heatmap</button>
+                    <select id="heatmapWindow" style="padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.5); background: rgba(255, 255, 255, 0.4);">
+                        <option value="1h">Last Hour</option>
+                        <option value="6h">Last 6 Hours</option>
+                        <option value="24h" selected>Last 24 Hours</option>
+                        <option value="7d">Last 7 Days</option>
+                    </select>
+                </div>
+                <div class="map-container" id="mapContainer">
+                    <button class="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle fullscreen">
+                        <svg id="fullscreenIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                        </svg>
+                    </button>
+                    <div id="map"></div>
+                </div>
+                <div style="margin-top: 1rem; text-align: center; color: #737373; font-size: 0.875rem;">
+                    Click markers to view cities • Zoom to explore regions
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="labelsTab">
+            <div class="section">
+                <div id="myLabelsSection" style="display: none;">
+                    <div class="section-title">My Labels</div>
+                    <div id="myLabelsAuth" style="display: none;">
+                        <p class="section-desc">Login to view and manage your location labels</p>
+                    </div>
+                    <div id="myLabelsContent" style="display: none;">
+                        <p class="section-desc">Your active location labels (<span id="myLabelCount">0</span>/3)</p>
+                        <div id="myLabelsList"></div>
+                    </div>
+                    <div class="section-title" style="margin-top: 2rem;">Check Other Users</div>
+                </div>
+                <div id="checkLabelsSection">
+                    <div class="section-title">Check Labels</div>
+                </div>
+                <p class="section-desc">View labels for any Bluesky user</p>
+                
+                <div class="search-grid">
+                    <input type="text" id="handleInput" placeholder="username.bsky.social" />
+                    <button onclick="checkUserLabels()">Check</button>
+                </div>
+                <div id="userLabels"></div>
+            </div>
+        </div>
+
+        <div class="tab-content active" id="locationsTab">
+            <div class="section">
+                <div class="section-title">Find Your Location</div>
+                <p class="section-desc">Send a command via Bluesky to assign a location label and be added to the corresponding city list. Use Check Labels to remove labels. SkyMap is fun, but it's also a repository for enabling custom feed makers to create great local feeds.</p>
+            <div class="search-grid">
+                <div class="input-group">
+                    <div class="autocomplete">
+                        <input type="text" id="searchInput" placeholder="Search cities..." autocomplete="off" />
+                        <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+                    </div>
+                    <select id="countryFilter">
+                        <option value="">All countries</option>
+                    </select>
+                    <select id="regionFilter">
+                        <option value="">All regions</option>
+                    </select>
+                </div>
+                <button onclick="searchLocations()">Search</button>
+            </div>
+            <div id="results"></div>
+            <div class="pagination" id="pagination" style="display: none;">
+                <button onclick="changePage(-1)" id="prevBtn">Previous</button>
+                <span id="pageInfo">Page 1</span>
+                <button onclick="changePage(1)" id="nextBtn">Next</button>
+            </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="feedmakersTab">
+            <div class="section">
+                <div class="section-title">Location Tools for Feedmakers</div>
+                <p class="section-desc">Browse AT Protocol Lists and Graze Custom Nodes for building location-based feeds. Lists have unlimited members powered by did:web:lists.fema.monster<br>
+                Example: <code style="background: #e5e7eb; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem; word-break: break-all; overflow-wrap: break-word;">curl "https://lists.fema.monster/xrpc/app.bsky.graph.getList?list=at://did:web:lists.fema.monster/app.bsky.graph.list/US-OR-Portland"</code></p>
+                
+                <div class="search-grid">
+                    <div class="input-group">
+                        <input type="text" id="feedSearchInput" placeholder="Search cities..." />
+                        <select id="feedCountryFilter">
+                            <option value="">All countries</option>
+                        </select>
+                        <select id="feedRegionFilter">
+                            <option value="">All regions</option>
+                        </select>
+                    </div>
+                    <button onclick="searchFeeds()">Search</button>
+                </div>
+                <div id="feedResults"></div>
+            </div>
+        </div>
+        
+
+        <div class="tab-content" id="developersTab">
+            <div class="section">
+                <div class="empty-state">Coming soon</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="listsModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="modalTitle">Users in List</h3>
+                <button class="modal-close" onclick="closeListsModal()">&times;</button>
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <input type="text" id="modalHandleSearch" placeholder="Check if handle is in list (e.g., user.bsky.social)" style="width: 100%; margin-bottom: 0.5rem;" />
+                <button onclick="searchModalUser()" style="width: 100%;">Check</button>
+            </div>
+            <div id="modalSearchResult" style="margin-bottom: 1rem;"></div>
+            <div id="modalLists" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Login to SkyMap</h3>
+                <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+            </div>
+            <div class="login-benefits">
+                <strong>Benefits of logging in:</strong>
+                <ul>
+                    <li>Add labels directly without posting commands</li>
+                    <li>View and manage your labels in one place</li>
+                    <li>Faster label updates</li>
+                    <li>And more! New Features Coming Soon!</li>
+                </ul>
+            </div>
+            <input type="text" id="modalHandle" placeholder="handle.bsky.social" style="width: 100%; margin-bottom: 0.75rem;" />
+            <input type="password" id="modalPassword" placeholder="app password" style="width: 100%; margin-bottom: 1rem;" />
+            <button onclick="modalLogin()" class="btn-primary" style="width: 100%;">Login</button>
+        </div>
+    </div>
+
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>About SkyMap</h3>
+                <button class="modal-close" onclick="closeAboutModal()">&times;</button>
+            </div>
+            <div style="color: #525252; line-height: 1.6;">
+                <p style="margin-bottom: 1rem;">SkyMap lets you add hidden location labels to your Bluesky account for custom feeds and community discovery.</p>
+                <p style="margin-bottom: 1rem;">Find your city, add a location label, and connect with your local community. Feed makers can use these labels to create location-based feeds.</p>
+                <p style="margin-bottom: 0;">It's fun, but it's also a repository for enabling custom feed makers to create great local feeds.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let map = null;
+        let markers = null;
+        let heatLayer = null;
+        let heatmapActive = false;
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            if (tabName === 'map' && !map) {
+                initMap();
+            }
+        }
+        
+        async function toggleHeatmap() {
+            const btn = document.getElementById('heatmapBtn');
+            
+            if (!map) {
+                alert('Please wait for the map to load');
+                return;
+            }
+            
+            if (heatmapActive) {
+                // Remove heatmap
+                if (heatLayer) {
+                    map.removeLayer(heatLayer);
+                    heatLayer = null;
+                }
+                heatmapActive = false;
+                btn.textContent = 'Show Activity Heatmap';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            } else {
+                // Show heatmap
+                await loadHeatmapData();
+                heatmapActive = true;
+                btn.textContent = 'Hide Activity Heatmap';
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-primary');
+            }
+        }
+        
+        async function loadHeatmapData() {
+            const window = document.getElementById('heatmapWindow').value;
+            
+            try {
+                console.log('Loading heatmap data for window:', window);
+                const response = await fetch(`/api/heatmap-data?window=${window}`);
+                const data = await response.json();
+                console.log('Received heatmap data:', data.length, 'locations');
+                console.log('Sample data:', data[0]);
+                
+                if (data.length === 0) {
+                    alert('No activity data available for this time window');
+                    return;
+                }
+                
+                // Remove old heatmap
+                if (heatLayer) {
+                    map.removeLayer(heatLayer);
+                }
+                
+                // Create heatmap data: [lat, lng, intensity]
+                const heatData = data.map(d => [d.latitude, d.longitude, d.intensity]);
+                console.log('Heatmap points:', heatData.slice(0, 3));
+                
+                const maxIntensity = Math.max(...data.map(d => d.intensity));
+                console.log('Max intensity:', maxIntensity);
+                
+                // Create heatmap layer with increased visibility
+                heatLayer = L.heatLayer(heatData, {
+                    radius: 50,
+                    blur: 35,
+                    maxZoom: 8,
+                    max: 1.0,
+                    minOpacity: 0.5,
+                    gradient: {0.4: 'blue', 0.6: 'cyan', 0.7: 'lime', 0.8: 'yellow', 1.0: 'red'}
+                }).addTo(map);
+                
+                console.log('Heatmap layer added to map');
+                console.log('Map layers count:', Object.keys(map._layers).length);
+            } catch (error) {
+                console.error('Error loading heatmap:', error);
+                alert('Failed to load heatmap data: ' + error.message);
+            }
+        }
+        
+        // Reload heatmap when window changes
+        document.addEventListener('DOMContentLoaded', () => {
+            const windowSelect = document.getElementById('heatmapWindow');
+            if (windowSelect) {
+                windowSelect.addEventListener('change', () => {
+                    currentTimeWindow = windowSelect.value;
+                    if (heatmapActive) {
+                        loadHeatmapData();
+                    }
+                    // Rebuild markers with new time window
+                    if (map && markers && window.mapLocations) {
+                        markers.clearLayers();
+                        window.mapLocations.forEach(loc => {
+                            if (loc.latitude && loc.longitude) {
+                                addMarker(loc);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        
+        async function initMap() {
+            map = L.map('map').setView([39.8283, -98.5795], 4);
+            
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '&copy; Esri',
+                maxZoom: 16
+            }).addTo(map);
+            
+            markers = L.markerClusterGroup({
+                maxClusterRadius: 50,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false
+            });
+            
+            // Verify Leaflet.heat is loaded
+            if (typeof L.heatLayer === 'undefined') {
+                console.error('Leaflet.heat library not loaded!');
+                alert('Heatmap library failed to load. Please refresh the page.');
+            } else {
+                console.log('Leaflet.heat library loaded successfully');
+            }
+            
+            await loadMapData();
+        }
+        
+        async function loadMapData() {
+            try {
+                const response = await fetch('/api/map-locations');
+                const locations = await response.json();
+                
+                // Store locations globally for marker updates
+                window.mapLocations = locations;
+                
+                // Only add markers for locations that already have coordinates
+                for (const loc of locations) {
+                    if (loc.latitude && loc.longitude) {
+                        addMarker(loc);
+                    }
+                    // Skip background geocoding - it causes performance issues
+                }
+                
+                map.addLayer(markers);
+                console.log(`Loaded ${markers.getLayers().length} markers on map`);
+            } catch (error) {
+                console.error('Error loading map data:', error);
+            }
+        }
+        
+        let currentTimeWindow = '24h';
+        
+        function addMarker(loc) {
+            const userCount = parseInt(loc.user_count) || 0;
+            const usageText = userCount === 1 ? '1 person' : `${userCount} people`;
+            
+            const posts1h = parseInt(loc.posts_1h) || 0;
+            const posts6h = parseInt(loc.posts_6h) || 0;
+            const posts24h = parseInt(loc.posts_24h) || 0;
+            const posts7d = parseInt(loc.posts_7d) || 0;
+            
+            const windowMap = { '1h': posts1h, '6h': posts6h, '24h': posts24h, '7d': posts7d };
+            const windowLabel = { '1h': 'last hour', '6h': 'last 6 hours', '24h': 'last 24 hours', '7d': 'last 7 days' };
+            
+            let activityText = '';
+            const currentPosts = windowMap[currentTimeWindow];
+            if (currentPosts > 0) {
+                activityText = `<div style="color: #737373; font-size: 0.875rem; margin-bottom: 0.75rem;">${currentPosts.toLocaleString()} posts ${windowLabel[currentTimeWindow]}</div>`;
+            }
+            
+            const marker = L.marker([loc.latitude, loc.longitude]);
+            
+            const popupContent = `
+                <div style="min-width: 200px;">
+                    <h4 style="margin: 0 0 0.5rem 0; font-weight: 600;">${loc.name}, ${loc.region_name}</h4>
+                    <div style="color: #737373; font-size: 0.875rem; margin-bottom: 0.75rem;">
+                        ${loc.population.toLocaleString()} population • ${usageText}
+                    </div>
+                    ${activityText}
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn-sm btn-primary" onclick="openBluesky('!set', '${loc.key}')" style="flex: 1;">Add Label</button>
+                        <button class="btn-sm btn-secondary" onclick="copyCommand(event, '!set', '${loc.key}')" style="flex: 1;">Copy</button>
+                    </div>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+            markers.addLayer(marker);
+        }
+        
+        async function geocodeLocation(key) {
+            try {
+                const response = await fetch(`/api/geocode?key=${encodeURIComponent(key)}`);
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (error) {
+                // Silently fail - geocoding errors are expected for many locations
+            }
+            return null;
+        }
+        let countries = [];
+        let regions = [];
+        let autocompleteTimeout;
+        let selectedIndex = -1;
+        let currentPage = 1;
+        let itemsPerPage = 20;
+        let allLocations = [];
+        
+        async function loadCountries() {
+            const response = await fetch('/api/countries');
+            countries = await response.json();
+            
+            const select = document.getElementById('countryFilter');
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.country_code;
+                option.textContent = country.country_name;
+                select.appendChild(option);
+            });
+        }
+        
+        async function loadRegions(countryCode = '') {
+            const url = countryCode ? `/api/regions?country=${countryCode}` : '/api/regions';
+            const response = await fetch(url);
+            regions = await response.json();
+            
+            const select = document.getElementById('regionFilter');
+            select.innerHTML = '<option value="">All regions</option>';
+            regions.forEach(region => {
+                const option = document.createElement('option');
+                option.value = region.region_code;
+                option.textContent = region.region_name;
+                select.appendChild(option);
+            });
+        }
+
+        async function searchLocations() {
+            const search = document.getElementById('searchInput').value;
+            const country = document.getElementById('countryFilter').value;
+            const region = document.getElementById('regionFilter').value;
+            
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (country) params.append('country', country);
+            if (region) params.append('region', region);
+            
+            const response = await fetch(`/api/locations?${params}`);
+            allLocations = await response.json();
+            
+            currentPage = 1;
+            displayPage();
+        }
+        
+        function displayPage() {
+            const results = document.getElementById('results');
+            const pagination = document.getElementById('pagination');
+            
+            if (allLocations.length === 0) {
+                results.innerHTML = '<div class="empty-state">No locations found</div>';
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageLocations = allLocations.slice(startIndex, endIndex);
+            
+            results.innerHTML = '';
+            
+            pageLocations.forEach(location => {
+                const div = document.createElement('div');
+                div.className = 'location';
+                const userCount = parseInt(location.user_count) || 0;
+                const usageText = userCount === 1 ? '1 person has this label' : `${userCount.toLocaleString()} people have this label`;
+                
+                div.innerHTML = `
+                    <div class="location-info">
+                        <h4>${location.name}, ${location.region_name}</h4>
+                        <div class="location-meta">
+                            <span>${location.population.toLocaleString()} population</span>
+                            <span class="usage-stats">${usageText}</span>
+                        </div>
+                    </div>
+                    <div class="location-right">
+                        <div style="text-align: right;">
+                            <div class="location-key">${location.key}</div>
+                            <div style="display: flex; gap: 0.25rem; margin-top: 0.25rem; justify-content: flex-end;">
+                                <button class="btn-sm btn-primary auth-required" onclick="addLabelDirect('${location.key}', '${location.name}')" style="display: none;">Add</button>
+                                <button class="btn-sm btn-primary no-auth" onclick="openBluesky('!set', '${location.key}')">Add</button>
+                                <button class="btn-sm btn-icon" onclick="copyCommand(event, '!set', '${location.key}')" title="Copy command">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                results.appendChild(div);
+            });
+            
+            // Update auth buttons after rendering
+            updateAuthButtons();
+            
+            const totalPages = Math.ceil(allLocations.length / itemsPerPage);
+            if (totalPages > 1) {
+                pagination.style.display = 'flex';
+                document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+                document.getElementById('prevBtn').disabled = currentPage === 1;
+                document.getElementById('nextBtn').disabled = currentPage === totalPages;
+            } else {
+                pagination.style.display = 'none';
+            }
+        }
+        
+        function changePage(direction) {
+            currentPage += direction;
+            displayPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function checkUserLabels() {
+            const handle = document.getElementById('handleInput').value.trim();
+            if (!handle) return;
+            
+            const userLabelsDiv = document.getElementById('userLabels');
+            userLabelsDiv.innerHTML = '<div class="loading">Loading...</div>';
+            
+            try {
+                const response = await fetch(`/api/user-labels?handle=${encodeURIComponent(handle)}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to fetch labels');
+                }
+                
+                const dbLabels = data.databaseLabels || [];
+                const bsLabels = data.blueskyLabels || [];
+                const dbCount = dbLabels.length;
+                const bsCount = bsLabels.length;
+                
+                let html = '';
+                
+                // Database labels section
+                html += `<div style="margin-bottom: 1.5rem;"><h3 style="font-size: 1rem; font-weight: 500; margin-bottom: 0.75rem;">Database (${dbCount}/3)</h3>`;
+                if (dbCount === 0) {
+                    html += '<div class="empty-state">No labels in database</div>';
+                } else {
+                    html += dbLabels.map(label => `
+                        <div class="user-label">
+                            <div>
+                                <h4>${label.name}, ${label.region_name}</h4>
+                                <span class="location-key">${label.key}</span>
+                            </div>
+                            <div class="location-actions">
+                                <button class="btn-sm btn-secondary" onclick="openBluesky('!remove', '${label.key}')">Remove</button>
+                                <button class="btn-sm btn-icon" onclick="copyCommand(event, '!remove', '${label.key}')" title="Copy command">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                html += '</div>';
+                
+                // Bluesky labels section
+                html += `<div><h3 style="font-size: 1rem; font-weight: 500; margin-bottom: 0.75rem;">Bluesky API (${bsCount})</h3>`;
+                if (bsCount === 0) {
+                    html += '<div class="empty-state">No labels from Bluesky</div>';
+                } else {
+                    html += bsLabels.map(label => `
+                        <div class="user-label">
+                            <div>
+                                <h4>${label.value}</h4>
+                            </div>
+                            <div class="location-actions">
+                                <button class="btn-sm btn-secondary" onclick="openBluesky('!remove', '${label.value}')">Remove</button>
+                                <button class="btn-sm btn-icon" onclick="copyCommand(event, '!remove', '${label.value}')" title="Copy command">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                html += '</div>';
+                
+                userLabelsDiv.innerHTML = html;
+            } catch (error) {
+                userLabelsDiv.innerHTML = `<div class="empty-state">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function showAutocomplete(query) {
+            if (query.length < 2) {
+                hideAutocomplete();
+                return;
+            }
+            
+            const response = await fetch(`/api/autocomplete?q=${encodeURIComponent(query)}`);
+            const suggestions = await response.json();
+            
+            const dropdown = document.getElementById('autocompleteDropdown');
+            
+            if (suggestions.length === 0) {
+                hideAutocomplete();
+                return;
+            }
+            
+            dropdown.innerHTML = suggestions.map((item, index) => `
+                <div class="autocomplete-item" data-index="${index}" onclick="selectAutocomplete('${item.name}')">
+                    <div class="autocomplete-item-name">${item.name}</div>
+                    <div class="autocomplete-item-meta">${item.region_name} • ${item.population.toLocaleString()} people</div>
+                </div>
+            `).join('');
+            
+            dropdown.style.display = 'block';
+            selectedIndex = -1;
+        }
+        
+        function hideAutocomplete() {
+            document.getElementById('autocompleteDropdown').style.display = 'none';
+            selectedIndex = -1;
+        }
+        
+        function selectAutocomplete(cityName) {
+            document.getElementById('searchInput').value = cityName;
+            hideAutocomplete();
+            searchLocations();
+        }
+        
+        function handleKeyDown(event) {
+            const dropdown = document.getElementById('autocompleteDropdown');
+            const items = dropdown.querySelectorAll('.autocomplete-item');
+            
+            if (dropdown.style.display === 'none' || items.length === 0) return;
+            
+            switch (event.key) {
+                case 'ArrowDown':
+                    event.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    updateSelection(items);
+                    break;
+                case 'ArrowUp':
+                    event.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    updateSelection(items);
+                    break;
+                case 'Enter':
+                    event.preventDefault();
+                    if (selectedIndex >= 0) {
+                        items[selectedIndex].click();
+                    } else {
+                        searchLocations();
+                    }
+                    break;
+                case 'Escape':
+                    hideAutocomplete();
+                    break;
+            }
+        }
+        
+        function updateSelection(items) {
+            items.forEach((item, index) => {
+                item.classList.toggle('selected', index === selectedIndex);
+            });
+        }
+
+        function openBluesky(command, locationKey) {
+            const handle = window.BLUESKY_HANDLE || 'labeler.domain';
+            const text = `@${handle} ${command} ${locationKey}`;
+            const encodedText = encodeURIComponent(text);
+            window.open(`https://bsky.app/intent/compose?text=${encodedText}`, '_blank');
+        }
+
+        function copyCommand(event, command, locationKey) {
+            const handle = window.BLUESKY_HANDLE || 'labeler.domain';
+            const text = `@${handle} ${command} ${locationKey}`;
+            const button = event.currentTarget;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopyFeedback(button);
+                });
+            } else {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showCopyFeedback(button);
+            }
+        }
+        
+        function showCopyFeedback(button) {
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+            }, 1000);
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(autocompleteTimeout);
+            const query = e.target.value.trim();
+            
+            if (query.length >= 2) {
+                autocompleteTimeout = setTimeout(() => showAutocomplete(query), 300);
+            } else {
+                hideAutocomplete();
+            }
+        });
+        
+        document.getElementById('searchInput').addEventListener('keydown', handleKeyDown);
+        document.getElementById('searchInput').addEventListener('blur', () => {
+            // Delay hiding to allow click events on dropdown items
+            setTimeout(hideAutocomplete, 150);
+        });
+        
+        document.getElementById('countryFilter').addEventListener('change', (e) => {
+            loadRegions(e.target.value);
+            searchLocations();
+        });
+        document.getElementById('regionFilter').addEventListener('change', searchLocations);
+        
+        // Feedmakers tab
+        async function loadFeedCountries() {
+            const response = await fetch('/api/countries');
+            const countries = await response.json();
+            
+            const select = document.getElementById('feedCountryFilter');
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.country_code;
+                option.textContent = country.country_name;
+                select.appendChild(option);
+            });
+        }
+        
+        async function loadFeedRegions(countryCode = '') {
+            const url = countryCode ? `/api/regions?country=${countryCode}` : '/api/regions';
+            const response = await fetch(url);
+            const regions = await response.json();
+            
+            const select = document.getElementById('feedRegionFilter');
+            select.innerHTML = '<option value="">All regions</option>';
+            regions.forEach(region => {
+                const option = document.createElement('option');
+                option.value = region.region_code;
+                option.textContent = region.region_name;
+                select.appendChild(option);
+            });
+        }
+        
+        async function searchFeeds() {
+            const search = document.getElementById('feedSearchInput').value;
+            const country = document.getElementById('feedCountryFilter').value;
+            const region = document.getElementById('feedRegionFilter').value;
+            
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (country) params.append('country', country);
+            if (region) params.append('region', region);
+            
+            const response = await fetch(`/api/location-lists?${params}`);
+            const locations = await response.json();
+            
+            const results = document.getElementById('feedResults');
+            
+            if (locations.length === 0) {
+                results.innerHTML = '<div class="empty-state">No locations found</div>';
+                return;
+            }
+            
+            results.innerHTML = '';
+            
+            for (const location of locations) {
+                const div = document.createElement('div');
+                div.className = 'location';
+                
+                const userCount = parseInt(location.user_count) || 0;
+                const listUri = `at://did:web:lists.fema.monster/app.bsky.graph.list/${location.key}`;
+                const memberText = userCount === 1 ? '1 user' : `${userCount} users`;
+                
+                let customNodeButton = '';
+                if (location.region_graze_id) {
+                    const customNodeUrl = `https://www.graze.social/custom-nodes/${location.region_graze_id}`;
+                    customNodeButton = `<a href="${customNodeUrl}" target="_blank" class="btn-sm btn-primary" style="text-decoration: none; display: block; text-align: center;">Graze Custom Node</a>`;
+                } else {
+                    customNodeButton = `<span class="btn-sm btn-secondary" style="opacity: 0.5; cursor: not-allowed; display: block; text-align: center;">No Custom Node</span>`;
+                }
+                
+                div.innerHTML = `
+                    <div class="location-info">
+                        <h4>${location.name}, ${location.region_name}</h4>
+                        <div class="location-meta">
+                            <span>${location.population.toLocaleString()} population • ${memberText}</span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: flex-start; margin-top: 0.5rem;">
+                            <div style="flex: 1; display: flex; gap: 0.5rem; align-items: center;">
+                                <div style="font-family: ui-monospace, 'SF Mono', Monaco, monospace; background: #f5f5f5; padding: 0.5rem; border-radius: 8px; font-size: 0.8125rem; word-break: break-all; flex: 1;">${listUri}</div>
+                                <button class="btn-sm btn-secondary copy-uri-btn" onclick="copyListUri('${listUri}', event)" title="Copy list URI">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="custom-node-desktop" style="position: relative;">
+                                <a href="/list/${location.key}" class="btn-sm btn-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; position: absolute; bottom: 100%; margin-bottom: 0.5rem; width: 100%;">View Members</a>
+                                ${customNodeButton}
+                            </div>
+                        </div>
+                        <div class="custom-node-mobile" style="margin-top: 0.5rem; display: none; flex-direction: row; gap: 0.5rem; align-items: center; width: 100%;">
+                            ${customNodeButton}
+                            <a href="/list/${location.key}" class="btn-sm btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; flex: 1;">View Members</a>
+                        </div>
+                    </div>
+                `;
+                results.appendChild(div);
+            }
+        }
+        
+        async function showListsModal(locationKey, locationName) {
+            const modal = document.getElementById('listsModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalLists = document.getElementById('modalLists');
+            const modalSearchResult = document.getElementById('modalSearchResult');
+            
+            window.currentLocationKey = locationKey;
+            modalTitle.textContent = `Users in ${locationName}`;
+            modalLists.innerHTML = '<div class="loading">Loading users...</div>';
+            modalSearchResult.innerHTML = '';
+            document.getElementById('modalHandleSearch').value = '';
+            modal.classList.add('active');
+            
+            try {
+                const response = await fetch(`/api/locations/${locationKey}/users`);
+                const users = await response.json();
+                
+                if (users.length === 0) {
+                    modalLists.innerHTML = '<div class="loading">No users in this list yet</div>';
+                } else {
+                    modalLists.innerHTML = users.map(user => `
+                        <div style="padding: 0.75rem; border-bottom: 1px solid rgba(0, 0, 0, 0.05); font-family: monospace; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span>${user.handle}</span>
+                            <a href="https://bsky.app/profile/${user.handle}" target="_blank" style="opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                            </a>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                modalLists.innerHTML = '<div class="loading">Failed to load users</div>';
+            }
+        }
+        
+        async function searchModalUser() {
+            const handle = document.getElementById('modalHandleSearch').value.trim().replace('@', '');
+            const searchResult = document.getElementById('modalSearchResult');
+            
+            if (!handle) return;
+            
+            searchResult.innerHTML = '<div class="loading">Checking...</div>';
+            
+            try {
+                const response = await fetch(`/api/locations/${window.currentLocationKey}/check-user?handle=${encodeURIComponent(handle)}`);
+                const data = await response.json();
+                
+                if (data.inList) {
+                    searchResult.innerHTML = `<div style="background: #e8f5e9; color: #2e7d32; padding: 0.75rem; border-radius: 8px; text-align: center;">✓ @${handle} is in this list</div>`;
+                } else {
+                    searchResult.innerHTML = `<div style="background: #ffebee; color: #c62828; padding: 0.75rem; border-radius: 8px; text-align: center;">✗ @${handle} is not in this list</div>`;
+                }
+            } catch (error) {
+                searchResult.innerHTML = '<div style="background: #ffebee; color: #c62828; padding: 0.75rem; border-radius: 8px; text-align: center;">Error checking user</div>';
+            }
+        }
+        
+        function copyListUri(uri, event) {
+            const button = event.currentTarget;
+            if (!button) return;
+            const originalHTML = button.innerHTML;
+            
+            navigator.clipboard.writeText(uri).then(() => {
+                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                }, 1000);
+            });
+        }
+        
+        function closeListsModal() {
+            document.getElementById('listsModal').classList.remove('active');
+        }
+        
+        document.getElementById('feedCountryFilter').addEventListener('change', (e) => {
+            loadFeedRegions(e.target.value);
+            searchFeeds();
+        });
+        document.getElementById('feedRegionFilter').addEventListener('change', searchFeeds);
+        document.getElementById('feedSearchInput').addEventListener('input', searchFeeds);
+        document.getElementById('modalHandleSearch').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchModalUser();
+        });
+        
+        loadFeedCountries();
+        loadFeedRegions();
+        searchFeeds();
+        
+        // Hide autocomplete when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.autocomplete')) {
+                hideAutocomplete();
+            }
+        });
+
+        loadCountries();
+        loadRegions();
+        searchLocations();
+        
+        // Auth functions
+        let isAuthenticated = false;
+        
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+        
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+        
+        function openAboutModal() {
+            document.getElementById('aboutModal').classList.add('active');
+        }
+        
+        function closeAboutModal() {
+            document.getElementById('aboutModal').classList.remove('active');
+        }
+        
+        async function modalLogin() {
+            const handle = document.getElementById('modalHandle').value.trim();
+            const password = document.getElementById('modalPassword').value.trim();
+            if (!handle || !password) {
+                alert('Please enter both handle and password');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ handle, password })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    isAuthenticated = true;
+                    document.getElementById('loginPrompt').style.display = 'none';
+                    document.getElementById('loggedInStatus').style.display = 'block';
+                    document.getElementById('loggedInHandle').textContent = data.handle;
+                    updateAuthButtons();
+                    loadMyLabels();
+                    closeLoginModal();
+                    document.getElementById('modalHandle').value = '';
+                    document.getElementById('modalPassword').value = '';
+                } else {
+                    alert('Login failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+            }
+        }
+        
+        async function quickLogout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            isAuthenticated = false;
+            document.getElementById('loginPrompt').style.display = 'block';
+            document.getElementById('loggedInStatus').style.display = 'none';
+            document.getElementById('myLabelsSection').style.display = 'none';
+            document.getElementById('checkLabelsSection').style.display = 'block';
+            updateAuthButtons();
+        }
+        
+        function updateAuthButtons() {
+            document.querySelectorAll('.auth-required').forEach(btn => {
+                btn.style.display = isAuthenticated ? 'inline-block' : 'none';
+            });
+            document.querySelectorAll('.no-auth').forEach(btn => {
+                btn.style.display = isAuthenticated ? 'none' : 'inline-block';
+            });
+        }
+        
+        async function addLabelDirect(locationKey, locationName) {
+            try {
+                const response = await fetch('/api/labels/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ locationKey })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`Added ${locationName} to your labels!`);
+                    loadMyLabels();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Failed to add label');
+            }
+        }
+        
+        async function removeLabelDirect(locationKey, locationName) {
+            try {
+                const response = await fetch('/api/labels/remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ locationKey })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`Removed ${locationName} from your labels!`);
+                    loadMyLabels();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Failed to remove label');
+            }
+        }
+        
+        async function loadMyLabels() {
+            if (!isAuthenticated) {
+                document.getElementById('myLabelsSection').style.display = 'none';
+                document.getElementById('checkLabelsSection').style.display = 'block';
+                document.getElementById('myLabelsAuth').style.display = 'block';
+                document.getElementById('myLabelsContent').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('myLabelsSection').style.display = 'block';
+            document.getElementById('checkLabelsSection').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/labels/my-labels');
+                const data = await response.json();
+                
+                const labels = data.labels || [];
+                document.getElementById('myLabelCount').textContent = labels.length;
+                document.getElementById('myLabelsAuth').style.display = 'none';
+                document.getElementById('myLabelsContent').style.display = 'block';
+                
+                const list = document.getElementById('myLabelsList');
+                if (labels.length === 0) {
+                    list.innerHTML = '<div class="empty-state">No labels yet. Search for a location and click "Add".</div>';
+                } else {
+                    list.innerHTML = labels.map(label => `
+                        <div class="user-label">
+                            <div>
+                                <h4>${label.name}, ${label.region_name}</h4>
+                                <span class="location-key">${label.key}</span>
+                            </div>
+                            <button class="btn-sm btn-secondary" onclick="removeLabelDirect('${label.key}', '${label.name}')">Remove</button>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load labels:', error);
+            }
+        }
+        
+        // Check if already logged in
+        fetch('/api/auth/session')
+            .then(r => r.json())
+            .then(data => {
+                if (data.authenticated) {
+                    isAuthenticated = true;
+                    document.getElementById('loginPrompt').style.display = 'none';
+                    document.getElementById('loggedInStatus').style.display = 'block';
+                    document.getElementById('loggedInHandle').textContent = data.handle;
+                    updateAuthButtons();
+                }
+                loadMyLabels();
+            });
+        
+        // Fullscreen toggle
+        function toggleFullscreen() {
+            const container = document.getElementById('mapContainer');
+            const icon = document.getElementById('fullscreenIcon');
+            
+            if (container.classList.contains('fullscreen')) {
+                container.classList.remove('fullscreen');
+                icon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
+            } else {
+                container.classList.add('fullscreen');
+                icon.innerHTML = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
+            }
+            
+            // Invalidate map size after transition
+            setTimeout(() => {
+                if (map) map.invalidateSize();
+            }, 100);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "nof_fails_threshold",
+  "graph": {
+    "nodes": [
+      { "id": "start", "type": "start", "data": {} },
+      { "id": "junction", "type": "junction", "data": { "logicModeTop": "nof", "logicNTop": 2 } },
+      { "id": "end-a", "type": "end", "data": {} },
+      { "id": "text-a", "type": "text", "data": { "keywords": ["urban"] } },
+      { "id": "text-b", "type": "text", "data": { "keywords": ["transit"] } }
+    ],
+    "edges": [
+      { "source": "start", "target": "junction", "sourceHandle": "output-right", "targetHandle": "input-left" },
+      { "source": "junction", "target": "end-a", "sourceHandle": "output-right", "targetHandle": "input-left" },
+      { "source": "text-a", "target": "junction", "sourceHandle": "logic-right", "targetHandle": "logic-top" },
+      { "source": "text-b", "target": "junction", "sourceHandle": "logic-right", "targetHandle": "logic-top" }
+    ]
+  },
+  "post": {
+    "uri": "at://did:plc:test/app.bsky.feed.post/3",
+    "text": "urban only"
+  },
+  "expected": {
+    "js": { "endId": "end-a", "passed": false, "score": 0 },
+    "python": { "endResults": { "end-a": { "passed": false, "score": 0 } } }
+  }
+}

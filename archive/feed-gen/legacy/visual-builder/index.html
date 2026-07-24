@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed Generator Visual Builder</title>
+    <link rel="stylesheet" href="styles.css?v=20260224-1778">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar" id="sidebar"></div>
+        
+        <div class="canvas" id="canvas">
+            <div class="toolbar">
+                <button onclick="openFeedSettings()" title="Feed Settings">⚙️</button>
+                <button onclick="clearCanvas()">Clear All</button>
+                <button onclick="exportJSON()">Export JSON</button>
+                <button onclick="groupSelected()">Group Selected</button>
+                <button onclick="togglePortNumbers()">Toggle Port #s</button>
+                <button class="primary" onclick="saveRules()">Save Rules</button>
+            </div>
+
+            <div class="canvas-inner" id="canvasInner">
+                <svg id="connectionsSvg"></svg>
+            </div>
+
+            <div class="help-text">
+                💡 Drag nodes • <strong>Click+Drag canvas</strong> to pan • Left/Right = continue flow • Top/Bottom = branch conditions • Click lines to toggle AND/OR • Right-click lines to delete
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="preview-section">
+                <h3>📊 Live Preview</h3>
+                <div id="validationWarning" style="display: none; background: #ff6b6b; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 12px; font-weight: 600;"></div>
+                <div class="stat">
+                    <div class="stat-label">Matching Posts (24h)</div>
+                    <div class="stat-value" id="matchCount">234</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Estimated Cost</div>
+                    <div class="stat-value" style="font-size: 18px;" id="costValue">$0.05/day</div>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <h3>📝 Sample Posts</h3>
+                <div class="sample-post">
+                    <div class="sample-post-author">@urbanist.bsky.social</div>
+                    <div class="sample-post-text">
+                        Just discovered this amazing walkable neighborhood! The bike lanes are incredible 🚴
+                    </div>
+                    <div class="sample-post-meta">
+                        ❤️ 156 • 🔄 23 • 💬 12 • 2h ago
+                    </div>
+                </div>
+                <div class="sample-post">
+                    <div class="sample-post-author">@transit_fan.bsky.social</div>
+                    <div class="sample-post-text">
+                        New light rail line opening next month! This is going to transform the city's transit system.
+                    </div>
+                    <div class="sample-post-meta">
+                        ❤️ 89 • 🔄 15 • 💬 8 • 5h ago
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js?v=20260224-1785"></script>
+    <script src="feed-settings.js?v=20260224-1785"></script>
+    <script src="app.js?v=20260224-1785"></script>
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List Members - ATlas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="List Members - ATlas">
+    <meta property="og:description" content="Browse list members on ATlas.">
+    <meta property="og:image" content="https://atls.city/atlas_banner.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://atls.city/atlas_banner.webp">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="/styles.css">
+    <style>
+        
+        body {
+            overflow-y: scroll;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+        
+        .header {
+            margin-bottom: 2rem;
+        }
+        
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .copy-links {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .copy-btn {
+            padding: 0.25rem 0.375rem;
+            background: rgba(245, 245, 245, 0.8);
+            color: #737373;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            line-height: 1;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(229, 229, 229, 0.9);
+            color: #171717;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #171717;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #737373;
+            font-size: 1rem;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #737373;
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            transition: color 0.15s ease;
+        }
+        
+        .back-link:hover {
+            color: #171717;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #171717;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #737373;
+            font-size: 1rem;
+        }
+        
+        .info-box {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .link-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .link-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .link-label {
+            color: #737373;
+            font-size: 0.8125rem;
+            width: 60px;
+            flex-shrink: 0;
+        }
+        
+        .link-text {
+            font-family: ui-monospace, 'SF Mono', Monaco, monospace;
+            background: #e5e7eb;
+            padding: 0.375rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            word-break: break-all;
+            flex: 1;
+            color: #525252;
+        }
+        
+        .search-box {
+            margin-bottom: 2rem;
+        }
+        
+        input {
+            padding: 0.875rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            transition: border-color 0.15s ease;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #171717;
+        }
+        
+        .member-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.15s ease;
+        }
+        
+        .member-card:hover {
+            border-color: #d4d4d4;
+        }
+        
+        .member-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            flex-shrink: 0;
+        }
+        
+        .member-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .member-name {
+            font-weight: 500;
+            color: #171717;
+            font-size: 0.9375rem;
+            margin-bottom: 0.125rem;
+        }
+        
+        .member-handle {
+            font-family: ui-monospace, 'SF Mono', Monaco, monospace;
+            font-size: 0.875rem;
+            color: #737373;
+        }
+        
+        .member-link {
+            color: #737373;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.15s ease;
+        }
+        
+        .member-link:hover {
+            color: #171717;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        button {
+            padding: 0.75rem 1.25rem;
+            background: rgba(23, 23, 23, 0.9);
+            backdrop-filter: blur(20px);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover:not(:disabled) {
+            background: rgba(64, 64, 64, 0.9);
+            transform: translateY(-1px);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: rgba(245, 245, 245, 0.8);
+            color: #737373;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(229, 229, 229, 0.9);
+            color: #171717;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #737373;
+            font-style: italic;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #737373;
+        }
+        
+        .error-state {
+            text-align: center;
+            padding: 3rem;
+            color: #dc2626;
+        }
+        
+        @media (max-width: 640px) {
+            .container { padding: 2rem 1rem; }
+            .header h1 { font-size: 1.5rem; }
+            .uri-box { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-nav">
+                <a href="/" class="back-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    Back to SkyMap
+                </a>
+                <div class="copy-links">
+                    <button class="copy-btn" onclick="copyUri()" title="Copy AT URI">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>AT URI</span>
+                    </button>
+                    <button class="copy-btn" onclick="copyWebUrl()" title="Copy Web URL">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>Web URL</span>
+                    </button>
+                </div>
+            </div>
+            <h1 id="listTitle">Loading...</h1>
+            <p id="listDescription"></p>
+        </div>
+        
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search members by handle..." />
+        </div>
+        
+        <div id="membersList"></div>
+        
+        <div class="pagination" id="pagination" style="display: none;">
+            <button onclick="changePage(-1)" id="prevBtn">Previous</button>
+            <span id="pageInfo">Page 1</span>
+            <button onclick="changePage(1)" id="nextBtn">Next</button>
+        </div>
+    </div>
+
+    <script>
+        const locationKey = window.location.pathname.split('/list/')[1];
+        const listUri = `at://did:web:lists.fema.monster/app.bsky.graph.list/${locationKey}`;
+        const webUrl = `https://skymap.fema.monster/list/${locationKey}`;
+        let allMembers = [];
+        let filteredMembers = [];
+        let currentPage = 1;
+        const itemsPerPage = 50;
+        
+        async function loadListData() {
+            try {
+                const apiUrl = `https://lists.fema.monster/xrpc/app.bsky.graph.getList?list=${encodeURIComponent(listUri)}`;
+                let cursor = null;
+                let items = [];
+                
+                // Fetch all pages
+                do {
+                    const url = cursor ? `${apiUrl}&cursor=${cursor}` : apiUrl;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to load list');
+                    }
+                    
+                    if (data.list) {
+                        document.getElementById('listTitle').textContent = data.list.name || locationKey;
+                        document.getElementById('listDescription').textContent = data.list.description || '';
+                    }
+                    
+                    if (data.items) {
+                        items = items.concat(data.items);
+                    }
+                    
+                    cursor = data.cursor;
+                } while (cursor);
+                
+                // Extract DIDs and resolve to profiles
+                const dids = items.map(item => item.subject);
+                allMembers = await resolveProfiles(dids);
+                filteredMembers = [...allMembers];
+                displayPage();
+                
+            } catch (error) {
+                console.error('Error loading list:', error);
+                document.getElementById('membersList').innerHTML = `<div class="error-state">Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function resolveProfiles(dids) {
+            if (dids.length === 0) return [];
+            
+            const CACHE_KEY = 'skymap_profiles';
+            const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
+            const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+            const now = Date.now();
+            
+            const profiles = [];
+            const uncachedDids = [];
+            
+            // Check cache first
+            for (const did of dids) {
+                const cached = cache[did];
+                if (cached && now - cached.timestamp < CACHE_DURATION) {
+                    profiles.push(cached.profile);
+                } else {
+                    uncachedDids.push(did);
+                }
+            }
+            
+            // Fetch uncached profiles
+            if (uncachedDids.length > 0) {
+                const batchSize = 25;
+                for (let i = 0; i < uncachedDids.length; i += batchSize) {
+                    const batch = uncachedDids.slice(i, i + batchSize);
+                    const params = batch.map(did => `actors=${encodeURIComponent(did)}`).join('&');
+                    const response = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.actor.getProfiles?${params}`);
+                    const data = await response.json();
+                    
+                    if (data.profiles) {
+                        for (const profile of data.profiles) {
+                            cache[profile.did] = { profile, timestamp: now };
+                            profiles.push(profile);
+                        }
+                    }
+                }
+                
+                localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+            }
+            
+            return profiles;
+        }
+        
+        function displayPage() {
+            const membersList = document.getElementById('membersList');
+            const pagination = document.getElementById('pagination');
+            
+            if (filteredMembers.length === 0) {
+                membersList.innerHTML = '<div class="empty-state">No members found</div>';
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageMembers = filteredMembers.slice(startIndex, endIndex);
+            
+            membersList.innerHTML = pageMembers.map(member => `
+                <div class="member-card">
+                    <img src="${member.avatar || ''}" alt="" class="member-avatar" onerror="this.style.display='none'">
+                    <div class="member-info">
+                        <div class="member-name">${member.displayName || member.handle}</div>
+                        <div class="member-handle">@${member.handle}</div>
+                    </div>
+                    <a href="https://bsky.app/profile/${member.handle}" target="_blank" class="member-link">
+                        View Profile →
+                    </a>
+                </div>
+            `).join('');
+            
+            const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
+            if (totalPages > 1) {
+                pagination.style.display = 'flex';
+                document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+                document.getElementById('prevBtn').disabled = currentPage === 1;
+                document.getElementById('nextBtn').disabled = currentPage === totalPages;
+            } else {
+                pagination.style.display = 'none';
+            }
+        }
+        
+        function changePage(direction) {
+            currentPage += direction;
+            displayPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function copyUri() {
+            navigator.clipboard.writeText(listUri).then(() => {
+                const btn = event.target.closest('button');
+                const span = btn.querySelector('span');
+                span.textContent = '✓';
+                setTimeout(() => span.textContent = 'AT URI', 1000);
+            });
+        }
+        
+        function copyWebUrl() {
+            navigator.clipboard.writeText(webUrl).then(() => {
+                const btn = event.target.closest('button');
+                const span = btn.querySelector('span');
+                span.textContent = '✓';
+                setTimeout(() => span.textContent = 'Web URL', 1000);
+            });
+        }
+        
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            
+            if (query === '') {
+                filteredMembers = [...allMembers];
+            } else {
+                filteredMembers = allMembers.filter(member => 
+                    member.handle.toLowerCase().includes(query)
+                );
+            }
+            
+            currentPage = 1;
+            displayPage();
+        });
+        
+        loadListData();
+    </script>
+</body>
+</html>

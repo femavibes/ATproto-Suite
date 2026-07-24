@@ -1,0 +1,158 @@
+<h2 class="page-title">Ingestion</h2>
+<p style="text-align: center; color: #525252; margin-bottom: 1.5rem;">Post ingestion powered by Near You (Jetstream)</p>
+
+<div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+  <h2>Status</h2>
+  <div style="display: grid; grid-template-columns: 200px 1fr; gap: 10px;">
+    <dt style="font-weight: 600;">Source:</dt>
+    <dd id="ingSource">Loading...</dd>
+    <dt style="font-weight: 600;">Near You Status:</dt>
+    <dd id="ingNyStatus">Loading...</dd>
+    <dt style="font-weight: 600;">ATlas Users:</dt>
+    <dd id="ingNyUsers">Loading...</dd>
+    <dt style="font-weight: 600;">Near You Uptime:</dt>
+    <dd id="ingNyUptime">Loading...</dd>
+    <dt style="font-weight: 600;">Total Locations:</dt>
+    <dd id="ingLocations">Loading...</dd>
+    <dt style="font-weight: 600;">Total Hashtags:</dt>
+    <dd id="ingHashtags">Loading...</dd>
+  </div>
+</div>
+
+<div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+  <h2>Recent Activity</h2>
+  <div style="margin-bottom: 1rem; display: flex; gap: 0.75rem; align-items: center;">
+    <input type="text" id="ingestionSearchInput" placeholder="Search locations..." style="flex: 1; width: auto;" oninput="ingestionFilterActivity()">
+    <select id="ingestionSortBy" onchange="ingestionSortActivity()" style="width: auto; flex: 0 0 auto;">
+      <option value="7d">Sort by 7d</option>
+      <option value="24h">Sort by 24h</option>
+      <option value="6h">Sort by 6h</option>
+      <option value="1h">Sort by 1h</option>
+      <option value="name">Sort by Name</option>
+    </select>
+  </div>
+  <div id="activityContainer">
+    <table id="activityTable" style="display: none; width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
+      <thead>
+        <tr>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">Location</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">Region</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">1h</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">6h</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">24h</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">7d</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">Last Post</th>
+        </tr>
+      </thead>
+      <tbody id="activityBody"></tbody>
+    </table>
+    <div id="noActivity" style="display: none; text-align: center; padding: 40px; color: #666;">No recent activity</div>
+    <div id="noResults" style="display: none; text-align: center; padding: 40px; color: #666;">No locations match your search</div>
+  </div>
+  <div id="pagination" style="display: none; margin-top: 1rem; text-align: center; display: flex; gap: 0.5rem; justify-content: center; align-items: center;">
+    <button onclick="ingestionChangePage(-1)" id="prevBtn" style="padding: 0.5rem 1rem;">Previous</button>
+    <span id="pageInfo" style="color: #525252;"></span>
+    <button onclick="ingestionChangePage(1)" id="nextBtn" style="padding: 0.5rem 1rem;">Next</button>
+  </div>
+</div>
+
+<script>
+  let allActivity = [];
+  let filteredActivity = [];
+  var currentPage = 1;
+  var itemsPerPage = 20;
+
+  async function loadStatus() {
+    try {
+      const res = await fetch('/api/ingestion/status');
+      const data = await res.json();
+      document.getElementById('ingSource').textContent = data.source || 'near-you';
+      document.getElementById('ingNyStatus').textContent = data.nearYouStatus || 'unknown';
+      document.getElementById('ingNyUsers').textContent = data.nearYouAtlasUsers ?? '-';
+      document.getElementById('ingNyUptime').textContent = data.nearYouUptime ? Math.round(data.nearYouUptime / 60) + ' min' : '-';
+      document.getElementById('ingLocations').textContent = data.totalLocations;
+      document.getElementById('ingHashtags').textContent = data.totalHashtags;
+    } catch (error) {
+      console.error('Error loading status:', error);
+    }
+  }
+
+  async function loadActivity() {
+    try {
+      const res = await fetch('/api/ingestion/recent-activity');
+      allActivity = await res.json();
+      filteredActivity = [...allActivity];
+      ingestionSortActivity();
+    } catch (error) {
+      console.error('Error loading activity:', error);
+    }
+  }
+
+  function ingestionSortActivity() {
+    const sortBy = document.getElementById('ingestionSortBy').value;
+    filteredActivity.sort((a, b) => {
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      if (sortBy === '1h') return b.post_count_1h - a.post_count_1h;
+      if (sortBy === '6h') return b.post_count_6h - a.post_count_6h;
+      if (sortBy === '24h') return b.post_count_24h - a.post_count_24h;
+      return b.post_count_7d - a.post_count_7d;
+    });
+    currentPage = 1;
+    ingestionRenderActivity();
+  }
+
+  function ingestionFilterActivity() {
+    const search = document.getElementById('ingestionSearchInput').value.toLowerCase();
+    filteredActivity = !search ? [...allActivity] : allActivity.filter(row =>
+      row.name.toLowerCase().includes(search) ||
+      (row.region_name && row.region_name.toLowerCase().includes(search))
+    );
+    currentPage = 1;
+    ingestionSortActivity();
+  }
+
+  function ingestionRenderActivity() {
+    const tbody = document.getElementById('activityBody');
+    const table = document.getElementById('activityTable');
+    const noActivity = document.getElementById('noActivity');
+    const noResults = document.getElementById('noResults');
+    const pagination = document.getElementById('pagination');
+
+    if (allActivity.length === 0) { table.style.display = 'none'; noActivity.style.display = 'block'; noResults.style.display = 'none'; pagination.style.display = 'none'; return; }
+    if (filteredActivity.length === 0) { table.style.display = 'none'; noActivity.style.display = 'none'; noResults.style.display = 'block'; pagination.style.display = 'none'; return; }
+
+    table.style.display = 'table'; noActivity.style.display = 'none'; noResults.style.display = 'none';
+    const totalPages = Math.ceil(filteredActivity.length / itemsPerPage);
+    const start = (currentPage - 1) * itemsPerPage;
+    const pageData = filteredActivity.slice(start, start + itemsPerPage);
+
+    tbody.innerHTML = pageData.map(row => `
+      <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #ddd;">${row.name}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #ddd;">${row.region_name || '-'}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #ddd;">${row.post_count_1h}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #ddd;">${row.post_count_6h}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #ddd;">${row.post_count_24h}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #ddd;">${row.post_count_7d}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #ddd;">${new Date(row.last_post_at).toLocaleString()}</td>
+      </tr>
+    `).join('');
+
+    if (totalPages > 1) {
+      pagination.style.display = 'flex';
+      document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages} (${filteredActivity.length} locations)`;
+      document.getElementById('prevBtn').disabled = currentPage === 1;
+      document.getElementById('nextBtn').disabled = currentPage === totalPages;
+    } else { pagination.style.display = 'none'; }
+  }
+
+  function ingestionChangePage(delta) {
+    const totalPages = Math.ceil(filteredActivity.length / itemsPerPage);
+    currentPage = Math.max(1, Math.min(totalPages, currentPage + delta));
+    ingestionRenderActivity();
+  }
+
+  loadStatus();
+  loadActivity();
+  setInterval(loadActivity, 30000);
+</script>

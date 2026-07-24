@@ -1,0 +1,52 @@
+/* Labels-specific styles (shared modal styles imported in component) */
+.labels-modal {
+  max-width: 500px;
+}
+
+.common-labels-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.common-label-btn {
+  padding: 6px 12px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.common-label-btn:hover:not(:disabled) {
+  background: #3a3a3a;
+  border-color: #4a9eff;
+  color: #4a9eff;
+}
+
+.common-label-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #1a2a3a;
+  border-color: #2a3a4a;
+}
+
+.labels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.label-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.label-input {
+  flex: 1;
+}
