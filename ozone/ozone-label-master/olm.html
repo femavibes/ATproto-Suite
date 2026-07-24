@@ -1,0 +1,4247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ozone Label Master</title>
+<style>
+  :root {
+    /* Light Mode Defaults */
+    --primary: #3b82f6;
+    --danger: #ef4444;
+    --gray: #6b7280;
+    --light-gray: #f3f4f6;
+    --background: #ffffff;
+    --text-color: #111827;
+    --block-background: #fff;
+    --block-border: #e5e7eb;
+    --header-background: #f9fafb;
+    --input-border: #d1d5db;
+    --output-background: #f3f4f6;
+    --output-border: #e5e7eb;
+    --border-radius: 4px; /* Changed to 4px for a more squared look */
+    --label-box-background: hsl(180, 70%, 90%); /* Light teal for the identifier box */
+    --label-box-text: hsl(180, 100%, 20%); /* Darker teal for contrast */
+  }
+
+  /* Dark Mode Overrides */
+  body.dark-mode {
+    --primary: #60a5fa; /* Lighter blue for dark mode */
+    --danger: #f87171; /* Lighter red for dark mode */
+    --gray: #9ca3af;
+    --light-gray: #1f2937; /* Dark background */
+    --background: #111827; /* Even darker background for container */
+    --text-color: #e5e7eb; /* Light text */
+    --block-background: #1f2937; /* Darker block background */
+    --block-border: #374151; /* Darker border */
+    --header-background: #374151; /* Darker header background */
+    --input-border: #4b5563; /* Darker input border */
+    --output-background: #374151; /* Darker output background */
+    --output-border: #4b5563; /* Darker output border */
+    --label-box-background: hsl(180, 100%, 20%); /* Dark teal for dark mode */
+    --label-box-text: hsl(180, 70%, 90%); /* Lighter text for contrast */
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--light-gray);
+    color: var(--text-color); /* Use variable */
+    margin: 0;
+    padding: 2em;
+    transition: background 0.3s ease, color 0.3s ease; /* Smooth transition */
+    display: flex; /* Use flexbox for layout */
+    justify-content: center; /* Center content horizontally */
+    align-items: flex-start; /* Align items to the top */
+    min-height: 100vh; /* Ensure body takes full viewport height */
+    box-sizing: border-box; /* Include padding in element's total width and height */
+  }
+
+  /* Custom Scrollbar Styles */
+  ::-webkit-scrollbar {
+    width: 8px; /* Width of the scrollbar */
+    height: 8px; /* Height of horizontal scrollbar */
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--light-gray); /* Color of the track */
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary); /* Color of the scroll thumb */
+    border-radius: 10px;
+    border: 2px solid var(--light-gray); /* Padding around thumb */
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2563eb; /* Color when hovering over the thumb */
+  }
+
+  /* For Firefox (less control, but some styling is possible) */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) var(--light-gray);
+  }
+
+
+  /* Default (Desktop) Floating Menu Styles */
+  #left-floating-menu {
+    position: sticky; /* Sticky on desktop */
+    top: 2em;
+    width: 50px; /* Further reduced width for icon-only buttons */
+    background: var(--background);
+    border: 1px solid var(--block-border);
+    border-radius: var(--border-radius); /* Uses variable */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 0.4em; /* Further reduced padding */
+    z-index: 9999; /* Increased z-index significantly */
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease-out; /* Add transform transition */
+    margin-right: 1em; /* Reduced margin to bring closer */
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em; /* Consistent gap for children */
+  }
+
+  #left-floating-menu .mobile-menu-header {
+    display: none; /* Hide mobile header on desktop */
+  }
+
+  #left-floating-menu button {
+    width: 100%;
+    margin-top: 0;
+    margin-right: 0;
+  }
+
+  #left-floating-menu .separator {
+    height: 1px;
+    background-color: var(--block-border);
+    margin: 0.4em 0; /* Reduced margin */
+    width: 100%;
+  }
+
+  #container {
+    max-width: 750px; /* Increased width by ~25% from 600px */
+    width: 100%;
+    background: var(--background);
+    padding: 2em;
+    border-radius: var(--border-radius); /* Uses variable */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    margin-right: 1em; /* Reduced margin to bring closer */
+    z-index: 1; /* Ensure container is below menus if they are fixed/absolute */
+  }
+
+  header {
+    display: flex; /* Changed to flex for horizontal alignment */
+    flex-direction: row; /* Ensure horizontal layout */
+    align-items: center;
+    justify-content: center;
+    gap: 16px; /* Space between image and text */
+    margin-bottom: 1.5em;
+    position: relative;
+  }
+
+  header .header-text-group { /* New container for title and version */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0; /* No gap between h1 and p */
+  }
+
+  header h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--primary);
+    text-transform: uppercase;
+  }
+
+  header p { /* Style for the new version paragraph */
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--gray);
+  }
+
+
+  header a img {
+    height: 48px;
+    width: auto;
+    border-radius: var(--border-radius); /* Uses variable */
+    transition: transform 0.2s ease;
+    /* Removed margin-bottom here as it's handled by gap in header */
+  }
+
+  header a img:hover {
+    transform: scale(1.05);
+  }
+
+  #searchInput {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius); /* Uses variable */
+    margin-bottom: 1.5em;
+    box-sizing: border-box;
+    background: var(--block-background);
+    color: var(--text-color);
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .label-block {
+    background: var(--block-background);
+    border: 1px solid var(--block-border);
+    border-radius: var(--border-radius); /* Uses variable */
+    margin-bottom: 1.5em;
+    overflow: hidden;
+    transition: box-shadow 0.2s, background 0.3s ease, border-color 0.3s ease;
+    cursor: pointer;
+  }
+
+  .label-block:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .label-block.is-dragging {
+    opacity: 0.4;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, opacity 0.1s ease-out;
+  }
+
+  .label-block.disabled {
+    opacity: 0.6;
+  }
+
+  .label-header {
+    background: var(--header-background);
+    padding: 0.75em 1em;
+    display: flex;
+    align-items: center;
+    gap: 0.5em; /* Increased gap for better spacing */
+    font-weight: 600;
+    cursor: grab;
+    border-bottom: 1px solid var(--block-border);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .label-identifier-box { /* New style for the yellow identifier box */
+    background-color: var(--label-box-background);
+    color: var(--label-box-text);
+    padding: 0.3em 0.6em;
+    border-radius: var(--border-radius); /* Uses variable */
+    font-size: 0.9em;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px; /* Limit width */
+    flex-shrink: 1; /* Allow it to shrink */
+  }
+
+  .collapse-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: var(--border-radius); /* Uses variable */
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: background 0.3s ease;
+  }
+
+  /* Unified style for all 'X' buttons and small square buttons */
+  .remove-btn,
+  .locale-remove-btn,
+  .close-mobile-menu-btn,
+  .move-up-btn,
+  .move-down-btn,
+  .snippet-action-btn { /* Added snippet-action-btn */
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    display: flex; /* Use flexbox for centering 'X' or arrow */
+    justify-content: center;
+    align-items: center;
+    line-height: 1; /* Ensure content is vertically centered */
+    flex-shrink: 0; /* Prevent shrinking in flex containers */
+    width: 30px; /* Fixed width */
+    height: 30px; /* Fixed height */
+    padding: 0; /* Remove padding for consistent size */
+    font-size: 1.2rem; /* Larger 'X' or arrow for small buttons */
+    border-radius: var(--border-radius); /* Uses variable */
+  }
+
+  /* Specific colors for different button types */
+  .remove-btn,
+  .locale-remove-btn,
+  .close-mobile-menu-btn {
+    background: var(--danger); /* Red color */
+    color: white;
+  }
+
+  .move-up-btn:disabled,
+  .move-down-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+
+  .snippet-action-btn {
+    background: var(--gray);
+    color: white;
+    font-size: 1rem;
+  }
+
+  /* Hover states */
+  .remove-btn:hover,
+  .locale-remove-btn:hover,
+  .close-mobile-menu-btn:hover {
+    background: #dc2626; /* Darker red on hover */
+    transform: none; /* Ensure no unwanted transform from previous styles */
+  }
+
+  .snippet-action-btn:hover {
+    background: #5a6268;
+  }
+
+
+  .label-content {
+    padding: 1em;
+  }
+
+  /* New flex containers for side-by-side inputs/selects */
+  .label-content .input-group-row {
+    display: flex;
+    gap: 1em; /* Space between items in the row */
+    margin-top: 1em; /* Space from previous elements */
+  }
+
+  .label-content .input-group-row:first-of-type {
+    margin-top: 0; /* No top margin for the very first row */
+  }
+
+  .label-content .input-group-row > div {
+    flex: 1; /* Each item takes equal space */
+    display: flex; /* Enable flex for label and input/select */
+    flex-direction: column; /* Stack label and input/select */
+  }
+
+  .label-content .input-group-row label {
+    margin-top: 0; /* Remove extra top margin from general label style */
+    margin-bottom: 0.25em; /* Small space between label and input */
+  }
+
+  .locale-block {
+    border: 1px solid var(--block-border);
+    padding: 1em;
+    margin-top: 1em;
+    border-radius: var(--border-radius); /* Uses variable */
+    background: var(--header-background);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .locale-header-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .locale-header-row .collapse-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: background 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .locale-header-row .collapse-btn:hover {
+    background: #2563eb;
+  }
+
+  .locale-header-row .locale-identifier-display {
+    flex: 1;
+    user-select: text;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  .locale-content-area {
+    /* No specific styles needed here, just acts as a container */
+  }
+
+  /* New flex container for buttons within locale block */
+  .locale-action-row {
+    display: flex;
+    justify-content: space-between; /* Pushes groups to ends */
+    align-items: center; /* Align buttons to center */
+    margin-top: 0.5em;
+    gap: 1em; /* Space between the two groups */
+  }
+
+  .locale-action-row .llm-buttons {
+    display: flex;
+    gap: 0.5em;
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+  }
+
+  .locale-action-row .snippet-action-group {
+    flex-shrink: 0; /* Prevent snippet button group from shrinking */
+  }
+
+
+  .locale-block .llm-buttons button {
+    padding: 0.4em 0.8em;
+    font-size: 0.85rem;
+    border-radius: var(--border-radius);
+    background: #10b981;
+  }
+
+  .locale-block .llm-buttons button:hover {
+    background: #059669;
+  }
+
+  /* Apply Snippet button styling */
+  .apply-snippet-btn {
+    padding: 0.4em 0.8em; /* Match padding of other LLM buttons */
+    font-size: 0.85rem; /* Match font-size of other LLM buttons */
+    border-radius: var(--border-radius);
+    background: var(--primary); /* Blue color */
+    color: white;
+    transition: background 0.2s;
+  }
+
+  .apply-snippet-btn:hover {
+    background: #2563eb; /* Darker blue on hover */
+  }
+
+
+  label {
+    display: block;
+    margin-top: 1em;
+    font-weight: 500;
+  }
+
+  input[type="text"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.5em 0.75em;
+    margin-top: 0.25em;
+    font-size: 1rem;
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    background: var(--block-background);
+    color: var(--text-color);
+    box-sizing: border-box;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  /* Override for inputs/selects within input-group-row */
+  .label-content .input-group-row input[type="text"],
+  .label-content .input-group-row select {
+    margin-top: 0;
+  }
+
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  /* General button styling */
+  button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  button:hover {
+    background: #2563eb;
+  }
+
+  button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+
+  /* Specific styling for buttons at the bottom of the container */
+  .action-button {
+    padding: 0.4em 0.8em;
+    font-size: 0.9rem;
+    margin-top: 1em;
+    margin-right: 0.5em;
+    vertical-align: middle;
+    border-radius: var(--border-radius);
+  }
+
+  /* New class for left menu buttons to ensure consistent sizing */
+  .left-menu-button {
+    padding: 0;
+    font-size: 1.1rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0;
+    margin-right: 0;
+    border-radius: var(--border-radius);
+    flex-shrink: 0;
+  }
+
+  /* Styling for Add Locale button */
+  .add-locale-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.4em 0.8em;
+    transition: background 0.2s;
+    margin-top: 1em;
+  }
+
+  .add-locale-btn:hover {
+    background: #2563eb;
+  }
+
+  /* Spacing for Locales: text and separator */
+  .locales-container {
+    border-top: 1px solid var(--block-border);
+    padding-top: 1em;
+    margin-top: 1.5em;
+  }
+
+  .locales-container strong {
+    display: block;
+    margin-bottom: 0.5em;
+  }
+
+  #output {
+    white-space: pre-wrap;
+    background: var(--output-background);
+    padding: 1em;
+    margin-top: 2em;
+    border: 1px solid var(--output-border);
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    border-radius: var(--border-radius);
+    max-height: 300px;
+    overflow-y: auto;
+    color: var(--text-color);
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  #duplicateWarning {
+    color: var(--danger);
+    font-weight: 600;
+    margin-bottom: 1em;
+    display: none;
+  }
+
+  /* Theme switch styles (now inside options modal) */
+  .theme-switch-wrapper {
+    background: none;
+    color: var(--text-color);
+    padding: 0;
+    border-radius: 0;
+    cursor: default;
+    font-size: 1rem;
+    transition: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 1em;
+    margin-bottom: 0;
+  }
+
+  .theme-switch-wrapper:hover {
+    background: none;
+  }
+
+  .theme-switch-label-text {
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 0;
+    text-align: left;
+    font-size: 1rem;
+  }
+
+  .theme-switch {
+    display: inline-block;
+    height: 16px;
+    position: relative;
+    width: 60px;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .theme-switch input {
+    display: none;
+  }
+
+  .slider {
+    background-color: #9ca3af;
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+  }
+
+  .slider:before {
+    background-color: #fff;
+    bottom: 2px;
+    content: "";
+    height: 12px;
+    left: 2px;
+    position: absolute;
+    transition: .4s;
+    width: 12px;
+  }
+
+  input:checked + .slider {
+    background-color: var(--primary);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(44px);
+  }
+
+  .slider.round {
+    border-radius: 34px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }
+
+  /* Right Side Menus Container (Desktop) */
+  #right-side-menus-container {
+    position: sticky;
+    top: 2em;
+    display: flex;
+    flex-direction: row; /* Main columns side-by-side */
+    gap: 1em; /* Space between stacked menus column and bulk actions column */
+    align-items: flex-start;
+    margin-left: 1em;
+    width: auto; /* Allow content to dictate width */
+    flex-shrink: 0;
+    height: calc(100vh - 4em); /* 100% viewport height minus 2em top/bottom body padding */
+  }
+
+  /* New wrapper for the stacked Category and Quick Access menus */
+  #stacked-left-right-column {
+    display: flex;
+    flex-direction: column; /* Stack Category and Quick Access vertically */
+    gap: 1em; /* Space between Category and Quick Access menus */
+    flex-shrink: 0;
+    width: 250px; /* Fixed width for this stacked column */
+    height: 100%; /* Take full height of its parent #right-side-menus-container */
+  }
+
+  /* Individual Menu Styles within the stacked column */
+  #category-menu, #floating-menu, #bulk-actions-menu {
+    background: var(--background);
+    border: 1px solid var(--block-border);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 1em;
+    position: static;
+    margin-bottom: 0;
+    display: flex; /* Make them flex containers */
+    flex-direction: column; /* Stack children vertically */
+    gap: 0.5em; /* Default gap for children */
+    flex-shrink: 0;
+    min-height: 0; /* Crucial for flex items with overflow */
+  }
+
+  /* Labels Quick Access: dynamic height/scrollbar */
+  #category-menu {
+    flex: 3; /* 30% height */
+  }
+
+  #floating-menu {
+    flex: 7; /* 70% height */
+  }
+
+  /* Scrollable content wrapper within menus */
+  .scrollable-content {
+    flex-grow: 1; /* Takes up remaining space */
+    overflow-y: auto; /* Enables scrolling */
+    min-height: 0; /* Important for flex items with overflow */
+    padding-right: 0.5em; /* Add some padding for scrollbar */
+    margin-bottom: 0.5em; /* Space before fixed footer buttons */
+  }
+
+  /* Fixed header/footer elements within menus */
+  #category-menu h3,
+  #category-menu .category-input-group,
+  #category-menu #deleteSelectedCategoriesBtn,
+  #floating-menu h3,
+  #floating-menu #deleteSelectedLabelsBtn,
+  #bulk-actions-menu h3,
+  #bulk-actions-menu .label-block { /* The new bulk control block */
+    flex-shrink: 0; /* Prevent these elements from shrinking */
+  }
+
+  /* Adjust gap for specific elements within menus if needed */
+  #category-menu .category-input-group {
+    margin-bottom: 1em;
+  }
+  #category-menu ul {
+    margin-top: 0;
+  }
+  #bulk-actions-menu .bulk-action-group {
+    margin-top: 0.5em;
+  }
+  #bulk-actions-menu .bulk-action-group:first-child {
+    margin-top: 0;
+  }
+
+
+  #floating-menu .mobile-menu-header, #category-menu .mobile-menu-header, #bulk-actions-menu .mobile-menu-header {
+    display: none;
+  }
+
+  #floating-menu h3, #category-menu h3, #bulk-actions-menu h3 {
+    margin-top: 0;
+    color: var(--primary);
+    font-size: 1.2rem;
+    margin-bottom: 0.8em;
+    flex-shrink: 0; /* Prevent title from shrinking */
+  }
+
+  #floating-menu ul, #category-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  #floating-menu li {
+    margin-bottom: 0.5em;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+  #floating-menu li:last-child {
+    margin-bottom: 0;
+  }
+
+
+  /* Styled Quick Access Labels */
+  #floating-menu a {
+    background: var(--label-box-background);
+    color: var(--label-box-text);
+    padding: 0.5em 0.8em;
+    border-radius: var(--border-radius);
+    display: block;
+    text-align: center;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    cursor: grab;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+  }
+  #floating-menu a:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  /* Updated drag styles for quick access list items (li) */
+  #floating-menu li.is-dragging {
+    opacity: 0.6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  #floating-menu li.over {
+    border: 2px dashed var(--primary);
+  }
+
+  /* Quick Access Label Number Box */
+  #floating-menu .label-number-box {
+    background: var(--gray);
+    color: white;
+    padding: 0.3em 0.6em;
+    border-radius: var(--border-radius);
+    font-size: 0.9em;
+    font-weight: 600;
+    flex-shrink: 0;
+    min-width: 30px;
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3em;
+  }
+
+  #floating-menu .label-number-box input[type="checkbox"] {
+    margin: 0;
+    transform: scale(1.1);
+  }
+
+
+  /* Category Menu Specifics */
+  #category-menu .category-input-group {
+    display: flex;
+    gap: 0.5em;
+    margin-bottom: 1em;
+    flex-shrink: 0; /* Prevent shrinking */
+  }
+
+  #category-menu .category-input-group input {
+    flex-grow: 1;
+    padding: 0.5em;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--input-border);
+  }
+
+  #category-menu .category-input-group button {
+    padding: 0.5em 0.8em;
+    border-radius: var(--border-radius);
+    background: var(--primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  #category-menu .category-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3em 0.5em;
+    background: var(--light-gray);
+    border-radius: var(--border-radius);
+    gap: 0.5em;
+    cursor: grab; /* Make categories draggable */
+    transition: box-shadow 0.2s, background 0.3s ease;
+  }
+  #category-menu .category-list-item:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  /* Drag styles for category list items */
+  #category-menu .category-list-item.is-dragging {
+    opacity: 0.6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  #category-menu .category-list-item.over {
+    border: 2px dashed var(--primary);
+  }
+
+  #category-menu .category-list-item span {
+    flex-grow: 1;
+    color: var(--text-color);
+  }
+
+  /* New style for the category select box (similar to label number box, but no number) */
+  .label-category-select-box {
+    background: var(--gray);
+    color: white;
+    padding: 0.3em 0.6em;
+    border-radius: var(--border-radius);
+    font-size: 0.9em;
+    font-weight: 600;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .label-category-select-box input[type="checkbox"] {
+    margin: 0;
+    transform: scale(1.1);
+  }
+
+
+  /* Bulk Actions Menu Specifics */
+  #bulk-actions-menu {
+    width: 420px; /* Increased width by 20% from 350px */
+    height: 100%; /* Take full height of its parent #right-side-menus-container */
+  }
+
+  #bulk-actions-menu .bulk-action-group {
+    flex-shrink: 0; /* Prevent shrinking of individual groups */
+  }
+
+
+  /* Mobile Menu Toggle Buttons (bottom corners) */
+  .mobile-menu-toggle-button {
+    display: none;
+    position: fixed;
+    bottom: 1em;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.8rem;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  .mobile-menu-toggle-button:hover {
+    background: #2563eb;
+    transform: scale(1.05);
+  }
+
+  #mobileLeftMenuToggle {
+    left: 1em;
+  }
+
+  #mobileRightMenuToggle {
+    right: 1em;
+  }
+
+  /* Mobile Menu Header (inside the menus when open) */
+  .mobile-menu-header {
+    display: none;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+    padding: 0.5em 1em;
+    border-bottom: 1px solid var(--block-border);
+    box-sizing: border-box;
+  }
+
+
+  /* Media query for smaller screens */
+  @media (max-width: 992px) {
+    /* Hide desktop right menus container */
+    #right-side-menus-container {
+      display: none;
+    }
+
+    /* Left floating menu becomes fixed mobile menu */
+    #left-floating-menu {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 80%;
+      max-width: 300px;
+      height: auto;
+      max-height: 80vh;
+      overflow-y: auto;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      border-bottom: none;
+      transform: translateY(calc(100% + 50px));
+      display: flex;
+      margin-right: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Mobile right menu wrapper (re-enable and style) */
+    #right-menu-wrapper-mobile {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        width: 80%;
+        max-width: 300px;
+        height: auto;
+        max-height: 80vh;
+        overflow-y: auto;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        border-bottom: none;
+        transform: translateY(calc(100% + 50px));
+        pointer-events: none;
+        z-index: 9998;
+        background: var(--background);
+        border: 1px solid var(--block-border);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 1em;
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+    }
+
+    /* When right menu wrapper is open, stack its children */
+    #right-menu-wrapper-mobile.open {
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    /* Individual Right Menu Styles (children of the mobile wrapper) on mobile */
+    #category-menu-mobile, #floating-menu-mobile, #bulk-actions-menu-mobile { /* Target the mobile-specific IDs */
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+        border-bottom: 1px solid var(--block-border);
+        width: auto;
+        padding: 1em; /* Ensure padding is applied to these inner divs */
+    }
+
+    #bulk-actions-menu-mobile { /* First menu in mobile stack */
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+    #category-menu-mobile { /* Last menu in mobile stack */
+        border-bottom: none;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+
+
+    /* Show mobile menu header when menus are open on mobile */
+    #left-floating-menu.open .mobile-menu-header,
+    #right-menu-wrapper-mobile.open .mobile-menu-header {
+      display: flex;
+    }
+
+    /* Show the mobile toggle buttons */
+    .mobile-menu-toggle-button {
+      display: flex;
+    }
+
+    /* Adjust main container on mobile */
+    #container {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Removed backdrop and blur styles */
+    body.menu-active::before,
+    body.menu-active #container {
+      /* No styles here, effectively removing the dimming/blurring */
+    }
+  }
+
+  /* Even smaller screens for overall padding adjustment */
+  @media (max-width: 768px) {
+    body {
+      padding: 1em;
+    }
+    #container {
+      padding: 1.5em;
+    }
+    .mobile-menu-toggle-button {
+      width: 45px;
+      height: 45px;
+      font-size: 1.5rem;
+    }
+  }
+  /* New style for the bulk translate button */
+  .translate-button {
+    background: #10b981;
+    color: white;
+  }
+
+  .translate-button:hover {
+    background: #059669;
+  }
+
+  /* Custom Modal Styles */
+  .custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  }
+
+  .custom-modal-content {
+    background: var(--block-background);
+    padding: 2em;
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    color: var(--text-color);
+  }
+
+  .custom-modal-content p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+
+  .custom-modal-content button {
+    padding: 0.6em 1.2em;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .custom-modal-content .confirm-btn {
+    background: var(--primary);
+    color: white;
+  }
+
+  .custom-modal-content .confirm-btn:hover {
+    background: #2563eb;
+  }
+
+  .custom-modal-content .cancel-btn {
+    background: var(--gray);
+    color: white;
+    margin-left: 0.5em;
+  }
+
+  .custom-modal-content .cancel-btn:hover {
+    background: #5a6268;
+  }
+
+  /* Copy Feedback Toast */
+  #copyFeedback {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #10b981;
+    color: white;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 10001;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  #copyFeedback.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* New style for the action button container in the label header */
+  .header-action-buttons {
+    display: flex;
+    gap: 0.2em;
+    align-items: center;
+  }
+
+  /* Adjust category select in header */
+  .category-in-header {
+    display: flex;
+    align-items: center;
+    gap: 0.2em;
+    margin-right: 0.5em;
+  }
+
+  .category-in-header select {
+    flex-grow: 1;
+    max-width: 150px;
+  }
+
+  /* New wrapper for elements aligned to the right in the header */
+  .header-right-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-left: auto;
+  }
+
+  /* Style for the label number box */
+  .label-number-box {
+    background: var(--gray);
+    color: white;
+    padding: 0.3em 0.6em;
+    border-radius: var(--border-radius);
+    font-size: 0.9em;
+    font-weight: 600;
+    flex-shrink: 0;
+    min-width: 30px;
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3em;
+  }
+
+  /* Style for the enabled toggle in the header */
+  .enabled-toggle-header {
+    display: flex;
+    align-items: center;
+    gap: 0.2em;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-right: 0.5em;
+    flex-shrink: 0;
+  }
+
+  .enabled-toggle-header input[type="checkbox"] {
+    margin: 0;
+    transform: scale(1.1);
+  }
+
+  /* Styling for danger buttons */
+  .danger-button {
+      background: var(--danger);
+      color: white;
+  }
+  .danger-button:hover {
+      background: #dc2626; /* Darker red on hover */
+  }
+
+  /* Snippet management section styling */
+  .snippet-management-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+  }
+
+  .snippet-management-section .snippet-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+  }
+  /* Adjust label margin within snippet-input-group to bring closer to title */
+  .snippet-management-section .snippet-input-group label {
+      margin-top: 0.5em; /* Reduced margin */
+  }
+  .snippet-management-section .snippet-input-group label:first-child {
+      margin-top: 0; /* No top margin for the very first label */
+  }
+
+
+  .snippet-management-section .snippet-actions {
+      display: flex;
+      justify-content: flex-start; /* Push button to the left */
+      margin-top: 0.5em;
+  }
+
+  .snippet-management-section .snippet-actions button {
+      width: auto; /* Allow button to size naturally */
+      padding: 0.4em 0.8em;
+  }
+
+  /* Bulk Translate Modal Specific Styles */
+  #bulkTranslateModal .modal-lang-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.5em;
+      margin-bottom: 1em;
+      padding: 0.5em;
+      border: 1px solid var(--input-border);
+      border-radius: var(--border-radius);
+      background: var(--header-background);
+      max-height: 200px;
+      overflow-y: auto;
+  }
+
+  #bulkTranslateModal .modal-lang-options label {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      margin: 0; /* Override default label margin */
+      font-weight: normal;
+  }
+
+  #bulkTranslateModal .modal-lang-options input[type="checkbox"] {
+      margin: 0;
+      transform: scale(1.1);
+  }
+
+  #bulkTranslateModal .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 0.5em;
+      margin-top: 1em;
+  }
+
+  /* New blue button style */
+  .blue-button {
+    background: var(--primary); /* Using primary color for blue */
+    color: white;
+  }
+  .blue-button:hover {
+    background: #2563eb; /* Darker blue on hover */
+  }
+
+  /* View Snippets Modal Specific Styles */
+  #viewSnippetsModal .snippet-item {
+      background: var(--light-gray);
+      border: 1px solid var(--block-border);
+      border-radius: var(--border-radius);
+      padding: 0.8em;
+      margin-bottom: 0.8em;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+  }
+  #viewSnippetsModal .snippet-item:last-child {
+      margin-bottom: 0;
+  }
+
+  #viewSnippetsModal .snippet-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      color: var(--text-color);
+  }
+
+  #viewSnippetsModal .snippet-item-content {
+      background: var(--output-background);
+      border: 1px solid var(--output-border);
+      border-radius: var(--border-radius);
+      padding: 0.6em;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      white-space: pre-wrap;
+      max-height: 100px;
+      overflow-y: auto;
+      color: var(--text-color);
+  }
+  #viewSnippetsModal .snippet-item-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5em;
+      margin-top: 0.5em;
+  }
+
+  /* Social Post Preview Styles */
+  .social-post-card {
+      background: var(--block-background);
+      border: 1px solid var(--block-border);
+      border-radius: var(--border-radius);
+      padding: 1em;
+      margin-top: 1em;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .social-post-card .post-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8em;
+      margin-bottom: 0.8em;
+  }
+
+  .social-post-card .post-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%; /* Make it round */
+      background-color: var(--primary); /* Blue background for placeholder */
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      flex-shrink: 0;
+      object-fit: cover; /* Ensure image covers the area */
+  }
+
+  .social-post-card .post-user-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+  }
+
+  .social-post-card .post-username {
+      font-weight: 600;
+      color: var(--text-color);
+  }
+
+  .social-post-card .post-handle {
+      font-size: 0.9em;
+      color: var(--gray);
+  }
+
+  .social-post-card .post-content {
+      margin-left: calc(48px + 0.8em); /* Align with text next to avatar */
+  }
+
+  .social-post-card .post-text { /* Changed from textarea to div */
+      width: 100%;
+      padding: 0.75em;
+      font-size: 1em;
+      background: var(--block-background);
+      color: var(--text-color);
+      box-sizing: border-box;
+      margin-bottom: 1em; /* Space between text and image */
+      white-space: pre-wrap; /* Preserve whitespace and wrap text */
+      word-wrap: break-word; /* Break long words */
+  }
+
+  .social-post-card .post-image {
+      width: 100%;
+      height: auto;
+      border-radius: var(--border-radius);
+      object-fit: cover;
+      max-height: 250px; /* Limit height for aesthetic */
+      background-color: var(--light-gray); /* Placeholder background */
+      color: var(--gray);
+      display: block;
+      font-size: 0.9em;
+      text-align: center;
+      line-height: 250px; /* Vertically center placeholder text */
+  }
+
+  /* New CSS for image blur */
+  .social-post-card .post-image.blurred {
+      filter: blur(8px); /* Apply blur effect */
+      transition: filter 0.3s ease-in-out; /* Smooth transition for blur */
+  }
+
+  .social-post-card .post-actions {
+      display: flex;
+      justify-content: space-around; /* Evenly space items */
+      align-items: center;
+      margin-top: 1em;
+      padding-top: 0.8em;
+      border-top: 1px solid var(--block-border);
+  }
+
+  .social-post-card .post-action-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      color: var(--gray);
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: color 0.2s ease;
+  }
+
+  .social-post-card .post-action-item:hover {
+      color: var(--primary);
+  }
+
+  .social-post-card .post-action-item .icon {
+      font-size: 1.2em; /* Larger icon size */
+  }
+
+</style>
+
+</head>
+<body>
+  <div id="left-floating-menu">
+    <div class="mobile-menu-header">
+      <h3>Main Menu</h3>
+      <button id="closeLeftMenuBtn" class="close-mobile-menu-btn" title="Close main menu">X</button>
+    </div>
+    <button id="addLabelBtn" class="left-menu-button" title="Add a new blank label block">📄</button>
+    <div class="separator"></div>
+    <button id="collapseAllBtn" class="left-menu-button" title="Collapse all label content areas">➖</button>
+    <button id="expandAllBtn" class="left-menu-button" title="Expand all label content areas">➕</button>
+    <button id="goTopBtn" class="left-menu-button" title="Scroll to the top of the page">⬆️</button>
+    <button id="goToJsonBtn" class="left-menu-button" title="Scroll to JSON output section">⬇️</button>
+    <button id="resetClearBtn" class="left-menu-button" title="Clear all labels or reset to default">🧹</button>
+    <div class="separator"></div>
+    <button id="versionHistoryBtn" class="left-menu-button" title="View and revert to previous saved versions">📜</button>
+    <button id="saveBtn" class="left-menu-button" title="Save the current state as a new version in history">💾</button>
+    <button id="undoBtn" class="left-menu-button" disabled title="Undo the last change">↩️</button>
+    <button id="redoBtn" class="left-menu-button" disabled title="Redo the last undone change">↪️</button>
+    <div class="separator"></div>
+    <button id="saveSessionFileBtn" class="left-menu-button" title="Download current labels and categories as a session file (.ozm)">📥</button>
+    <button id="loadSessionFileBtn" class="left-menu-button" title="Load labels and categories from a session file (.ozm or .json)">📤</button>
+    <input type="file" id="sessionFileInput" accept=".json,.ozm" style="display:none" />
+    <div class="separator"></div>
+    <button id="optionsBtn" class="left-menu-button" title="Open options menu">⚙️</button>
+  </div>
+
+  <div id="container">
+    <header>
+      <a href="https://fema.monster" target="_blank" rel="noopener noreferrer" title="Go to fema.monster">
+        <img src="https://raw.githubusercontent.com/femavibes/ozone-label-master/refs/heads/main/femamonster.jpg" alt="Ozone Logo" onerror="this.onerror=null;this.src='https://placehold.co/48x48/6b7280/ffffff?text=LOGO';" />
+      </a>
+      <div class="header-text-group">
+        <h1>OZONE LABEL MASTER</h1>
+        <p>version 0.93</p>
+      </div>
+    </header>
+
+    <input type="text" id="searchInput" placeholder="Search labels and categories..." title="Filter labels by identifier, locale name, or category" />
+    <div id="duplicateWarning">⚠ Duplicate identifiers found!</div>
+
+    <div id="labels-container"></div>
+
+    <button id="pasteJsonBtn" class="action-button" title="Paste JSON data from clipboard into the editor">Paste JSON</button>
+    <button id="copyJsonBtn" class="action-button" title="Copy the generated JSON to clipboard">Copy JSON</button>
+    <span id="copyFeedback" class="copy-feedback">Copied!</span>
+    <button id="importJsonBtn" class="action-button" title="Import labels from a JSON file">Import JSON</button>
+    <button id="exportJsonBtn" class="action-button" title="Export current labels to a JSON file">Export JSON</button>
+    <input type="file" id="fileInput" accept=".json" style="display:none" />
+
+    <pre id="output" title="Generated JSON output of your labels"></pre>
+  </div>
+
+  <div id="right-side-menus-container">
+    <div id="stacked-left-right-column">
+        <div id="category-menu">
+            <div class="mobile-menu-header">
+                <h3>Categories</h3>
+                <button id="closeCategoryMenuBtnDesktop" class="close-mobile-menu-btn" title="Close categories menu">X</button>
+            </div>
+            <h3>Label Categories</h3>
+            <div class="category-input-group">
+                <input type="text" id="newCategoryInput" placeholder="New category name" title="Enter a new category name" />
+                <button id="addCategoryBtn" title="Add the new category">Add</button>
+            </div>
+            <div class="scrollable-content">
+                <ul id="category-list" style="list-style: none; padding: 0; margin-top: 1em;" title="List of existing categories">
+                </ul>
+            </div>
+            <button id="deleteSelectedCategoriesBtn" class="action-button danger-button" title="Delete all selected categories" style="margin-top: 1em;">Delete Selected Categories</button>
+        </div>
+
+        <div id="floating-menu">
+            <div class="mobile-menu-header">
+                <h3>Quick Access</h3>
+                <button id="closeRightMenuBtnDesktop" class="close-mobile-menu-btn" title="Close quick access menu">X</button>
+            </div>
+            <h3>Labels Quick Access</h3>
+            <div class="scrollable-content">
+                <ul id="label-quick-access-list" title="Quick access links to label blocks">
+                </ul>
+            </div>
+            <button id="deleteSelectedLabelsBtn" class="action-button danger-button" title="Delete all selected labels" style="margin-top: 1em;">Delete Selected Labels</button>
+        </div>
+    </div>
+
+    <div id="bulk-actions-menu">
+        <div class="mobile-menu-header">
+            <h3>Bulk Actions</h3>
+            <button id="closeBulkActionsMenuBtnDesktop" class="close-mobile-menu-btn" title="Close bulk actions menu">X</button>
+        </div>
+        <h3>Bulk Actions</h3>
+
+        <div class="label-block" style="margin-bottom: 1em;">
+            <div class="label-header" style="cursor: default;">
+                <div class="label-number-box">
+                    <span class="label-number"></span>
+                </div>
+                <div class="label-identifier-box">
+                    <span class="label-identifier-display">Bulk Edit Label Settings</span>
+                </div>
+                <div class="header-right-group">
+                    <div class="enabled-toggle-header">
+                        <span>Enabled:</span>
+                        <input type="checkbox" id="bulkEnabledControl" checked title="Toggle label enabled/disabled state">
+                    </div>
+                </div>
+            </div>
+            <div class="label-content">
+                <div class="input-group-row">
+                    <div>
+                        <label for="bulkPlaceholderIdentifier">Identifier:</label>
+                        <input type="text" id="bulkPlaceholderIdentifier" value="(Placeholder)" disabled title="This field is a placeholder for bulk actions">
+                    </div>
+                    <div>
+                        <label for="bulkBlursControl">Blurs:</label>
+                        <select id="bulkBlursControl" title="Set blur setting for selected labels">
+                            <option value="">(No Change)</option>
+                            <option value="content">content</option>
+                            <option value="media">media</option>
+                            <option value="none">none</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group-row">
+                    <div>
+                        <label for="bulkSeverityControl">Severity:</label>
+                        <select id="bulkSeverityControl" title="Set severity for selected labels">
+                            <option value="">(No Change)</option>
+                            <option value="inform">inform</option>
+                            <option value="alert">alert</option>
+                            <option value="none">none</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="bulkDefaultSettingControl">Default Setting:</label>
+                        <select id="bulkDefaultSettingControl" title="Set default setting for selected labels">
+                            <option value="">(No Change)</option>
+                            <option value="ignore">ignore</option>
+                            <option value="warn">warn</option>
+                            <option value="hide">hide</option>
+                        </select>
+                    </div>
+                </div>
+                <label style="margin-top: 1em;">Adult Only: <input type="checkbox" id="bulkAdultOnlyControl" title="Mark if this label is for adult content only"></label>
+                <button id="bulkApplyPropertiesBtn" class="action-button full-width-button" style="margin-top: 1em;" title="Apply selected property changes to target labels">Apply Selected Properties</button>
+            </div>
+        </div>
+
+        <div class="bulk-action-group">
+            <h3>Post Preview</h3>
+            <div id="blueskyPostPreview" class="social-post-card">
+                <div class="post-header">
+                    <a href="https://bsky.app/profile/did:plc:lptjvw6ut224kwrj7ub3sqbe" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.8em;">
+                        <img src="https://raw.githubusercontent.com/femavibes/ozone-label-master/refs/heads/main/femamonster.jpg" alt="User Avatar" class="post-avatar">
+                        <div class="post-user-info">
+                            <span class="post-username">fema 🚲</span>
+                            <span class="post-handle">@fema.monster</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="post-content">
+                    <div class="post-text">This is an example of a social media post, demonstrating how content might appear before moderation. Use the above bulk actions menu to see how these settings will affect a post on Bluesky.</div>
+                    <img src="https://placehold.co/400x200/9CA3AF/ffffff?text=Placeholder+Image" alt="Post Image" class="post-image">
+                </div>
+                <div class="post-actions">
+                    <div class="post-action-item">
+                        <span class="icon">💬</span>
+                        <span>0</span>
+                    </div>
+                    <div class="post-action-item">
+                        <span class="icon">🔁</span>
+                        <span>12</span>
+                    </div>
+                    <div class="post-action-item">
+                        <span class="icon">❤️</span>
+                        <span>345</span>
+                    </div>
+                    <div class="post-action-item">
+                        <span class="icon">…</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bulk-action-group snippet-management-section">
+            <h3>Description Snippets</h3>
+            <div class="snippet-input-group">
+                <label for="newSnippetName">Snippet Name:</label>
+                <input type="text" id="newSnippetName" placeholder="e.g., 'Common Disclaimer'" title="Enter a name for your snippet">
+                <label for="newSnippetContent">Snippet Content:</label>
+                <textarea id="newSnippetContent" placeholder="Enter the prewritten text here..." title="Enter the text content of your snippet"></textarea>
+            </div>
+            <div class="snippet-actions" style="justify-content: flex-start;">
+                <button id="addSnippetBtn" class="action-button" style="background: var(--primary); color: white;" title="Add this text as a reusable snippet">Add Snippet</button>
+            </div>
+            <div class="bulk-action-row" style="margin-top: 1em; display: flex; align-items: center; gap: 0.5em;">
+                <label for="bulkApplySnippetSelect" style="margin-top: 0;">Apply Snippet:</label>
+                <select id="bulkApplySnippetSelect" style="flex-grow: 1;" title="Select a snippet to apply to descriptions">
+                    <option value="">(Select Snippet)</option>
+                </select>
+                <button id="bulkApplySnippetBtn" class="action-button" disabled title="Apply the selected snippet to descriptions of target labels">Apply</button>
+            </div>
+            <button id="viewSnippetsBtn" class="action-button blue-button" style="width: 100%; margin-top: 0.5em;" title="View, edit, or delete existing snippets">View Snippets</button>
+        </div>
+    </div>
+  </div>
+
+  <div id="right-menu-wrapper-mobile" style="display: none;">
+      <div class="mobile-menu-header">
+          <h3>Right Menu</h3>
+          <button id="closeRightMenuBtnMobile" class="close-mobile-menu-btn" title="Close right menu">X</button>
+      </div>
+      </div>
+
+
+  <button id="mobileLeftMenuToggle" class="mobile-menu-toggle-button" title="Open main menu">☰</button>
+  <button id="mobileRightMenuToggle" class="mobile-menu-toggle-button" title="Open bulk actions and categories menu">⋮</button>
+
+
+  <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="spinner"></div>
+    <span>Loading...</span>
+  </div>
+
+  <div id="optionsModal" class="custom-modal-overlay" style="display: none;">
+    <div class="custom-modal-content">
+      <h3>App Options</h3>
+      <label for="defaultLocaleLangSelect" style="text-align: left; margin-bottom: 0.5em;">Default Locale Language:</label>
+      <select id="defaultLocaleLangSelect" title="Set the default language for new locales" style="width: 100%; padding: 0.5em; border-radius: var(--border-radius); border: 1px solid var(--input-border); background: var(--block-background); color: var(--text-color);">
+      </select>
+      <div class="theme-switch-wrapper" title="Toggle between light and dark mode">
+        <span class="theme-switch-label-text">Dark Mode</span>
+        <label class="theme-switch" for="checkbox">
+          <input type="checkbox" id="checkbox" />
+          <div class="slider round"></div>
+        </label>
+      </div>
+      <button id="closeOptionsModalBtn" class="confirm-btn" style="margin-top: 1em;">Close</button>
+    </div>
+  </div>
+
+  <div id="applySnippetModal" class="custom-modal-overlay" style="display: none;">
+    <div class="custom-modal-content">
+      <h3>Apply Description Snippet</h3>
+      <p>Select a snippet to apply to the description:</p>
+      <select id="snippetSelectForLocale" style="width: 100%; padding: 0.5em; border-radius: var(--border-radius); border: 1px solid var(--input-border); background: var(--block-background); color: var(--text-color);">
+        <option value="">(Select Snippet)</option>
+      </select>
+      <div style="display: flex; justify-content: center; gap: 0.5em;">
+        <button id="applySnippetToLocaleBtn" class="confirm-btn">Apply</button>
+        <button id="cancelApplySnippetToLocaleBtn" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="bulkTranslateModal" class="custom-modal-overlay" style="display: none;">
+    <div class="custom-modal-content">
+        <h3>Translate to Multiple Languages</h3>
+        <p>Select languages to translate the current locale's name and description into. Existing locales in target languages will be overwritten.</p>
+        <div class="modal-lang-options" id="bulkTranslateTargetLangsModal">
+            </div>
+        <div class="modal-buttons">
+            <button id="startBulkTranslateBtn" class="confirm-btn translate-button">Start Translation</button>
+            <button id="cancelBulkTranslateBtn" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+  </div>
+
+  <div id="pasteJsonModal" class="custom-modal-overlay" style="display: none;">
+    <div class="custom-modal-content">
+      <h3>Paste JSON Data</h3>
+      <p>Paste your JSON content below:</p>
+      <textarea id="pasteJsonTextarea" rows="10" placeholder="Paste JSON here..." style="width: 100%; padding: 0.75em; border: 1px solid var(--input-border); border-radius: var(--border-radius); background: var(--block-background); color: var(--text-color); resize: vertical;"></textarea>
+      <div style="display: flex; justify-content: center; gap: 0.5em;">
+        <button id="confirmPasteJsonBtn" class="confirm-btn">Paste</button>
+        <button id="cancelPasteJsonBtn" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="viewSnippetsModal" class="custom-modal-overlay" style="display: none;">
+    <div class="custom-modal-content">
+      <h3>All Description Snippets</h3>
+      <div style="max-height: 300px; overflow-y: auto; text-align: left; padding-right: 10px;">
+        <ul id="view-snippets-list" style="list-style: none; padding: 0; margin: 0;">
+          </ul>
+      </div>
+      <button id="closeViewSnippetsModalBtn" class="confirm-btn" style="margin-top: 1em;">Close</button>
+    </div>
+  </div>
+
+  <script type="module">
+    // No Firebase SDK imports needed as we are using Local Storage only.
+
+    let dragSrcEl = null; // For main label block drag-and-drop
+    let dragSrcQuickAccessEl = null; // For quick access link drag-and-drop
+    let dragSrcCategoryEl = null; // For category list item drag-and-drop
+
+    // --- State Management for Undo/Redo and Local Storage ---
+    const LOCAL_STORAGE_KEY = 'ozoneLabelMasterData'; // Now stores full session state
+    const HISTORY_LOCAL_STORAGE_KEY = 'ozoneLabelMasterHistory'; // New key for history
+    let history = []; // In-memory history for undo/redo
+    let historyIndex = -1;
+    let suppressSave = false; // Flag to prevent saving state during undo/redo operations
+    const MAX_HISTORY_SIZE = 50; // Limit in-memory history size
+
+    let categories = []; // Global array for categories
+    let selectedLabelIds = new Set(); // Stores IDs of currently selected labels for bulk actions
+    let selectedCategoryNames = new Set(); // Stores names of currently selected categories for bulk actions
+    let defaultLocaleLanguage = ''; // New global variable for default locale language
+    let descriptionSnippets = []; // New global variable for description snippets
+
+    // --- IMPORTANT: Clear selectedLabelIds at the very start of script execution ---
+    // This ensures a clean slate for selected IDs on every page load.
+    selectedLabelIds.clear();
+    console.log("Initial selectedLabelIds cleared:", selectedLabelIds);
+
+
+    // Show/Hide loading overlay
+    function showLoadingOverlay(message = 'Loading...') {
+      const overlay = document.getElementById('loadingOverlay');
+      overlay.style.display = 'flex';
+      overlay.querySelector('span').textContent = message;
+    }
+
+    function hideLoadingOverlay() {
+      const overlay = document.getElementById('loadingOverlay');
+      overlay.style.display = 'none';
+    }
+
+    // Custom Modal for alerts/confirms
+    function showCustomModal(message, type = 'alert', onConfirm = null, customContent = null) {
+      // Remove any existing modal overlays to prevent multiple modals
+      // IMPORTANT: Exclude the static optionsModal from this removal
+      document.querySelectorAll('.custom-modal-overlay:not(#optionsModal):not(#pasteJsonModal):not(#applySnippetModal):not(#bulkTranslateModal):not(#viewSnippetsModal)').forEach(el => el.remove());
+
+      const overlay = document.createElement('div');
+      overlay.className = 'custom-modal-overlay';
+
+      const content = document.createElement('div');
+      content.className = 'custom-modal-content';
+
+      if (customContent) {
+        content.appendChild(customContent);
+      } else {
+        content.innerHTML = `<p>${message}</p>`;
+      }
+
+
+      if (type === 'confirm') {
+        const confirmBtn = document.createElement('button');
+        confirmBtn.textContent = 'Confirm';
+        confirmBtn.className = 'confirm-btn';
+        confirmBtn.onclick = () => {
+          onConfirm(true);
+          overlay.remove();
+        };
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.className = 'cancel-btn';
+        cancelBtn.onclick = () => {
+          onConfirm(false);
+          overlay.remove();
+        };
+        content.appendChild(confirmBtn);
+        content.appendChild(cancelBtn);
+      } else if (type === 'alert') { // Explicitly check for 'alert'
+        const okBtn = document.createElement('button');
+        okBtn.textContent = 'OK';
+        okBtn.className = 'confirm-btn';
+        okBtn.onclick = () => overlay.remove();
+        content.appendChild(okBtn);
+      } else if (type === 'custom') { // For custom content, add a close button if onConfirm is null
+        if (!onConfirm) { // If no specific confirm/cancel logic, provide a simple close
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = 'Close';
+            closeBtn.className = 'cancel-btn'; // Use cancel-btn style for close
+            closeBtn.onclick = () => overlay.remove();
+            content.appendChild(closeBtn);
+        }
+      }
+      // No 'else' for 'custom' type, so no extra buttons are added if customContent is provided.
+
+      document.body.appendChild(overlay);
+      overlay.appendChild(content);
+    }
+
+    // This function saves the current working state to local storage for persistence across sessions.
+    function saveFullSessionStateToLocalStorage() {
+      const currentLabels = getLabelsData();
+      const currentSessionState = {
+        labels: currentLabels,
+        categories: categories,
+        defaultLocaleLanguage: defaultLocaleLanguage,
+        descriptionSnippets: descriptionSnippets
+      };
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentSessionState));
+      // console.log("Saved current session state to local storage:", currentSessionState); // Commented for less console noise
+    }
+
+    // This function saves the entire history array to local storage
+    function saveHistoryToLocalStorage() {
+        localStorage.setItem(HISTORY_LOCAL_STORAGE_KEY, JSON.stringify(history));
+        // console.log("Saved history to local storage:", history); // Commented for less console noise
+    }
+
+    // This function adds the current state as a new version to the history array.
+    function addVersionToHistory() {
+      showLoadingOverlay('Saving version...');
+      try {
+        const currentLabels = getLabelsData();
+        const versionData = {
+          labelValues: currentLabels.map(label => label.identifier), // New structure
+          labelValueDefinitions: currentLabels, // New structure
+          categories: categories, // Include categories in history snapshot
+          timestamp: new Date().toISOString(), // Use ISO string for date
+          defaultLocaleLanguage: defaultLocaleLanguage, // Include default locale language in history snapshot
+          descriptionSnippets: descriptionSnippets
+        };
+
+        // Update in-memory history for undo/redo
+        if (historyIndex < history.length - 1) {
+          history = history.slice(0, historyIndex + 1);
+        }
+        history.push(JSON.stringify(versionData)); // Store the entire versionData object
+        historyIndex = history.length - 1;
+
+        // Limit in-memory history size
+        if (history.length > MAX_HISTORY_SIZE) {
+          history.shift();
+          historyIndex--;
+        }
+
+        saveHistoryToLocalStorage(); // Persist updated history to local storage
+        updateUndoRedoButtons();
+        showCustomModal('Current version saved to history!', 'alert');
+      } catch (error) {
+        console.error("Error saving version to history:", error);
+        showCustomModal("Failed to save version. Please check console for details.", "alert");
+      } finally {
+        hideLoadingOverlay();
+      }
+    }
+
+
+    // Loads a specific state from history (for undo/redo and version history revert) or from session file
+    function loadState(stateJson) {
+      suppressSave = true; // Prevent saving this load operation to history
+      console.log('loadState called. suppressSave BEFORE:', suppressSave, 'historyIndex:', historyIndex);
+
+      selectedLabelIds.clear(); // IMPORTANT: Clear selected IDs on load
+      console.log("selectedLabelIds cleared at start of loadState:", selectedLabelIds);
+
+
+      const sessionData = JSON.parse(stateJson);
+
+      // Load Labels
+      const dataLabels = sessionData.labelValueDefinitions || sessionData.labels; // Support old and new formats
+      document.getElementById('labels-container').innerHTML = ''; // Ensure a clean slate
+      dataLabels.forEach((label, index) => { // Pass index to createLabelBlock
+        // Generate a unique HTML ID for this label block *before* creating it
+        const uniqueHtmlId = `label-${crypto.randomUUID()}`;
+        createLabelBlock(
+          label.identifier || label.id || '', // Backward compatibility
+          label.severity || 'inform',
+          label.blurs || 'content',
+          label.defaultSetting || 'ignore',
+          label.adultOnly || false,
+          label.enabled !== undefined ? label.enabled : true,
+          label.locales || [],
+          label.category || '',
+          index === 0, // Pass true if it's the first label being loaded
+          uniqueHtmlId // Pass the generated ID
+        );
+      });
+
+      // Load Categories
+      categories = sessionData.categories || [];
+      selectedCategoryNames.clear(); // Clear selection on load
+      renderCategoryMenu(); // Re-render category menu
+      updateLabelCategoryDropdowns(); // Update dropdowns in existing labels
+
+      // Load Default Locale Language
+      defaultLocaleLanguage = sessionData.defaultLocaleLanguage || '';
+      populateDefaultLocaleLanguageSelect(); // Update the dropdown in the options modal
+
+      // Load Description Snippets
+      descriptionSnippets = sessionData.descriptionSnippets || [];
+      // No longer rendering snippet list in main UI, just populate dropdown
+      populateBulkApplySnippetSelect(); // Populate the bulk apply snippet dropdown
+
+      updateJSONOutput(); // Update JSON output display
+      updateFloatingMenu();
+      suppressSave = false;
+      console.log('loadState finished. suppressSave AFTER:', suppressSave);
+      updateUndoRedoButtons();
+      updateLabelNumbers(); // Update numbers after loading state
+      console.log("selectedLabelIds after loadState:", selectedLabelIds);
+    }
+
+    // Undo the last change
+    function undo() {
+      console.log('Undo called. Before:', { history: history.length, index: historyIndex });
+      if (historyIndex > 0) {
+        historyIndex--;
+        loadState(history[historyIndex]);
+      }
+      console.log('Undo called. After:', { history: history.length, index: historyIndex });
+    }
+
+    // Redo the last undone change
+    function redo() {
+      console.log('Redo called. Before:', { history: history.length, index: historyIndex });
+      if (historyIndex < history.length - 1) {
+        historyIndex++;
+        loadState(history[historyIndex]);
+      }
+      console.log('Redo called. After:', { history: history.length, index: historyIndex });
+    }
+
+    // Update the disabled state of undo/redo buttons
+    function updateUndoRedoButtons() {
+      document.getElementById('undoBtn').disabled = historyIndex <= 0;
+      document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
+    }
+    // --- End State Management ---
+
+    // Define common languages for the dropdown
+    const commonLanguages = [
+      { code: 'en', name: 'English' },
+      { code: 'es', name: 'Spanish' },
+      { code: 'fr', name: 'French' },
+      { code: 'de', name: 'German' },
+      { code: 'ja', name: 'Japanese' },
+      { code: 'zh', name: 'Chinese (Simplified)' },
+      { code: 'ar', name: 'Arabic' },
+      { code: 'pt', name: 'Portuguese' },
+      { code: 'ru', name: 'Russian' },
+      { code: 'it', name: 'Italian' },
+      { code: 'ko', name: 'Korean' },
+      { code: 'nl', name: 'Dutch' },
+      { code: 'sv', name: 'Swedish' },
+      { code: 'pl', 'name': 'Polish' },
+      { code: 'tr', 'name': 'Turkish' },
+      { code: 'vi', 'name': 'Vietnamese' },
+      { code: 'id', 'name': 'Indonesian' },
+      { code: 'th', 'name': 'Thai' },
+      { code: 'hi', 'name': 'Hindi' },
+      { code: 'bn', 'name': 'Bengali' },
+      // Add more languages as needed
+    ];
+
+
+    // Function to update the duplicate warning message based on identifiers
+    function updateDuplicateWarning(identifiers) {
+      const seen = new Set();
+      const dupes = new Set();
+      identifiers.forEach(id => {
+        if (seen.has(id)) dupes.add(id);
+        seen.add(id);
+      });
+      document.getElementById('duplicateWarning').style.display = dupes.size > 0 ? 'block' : 'none';
+    }
+
+    // Function to update the visual state (disabled/enabled) of a label block
+    function updateLabelBlockVisualState(labelDiv) {
+      const enabledCheckbox = labelDiv.querySelector('.enabled');
+      if (enabledCheckbox) { // Check if the element exists
+        const enabled = enabledCheckbox.checked;
+        labelDiv.classList.toggle('disabled', !enabled);
+      }
+    }
+
+    // Function to update the display text for a locale block header
+    function updateLocaleDisplayName(localeDiv) {
+      const langSelect = localeDiv.querySelector('.lang');
+      const localeDisplayNameSpan = localeDiv.querySelector('.locale-identifier-display');
+      if (langSelect && localeDisplayNameSpan) {
+        const selectedOption = langSelect.options[langSelect.selectedIndex];
+        localeDisplayNameSpan.textContent = selectedOption.textContent || 'Select Language';
+      }
+    }
+
+    // Function to create a new locale block within a label
+    function createLocaleBlock(localesContainer, lang = '', name = '', description = '', isFirstLocale = false) { // Added isFirstLocale
+      const div = document.createElement('div');
+      div.className = 'locale-block';
+
+      let optionsHtml = '<option value="">Select Language</option>';
+      let foundExistingLang = false;
+
+      commonLanguages.forEach(langObj => {
+        const selected = (langObj.code === lang) ? 'selected' : '';
+        if (selected) foundExistingLang = true;
+        optionsHtml += `<option value="${langObj.code}" ${selected}>${langObj.name}</option>`;
+      });
+
+      // If the provided lang is not in our common list, add it as a selected option
+      if (lang && !foundExistingLang) {
+        optionsHtml += `<option value="${lang}" selected>${lang}</option>`; // Display code if name not found
+      }
+
+      let isCollapsed = false; // State for locale collapse
+
+      div.innerHTML = `
+        <div class="locale-header-row">
+          <button class="collapse-btn" title="Collapse/expand this locale's details">Collapse</button>
+          <span class="locale-identifier-display" style="flex:1; user-select:text;"></span>
+          <button class="locale-remove-btn" title="Remove this locale">×</button>
+        </div>
+        <div class="locale-content-area">
+          <label>Language:
+            <select class="lang" title="Select the language for this locale">
+              ${optionsHtml}
+            </select>
+          </label>
+          <label>Name: <input type="text" class="name" value="${name}" title="Enter the name for this locale"></label>
+          <label>Description: <textarea class="description" title="Enter the description for this locale">${description}</textarea></label>
+          <div class="locale-action-row"> <div class="llm-buttons">
+              <button class="translate-name-btn" title="Translate this locale's name using AI">Translate Name ✨</button>
+              <button class="translate-description-btn" title="Translate this locale's description using AI">Translate Description ✨</button>
+              ${isFirstLocale ? `<button class="translate-multiple-btn translate-button" title="Translate name and description to multiple languages">Bulk Translate ✨</button>` : ''}
+            </div>
+            <div class="snippet-action-group"> <button class="apply-snippet-btn blue-button" title="Apply a prewritten description snippet">Apply Snippet</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const collapseBtn = div.querySelector('.collapse-btn');
+      const localeContentArea = div.querySelector('.locale-content-area');
+
+      collapseBtn.onclick = () => {
+        isCollapsed = !isCollapsed;
+        localeContentArea.style.display = isCollapsed ? 'none' : 'block';
+        collapseBtn.textContent = isCollapsed ? 'Expand' : 'Collapse';
+      };
+
+      div.querySelector('.locale-remove-btn').onclick = () => {
+        div.remove();
+        saveFullSessionStateToLocalStorage(); // Save full session state
+        updateJSONOutput(); // Update JSON output display
+      };
+
+      const nameInput = div.querySelector('.name');
+      const descriptionTextarea = div.querySelector('.description');
+      const langSelect = div.querySelector('.lang');
+      const translateNameBtn = div.querySelector('.translate-name-btn');
+      const translateDescriptionBtn = div.querySelector('.translate-description-btn');
+      const translateMultipleBtn = div.querySelector('.translate-multiple-btn'); // New button
+      const applySnippetBtn = div.querySelector('.apply-snippet-btn'); // New snippet button
+
+      // Event listener for Apply Snippet button
+      applySnippetBtn.onclick = () => {
+        const snippetSelect = document.getElementById('snippetSelectForLocale');
+        snippetSelect.innerHTML = '<option value="">(Select Snippet)</option>';
+        descriptionSnippets.forEach((snippet, index) => {
+            const option = document.createElement('option');
+            option.value = index; // Use index as value to retrieve snippet
+            option.textContent = snippet.name;
+            snippetSelect.appendChild(option);
+        });
+
+        const applyModal = document.getElementById('applySnippetModal');
+        applyModal.style.display = 'flex';
+
+        const applyBtn = document.getElementById('applySnippetToLocaleBtn');
+        const cancelBtn = document.getElementById('cancelApplySnippetToLocaleBtn');
+
+        // Store a reference to the target textarea
+        applyBtn.dataset.targetTextareaId = descriptionTextarea.id;
+
+        applyBtn.onclick = () => {
+            const selectedIndex = snippetSelect.value;
+            if (selectedIndex !== '') {
+                const snippetText = descriptionSnippets[parseInt(selectedIndex)].content;
+                // Append snippet content, ensuring it starts on a new line
+                if (descriptionTextarea.value.trim() !== '') {
+                    descriptionTextarea.value += '\n' + snippetText;
+                } else {
+                    descriptionTextarea.value = snippetText;
+                }
+                saveFullSessionStateToLocalStorage();
+                updateJSONOutput();
+            }
+            applyModal.style.display = 'none';
+        };
+
+        cancelBtn.onclick = () => {
+            applyModal.style.display = 'none';
+        };
+      };
+
+
+      // Event listener for Translate Name button
+      translateNameBtn.onclick = async () => {
+        const currentName = nameInput.value.trim();
+        if (!currentName) {
+          showCustomModal('Please enter a name to translate.', 'alert');
+          return;
+        }
+
+        const selectTargetLang = document.createElement('select');
+        selectTargetLang.innerHTML = '<option value="">Select Target Language</option>';
+        commonLanguages.forEach(langObj => {
+          selectTargetLang.innerHTML += `<option value="${langObj.code}">${langObj.name}</option>`;
+        });
+        selectTargetLang.style.width = '100%';
+        selectTargetLang.style.marginBottom = '1em';
+        selectTargetLang.style.padding = '0.5em';
+        selectTargetLang.style.border = '1px solid var(--input-border)';
+        selectTargetLang.style.borderRadius = 'var(--border-radius)'; /* Uses variable */
+        selectTargetLang.style.background = 'var(--block-background)';
+        selectTargetLang.style.color = 'var(--text-color)';
+
+
+        const translatedTextarea = document.createElement('textarea');
+        translatedTextarea.readOnly = true;
+        translatedTextarea.placeholder = 'Translated text will appear here...';
+        translatedTextarea.style.width = '100%';
+        translatedTextarea.style.minHeight = '100px';
+        translatedTextarea.style.marginBottom = '1em';
+        translatedTextarea.style.padding = '10px';
+        translatedTextarea.style.border = '1px solid var(--input-border)';
+        translatedTextarea.style.borderRadius = 'var(--border-radius)'; /* Uses variable */
+        translatedTextarea.style.background = 'var(--output-background)';
+        translatedTextarea.style.color = 'var(--text-color)';
+        translatedTextarea.style.fontFamily = 'monospace';
+
+
+        const translateActionBtn = document.createElement('button');
+        translateActionBtn.textContent = 'Translate';
+        translateActionBtn.className = 'confirm-btn';
+        translateActionBtn.style.marginRight = '0.5em';
+        translateActionBtn.disabled = true; // Disable until language is selected
+
+        const applyBtn = document.createElement('button');
+        applyBtn.textContent = 'Apply Translation';
+        applyBtn.className = 'confirm-btn';
+        applyBtn.style.marginRight = '0.5em';
+        applyBtn.disabled = true; // Disable until translation is done
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.className = 'cancel-btn';
+
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(selectTargetLang);
+        wrapper.appendChild(translatedTextarea);
+        wrapper.appendChild(translateActionBtn);
+        wrapper.appendChild(applyBtn);
+        wrapper.appendChild(cancelBtn);
+
+        showCustomModal('Translate Name', 'custom', null, wrapper);
+
+        selectTargetLang.onchange = () => {
+          translateActionBtn.disabled = !selectTargetLang.value;
+        };
+
+        translateActionBtn.onclick = async () => {
+          const targetLangCode = selectTargetLang.value;
+          const targetLanguageName = selectTargetLang.options[selectTargetLang.selectedIndex].textContent;
+
+          if (!targetLangCode) {
+            showCustomModal('Please select a target language.', 'alert');
+            return;
+          }
+
+          showLoadingOverlay('Translating name...');
+          try {
+            const prompt = `Translate the following content moderation label name into ${targetLanguageName}. Only provide the translated text, no additional commentary.
+Original name:
+'${currentName}'`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            // IMPORTANT: Replace with your actual Gemini API Key here.
+            const apiKey = "AIzaSyDiYlt8YhzSFIqgvEE7qSFZHVcjYLRXu-c"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            const response = await fetch(apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, body: ${errorBody}`);
+            }
+
+            const result = await response.json();
+
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+              const translatedText = result.candidates[0].content.parts[0].text;
+              translatedTextarea.value = translatedText;
+              applyBtn.disabled = false;
+            } else {
+              showCustomModal('Failed to translate name. Unexpected API response structure.', 'alert');
+              console.error('Gemini API response structure unexpected:', result);
+            }
+          } catch (error) {
+            console.error('Error translating name:', error);
+            showCustomModal('Error translating name: ' + error.message, 'alert');
+          } finally {
+            hideLoadingOverlay();
+          }
+        };
+
+        applyBtn.onclick = () => {
+          nameInput.value = translatedTextarea.value; // Apply to name input
+          saveFullSessionStateToLocalStorage(); // Save full session state
+          updateJSONOutput(); // Update JSON output display
+          document.querySelector('.custom-modal-overlay').remove(); // Close the modal
+        };
+
+        cancelBtn.onclick = () => {
+          document.querySelector('.custom-modal-overlay').remove();
+        };
+      };
+
+
+      // Event listener for Translate Description button
+      translateDescriptionBtn.onclick = async () => {
+        const currentDescription = descriptionTextarea.value.trim();
+        if (!currentDescription) {
+          showCustomModal('Please enter a description to translate.', 'alert');
+          return;
+        }
+
+        const selectTargetLang = document.createElement('select');
+        selectTargetLang.innerHTML = '<option value="">Select Target Language</option>';
+        commonLanguages.forEach(langObj => {
+          selectTargetLang.innerHTML += `<option value="${langObj.code}" ${langObj.code === langSelect.value ? 'disabled' : ''}>${langObj.name}</option>`; // Disable source language
+        });
+        selectTargetLang.style.width = '100%';
+        selectTargetLang.style.marginBottom = '1em';
+        selectTargetLang.style.padding = '0.5em';
+        selectTargetLang.style.border = '1px solid var(--input-border)';
+        selectTargetLang.style.borderRadius = 'var(--border-radius)'; /* Uses variable */
+        selectTargetLang.style.background = 'var(--block-background)';
+        selectTargetLang.style.color = 'var(--text-color)';
+
+
+        const translatedTextarea = document.createElement('textarea');
+        translatedTextarea.readOnly = true;
+        translatedTextarea.placeholder = 'Translated text will appear here...';
+        translatedTextarea.style.width = '100%';
+        translatedTextarea.style.minHeight = '100px';
+        translatedTextarea.style.marginBottom = '1em';
+        translatedTextarea.style.padding = '10px';
+        translatedTextarea.style.border = '1px solid var(--input-border)';
+        translatedTextarea.style.borderRadius = 'var(--border-radius)'; /* Uses variable */
+        translatedTextarea.style.background = 'var(--output-background)';
+        translatedTextarea.style.color = 'var(--text-color)';
+        translatedTextarea.style.fontFamily = 'monospace';
+
+
+        const translateActionBtn = document.createElement('button');
+        translateActionBtn.textContent = 'Translate';
+        translateActionBtn.className = 'confirm-btn';
+        translateActionBtn.style.marginRight = '0.5em';
+        translateActionBtn.disabled = true; // Disable until language is selected
+
+        const applyBtn = document.createElement('button');
+        applyBtn.textContent = 'Apply Translation';
+        applyBtn.className = 'confirm-btn';
+        applyBtn.style.marginRight = '0.5em';
+        applyBtn.disabled = true; // Disable until translation is done
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.className = 'cancel-btn';
+
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(selectTargetLang);
+        wrapper.appendChild(translatedTextarea);
+        wrapper.appendChild(translateActionBtn);
+        wrapper.appendChild(applyBtn);
+        wrapper.appendChild(cancelBtn);
+
+        showCustomModal('Translate Description', 'custom', null, wrapper);
+
+        selectTargetLang.onchange = () => {
+          translateActionBtn.disabled = !selectTargetLang.value;
+        };
+
+        translateActionBtn.onclick = async () => {
+          const targetLangCode = selectTargetLang.value;
+          const targetLangName = selectTargetLang.options[selectTargetLang.selectedIndex].textContent;
+
+          if (!targetLangCode) {
+            showCustomModal('Please select a target language.', 'alert');
+            return;
+          }
+
+          showLoadingOverlay('Translating description...');
+          try {
+            const prompt = `Translate the following content moderation label description into ${targetLangName}. Only provide the translated text, no additional commentary.
+Original description:
+'${currentDescription}'`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            // IMPORTANT: Replace with your actual Gemini API Key here.
+            const apiKey = "AIzaSyDiYlt8YhzSFIqgvEE7qSFZHVcjYLRXu-c"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            const response = await fetch(apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, body: ${errorBody}`);
+            }
+
+            const result = await response.json();
+
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+              const translatedText = result.candidates[0].content.parts[0].text;
+              translatedTextarea.value = translatedText;
+              applyBtn.disabled = false;
+            } else {
+              showCustomModal('Failed to translate description. Unexpected API response structure.', 'alert');
+              console.error('Gemini API response structure unexpected:', result);
+            }
+          } catch (error) {
+            console.error('Error translating description:', error);
+            showCustomModal('Error translating description: ' + error.message, 'alert');
+          } finally {
+            hideLoadingOverlay();
+          }
+        };
+
+        applyBtn.onclick = () => {
+          descriptionTextarea.value = translatedTextarea.value;
+          saveFullSessionStateToLocalStorage(); // Save full session state
+          updateJSONOutput(); // Update JSON output display
+          document.querySelector('.custom-modal-overlay').remove(); // Close the modal
+        };
+
+        cancelBtn.onclick = () => {
+          document.querySelector('.custom-modal-overlay').remove();
+        };
+      };
+
+      // New: Event listener for Translate Multiple button
+      if (translateMultipleBtn) { // Only attach if the button exists (i.e., isFirstLocale is true)
+        translateMultipleBtn.onclick = () => {
+            const sourceLangCode = langSelect.value;
+            const sourceName = nameInput.value.trim();
+            const sourceDescription = descriptionTextarea.value.trim();
+
+            if (!sourceLangCode) {
+                showCustomModal('Please select a source language for this locale before translating to multiple languages.', 'alert');
+                return;
+            }
+            if (!sourceName && !sourceDescription) {
+                showCustomModal('Please enter a name or description in this locale to translate.', 'alert');
+                return;
+            }
+
+            // Populate modal checkboxes and show modal
+            populateBulkTranslateLanguageOptionsModal(sourceLangCode); // Pass source language to disable it
+            document.getElementById('bulkTranslateModal').style.display = 'flex';
+
+            // Store current locale data in modal for use by startBulkTranslateBtn
+            document.getElementById('startBulkTranslateBtn').dataset.sourceLangCode = sourceLangCode;
+            document.getElementById('startBulkTranslateBtn').dataset.sourceName = sourceName;
+            document.getElementById('startBulkTranslateBtn').dataset.sourceDescription = sourceDescription;
+            document.getElementById('startBulkTranslateBtn').dataset.labelId = div.closest('.label-block').id;
+        };
+      }
+
+
+      // Use 'change' event for select elements, 'input' for textareas/text inputs
+      langSelect.addEventListener('change', () => {
+        updateLocaleDisplayName(div); // Update display name on language change
+        saveFullSessionStateToLocalStorage(); // Save full session state
+        updateJSONOutput(); // Update JSON output display
+      });
+      nameInput.addEventListener('input', () => {
+        saveFullSessionStateToLocalStorage(); // Save full session state
+        updateJSONOutput(); // Update JSON output display
+      });
+      descriptionTextarea.addEventListener('input', () => {
+        saveFullSessionStateToLocalStorage(); // Save full session state
+        updateJSONOutput(); // Update JSON output display
+      });
+
+      localesContainer.appendChild(div); // Append the new locale block to the container
+      updateLocaleDisplayName(div); // Set initial display name
+
+      return div; // Return the created div
+    }
+
+    // Function to create a new label block
+    function createLabelBlock(id = '', severity = 'inform', blurs = 'content', defaultSetting = 'ignore', adultOnly = false, enabled = true, locales = [], category = '', isFirstLabel = false, htmlId = `label-${crypto.randomUUID()}`) { // Added htmlId parameter
+      const container = document.getElementById('labels-container');
+      const labelDiv = document.createElement('div');
+      labelDiv.className = 'label-block';
+      labelDiv.setAttribute('draggable', 'true');
+
+      // Use the provided htmlId or generate a new one
+      labelDiv.id = htmlId;
+
+      let isCollapsed = false;
+
+      // Define the user-friendly placeholder
+      const identifierPlaceholder = '(Untitled Label)';
+
+      labelDiv.innerHTML = `
+        <div class="label-header" title="Click to expand/collapse this label">
+          <div class="label-number-box">
+            <span class="label-number"></span>
+            <input type="checkbox" class="bulk-select-checkbox" data-label-id="${labelDiv.id}" title="Select this label for bulk actions">
+          </div>
+          <button class="collapse-btn" title="Collapse/expand this label's details">Collapse</button>
+          <div class="label-identifier-box">
+            <span class="label-identifier-display">${id || identifierPlaceholder}</span>
+          </div>
+          <div class="header-right-group">
+            <div class="enabled-toggle-header">
+              <span>Enabled:</span>
+              <input type="checkbox" class="enabled" ${enabled ? 'checked' : ''} title="Toggle label enabled/disabled state">
+            </div>
+            <div class="category-in-header">
+              <select id="${labelDiv.id}-category" class="label-category" title="Assign a category to this label">
+                <option value="">(No Category)</option>
+              </select>
+            </div>
+            <div class="header-action-buttons">
+              <button class="move-up-btn" title="Move label up in the list">▲</button>
+              <button class="move-down-btn" title="Move label down in the list">▼</button>
+              <button class="remove-btn" title="Remove this label permanently">×</button>
+            </div>
+          </div>
+        </div>
+        <div class="label-content">
+          <div class="input-group-row">
+            <div>
+              <label for="${labelDiv.id}-identifier">Identifier:</label>
+              <input type="text" id="${labelDiv.id}-identifier" class="identifier" value="${id}" title="Unique identifier for this label">
+            </div>
+            <div>
+              <label for="${labelDiv.id}-blurs">Blurs:</label>
+              <select id="${labelDiv.id}-blurs" class="blurs" title="Content blurring setting for the label">
+                <option value="content" ${blurs === 'content' ? 'selected' : ''}>content</option>
+                <option value="media" ${blurs === 'media' ? 'selected' : ''}>media</option>
+                <option value="none" ${blurs === 'none' ? 'selected' : ''}>none</option>
+              </select>
+            </div>
+          </div>
+          <div class="input-group-row">
+            <div>
+              <label for="${labelDiv.id}-severity">Severity:</label>
+              <select id="${labelDiv.id}-severity" class="severity" title="Severity level of the label">
+                <option value="inform" ${severity === 'inform' ? 'selected' : ''}>inform</option>
+                <option value="alert" ${severity === 'alert' ? 'selected' : ''}>alert</option>
+                <option value="none" ${severity === 'none' ? 'selected' : ''}>none</option>
+              </select>
+            </div>
+            <div>
+              <label for="${labelDiv.id}-defaultSetting">Default Setting:</label>
+              <select id="${labelDiv.id}-defaultSetting" class="defaultSetting" title="Default action when this label is applied">
+                <option value="ignore" ${defaultSetting === 'ignore' ? 'selected' : ''}>ignore</option>
+                <option value="warn" ${defaultSetting === 'warn' ? 'selected' : ''}>warn</option>
+                <option value="hide" ${defaultSetting === 'hide' ? 'selected' : ''}>hide</option>
+              </select>
+            </div>
+          </div>
+          <label>Adult Only: <input type="checkbox" class="adultOnly" ${adultOnly ? 'checked' : ''} title="Mark if this label is for adult content only"></label>
+          <div class="locales-container">
+            <strong>Locales:</strong>
+          </div>
+          <button class="add-locale-btn" title="Add a new language locale for this label">+ Add Locale</button>
+        </div>
+      `;
+
+      container.appendChild(labelDiv);
+
+      const collapseBtn = labelDiv.querySelector('.collapse-btn');
+      const labelContent = labelDiv.querySelector('.label-content');
+      collapseBtn.onclick = () => {
+        isCollapsed = !isCollapsed;
+        labelContent.style.display = isCollapsed ? 'none' : 'block';
+        collapseBtn.textContent = isCollapsed ? 'Expand' : 'Collapse';
+      };
+
+      labelDiv.querySelector('.remove-btn').onclick = () => {
+        showCustomModal('Are you sure you want to delete this label? This action cannot be undone.', 'confirm', (response) => {
+            if (response) {
+                labelDiv.remove();
+                selectedLabelIds.delete(labelDiv.id); // Remove from selection set
+                updateFloatingMenu(); // Update quick access checkboxes
+                saveFullSessionStateToLocalStorage(); // Save full session state
+                updateJSONOutput(); // Update JSON output display
+                updateLabelNumbers(); // Update numbers after removal
+                console.log("selectedLabelIds after label removal:", selectedLabelIds);
+            }
+        });
+      };
+
+      // New move buttons
+      labelDiv.querySelector('.move-up-btn').onclick = () => moveLabelUp(labelDiv);
+      labelDiv.querySelector('.move-down-btn').onclick = () => moveLabelDown(labelDiv);
+
+
+      const identifierInput = labelDiv.querySelector('.identifier');
+      const labelIdentifierDisplay = labelDiv.querySelector('.label-identifier-display'); // Get the span inside the new box
+      const categorySelect = labelDiv.querySelector('.label-category'); // New category select
+      const severitySelect = labelDiv.querySelector('.severity');
+      const blursSelect = labelDiv.querySelector('.blurs');
+      const defaultSettingSelect = labelDiv.querySelector('.defaultSetting');
+      const adultOnlyCheckbox = labelDiv.querySelector('.adultOnly');
+      const enabledCheckbox = labelDiv.querySelector('.enabled');
+      const bulkSelectCheckbox = labelDiv.querySelector('.bulk-select-checkbox'); // New bulk select checkbox
+
+      // Set initial category
+      if (category) {
+          categorySelect.value = category;
+      }
+
+      // Event listener for bulk select checkbox
+      bulkSelectCheckbox.addEventListener('change', () => {
+          if (bulkSelectCheckbox.checked) {
+              selectedLabelIds.add(labelDiv.id);
+          } else {
+              selectedLabelIds.delete(labelDiv.id);
+          }
+          updateFloatingMenu(); // Update quick access checkboxes
+          populateBulkApplySnippetSelect(); // Update button disabled state
+          console.log("selectedLabelIds after bulk select checkbox change:", selectedLabelIds);
+      });
+
+      // Use 'change' for select and checkbox, 'input' for text inputs
+      [severitySelect, blursSelect, defaultSettingSelect, categorySelect].forEach(elem => { // Added categorySelect
+        elem.addEventListener('change', () => {
+            saveFullSessionStateToLocalStorage(); // Save full session state
+            updateJSONOutput(); // Update JSON output display
+        });
+      });
+
+      [adultOnlyCheckbox, enabledCheckbox].forEach(elem => {
+        elem.addEventListener('change', () => {
+          if(elem.classList.contains('enabled')) {
+            updateLabelBlockVisualState(labelDiv);
+          }
+          saveFullSessionStateToLocalStorage(); // Save full session state
+          updateJSONOutput(); // Update JSON output display
+        });
+      });
+
+      identifierInput.addEventListener('input', () => {
+        labelIdentifierDisplay.textContent = identifierInput.value || identifierPlaceholder; // Update the text in the yellow box
+        checkDuplicates();
+        saveFullSessionStateToLocalStorage(); // Save full session state
+        updateJSONOutput(); // Update JSON output display
+      });
+
+      enabledCheckbox.addEventListener('change', () => {
+        updateLabelBlockVisualState(labelDiv);
+      });
+
+      const localesContainer = labelDiv.querySelector('.locales-container');
+      const addLocaleBtn = labelDiv.querySelector('.add-locale-btn');
+
+      // Add default locale if none exist
+      if (locales.length === 0) {
+        // Use the global defaultLocaleLanguage for new labels
+        createLocaleBlock(localesContainer, defaultLocaleLanguage, '', '', true); // Pass true for isFirstLocale
+      } else {
+        locales.forEach((loc, index) => { // Pass index to determine if it's the first locale
+          createLocaleBlock(localesContainer, loc.lang || '', loc.name || '', loc.description || '', index === 0);
+        });
+      }
+
+      addLocaleBtn.onclick = () => {
+        // Get values from the first existing locale to pre-fill the new one
+        const existingLocales = localesContainer.querySelectorAll('.locale-block');
+        let defaultLang = '';
+        let defaultName = '';
+        let defaultDescription = '';
+
+        if (existingLocales.length > 0) {
+          const firstLocale = existingLocales[0];
+          defaultLang = firstLocale.querySelector('.lang').value;
+          defaultName = firstLocale.querySelector('.name').value;
+          defaultDescription = firstLocale.querySelector('.description').value;
+        }
+
+        createLocaleBlock(localesContainer, defaultLang, defaultName, defaultDescription, false); // New locales are not the first
+        saveFullSessionStateToLocalStorage(); // Save full session state
+        updateJSONOutput(); // Update JSON output display
+      };
+
+      updateLabelBlockVisualState(labelDiv);
+      addDragHandlers(labelDiv);
+      updateLabelCategoryDropdowns(); // Update category dropdown for this new label
+      updateLabelNumbers(); // Update numbers after adding a new label
+
+      return labelDiv;
+    }
+
+    function addDragHandlers(labelDiv) {
+      labelDiv.addEventListener('dragstart', dragStart);
+      labelDiv.addEventListener('dragenter', dragEnter);
+      labelDiv.addEventListener('dragover', dragOver);
+      labelDiv.addEventListener('dragleave', dragLeave);
+      labelDiv.addEventListener('drop', drop);
+      labelDiv.addEventListener('dragend', dragEnd);
+    }
+
+    function dragStart(e) {
+      dragSrcEl = this;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', '');
+      this.style.opacity = '0.4';
+      this.classList.add('is-dragging'); /* Add class for visual feedback */
+    }
+
+    function dragEnter(e) {
+      if (this !== dragSrcEl) {
+        this.classList.add('over');
+      }
+    }
+
+    function dragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function dragLeave(e) {
+      this.classList.remove('over');
+    }
+
+    function drop(e) {
+      e.stopPropagation();
+      this.classList.remove('over');
+
+      if (dragSrcEl !== this) {
+        const container = document.getElementById('labels-container');
+        let nodes = Array.from(container.children);
+        let srcIndex = nodes.indexOf(dragSrcEl);
+        let tgtIndex = nodes.indexOf(this);
+
+        if (srcIndex < tgtIndex) {
+          container.insertBefore(dragSrcEl, this.nextSibling);
+        } else {
+          container.insertBefore(dragSrcEl, this);
+        }
+      }
+      saveFullSessionStateToLocalStorage(); // Save full session state
+      updateJSONOutput(); // Update JSON output display
+      updateLabelNumbers(); // Update numbers after drag and drop
+      return false;
+    }
+
+    function dragEnd(e) {
+      this.style.opacity = '1';
+      this.classList.remove('is-dragging'); /* Remove class after drag ends */
+      document.querySelectorAll('.label-block.over').forEach(el => el.classList.remove('over'));
+      // Re-apply visual state after drag ends
+      updateLabelBlockVisualState(this);
+    }
+
+    // Extracts current label data from the DOM
+    function getLabelsData() {
+      const labels = [];
+      document.querySelectorAll('.label-block').forEach(labelDiv => {
+        // Add null checks for each querySelector result
+        const identifierInput = labelDiv.querySelector('.identifier');
+        const identifier = identifierInput ? identifierInput.value.trim() : ''; // Default to empty string
+
+        const severitySelect = labelDiv.querySelector('.severity');
+        const severity = severitySelect ? severitySelect.value : 'inform'; // Default to 'inform'
+
+        const blursSelect = labelDiv.querySelector('.blurs');
+        const blurs = blursSelect ? blursSelect.value : 'content'; // Default to 'content'
+
+        const defaultSettingSelect = labelDiv.querySelector('.defaultSetting');
+        const defaultSetting = defaultSettingSelect ? defaultSettingSelect.value : 'ignore'; // Default to 'ignore'
+
+        const adultOnlyCheckbox = labelDiv.querySelector('.adultOnly');
+        const adultOnly = adultOnlyCheckbox ? adultOnlyCheckbox.checked : false; // Default to false
+
+        const enabledCheckbox = labelDiv.querySelector('.enabled');
+        const enabled = enabledCheckbox ? enabledCheckbox.checked : true; // Default to true
+
+        const categorySelect = labelDiv.querySelector('.label-category');
+        const category = categorySelect ? categorySelect.value : ''; // Default to empty string
+
+        const locales = [];
+        labelDiv.querySelectorAll('.locale-block').forEach(localeDiv => {
+          const langSelect = localeDiv.querySelector('.lang');
+          const lang = langSelect ? langSelect.value : '';
+
+          const nameInput = localeDiv.querySelector('.name');
+          const name = nameInput ? nameInput.value.trim() : '';
+
+          const descriptionTextarea = localeDiv.querySelector('.description');
+          const description = descriptionTextarea ? descriptionTextarea.value.trim() : '';
+
+          if(lang || name || description) { // Only push if at least one field has content
+            locales.push({lang, name, description});
+          }
+        });
+
+        labels.push({
+          identifier, // Use 'identifier' property name
+          severity,
+          blurs,
+          defaultSetting,
+          adultOnly,
+          enabled,
+          locales,
+          category: category || undefined // Only include if not empty
+        });
+      });
+      return labels;
+    }
+
+    // Function to generate and display the JSON output, and save state
+    function updateJSONOutput() { // Renamed from updateJSON
+      const currentLabels = getLabelsData(); // This returns the array of label objects as currently structured
+
+      const labelValues = currentLabels.map(label => label.identifier); // Extract only the identifiers
+      const labelValueDefinitions = currentLabels.map(label => {
+          const { category, ...rest } = label; // Exclude category from JSON output
+          return rest;
+      });
+
+      updateDuplicateWarning(labelValues); // Use labelValues for duplicate check
+
+      const output = {
+        labelValues: labelValues,
+        labelValueDefinitions: labelValueDefinitions
+      };
+
+      document.getElementById('output').textContent = JSON.stringify(output, null, 2);
+      saveFullSessionStateToLocalStorage(); // Save current state to local storage for persistence
+      updateFloatingMenu(); // Always update floating menu when JSON changes
+      updateMoveButtons(); // Update state of move buttons after JSON changes
+
+      // If not suppressing save (i.e., it's a user-initiated change), add to history
+      if (!suppressSave) {
+          addStateToHistoryForUndoAndRedo();
+      }
+    }
+
+    // Adds the current state to the in-memory history for undo/redo
+    function addStateToHistoryForUndoAndRedo() {
+        console.log('addStateToHistoryForUndoAndRedo called. suppressSave:', suppressSave);
+        // Prevent adding to history if suppressSave is true (e.g., during loadState)
+        if (suppressSave) return;
+
+        const currentLabels = getLabelsData();
+        // Ensure history also saves in the new format
+        const stateToSave = JSON.stringify({
+          labelValueDefinitions: currentLabels,
+          categories: categories,
+          defaultLocaleLanguage: defaultLocaleLanguage,
+          descriptionSnippets: descriptionSnippets
+        });
+
+        if (historyIndex < history.length - 1) {
+            history = history.slice(0, historyIndex + 1);
+        }
+        history.push(stateToSave);
+        historyIndex = history.length - 1;
+
+        if (history.length > MAX_HISTORY_SIZE) {
+            history.shift();
+            historyIndex--;
+        }
+        saveHistoryToLocalStorage();
+        updateUndoRedoButtons();
+    }
+
+    // Function to check for duplicate identifiers and update the warning
+    function checkDuplicates() {
+      const identifiers = Array.from(document.querySelectorAll('.label-block .identifier')).map(input => input.value.trim());
+      updateDuplicateWarning(identifiers);
+    }
+
+    // Function to update the label numbers in the quick access menu and main display
+    function updateLabelNumbers() {
+      document.querySelectorAll('.label-block').forEach((labelDiv, index) => {
+        const labelNumberSpan = labelDiv.querySelector('.label-number');
+        if (labelNumberSpan) {
+          labelNumberSpan.textContent = index + 1;
+        }
+      });
+
+      // Update quick access list numbers as well
+      updateFloatingMenu();
+    }
+
+    // Function to update the disabled state of move up/down buttons
+    function updateMoveButtons() {
+      const labelBlocks = document.querySelectorAll('.label-block');
+      labelBlocks.forEach((labelDiv, index) => {
+        const moveUpBtn = labelDiv.querySelector('.move-up-btn');
+        const moveDownBtn = labelDiv.querySelector('.move-down-btn');
+
+        if (moveUpBtn) {
+          moveUpBtn.disabled = (index === 0);
+        }
+        if (moveDownBtn) {
+          moveDownBtn.disabled = (index === labelBlocks.length - 1);
+        }
+      });
+    }
+
+    // Function to move a label block up in the list
+    function moveLabelUp(labelDiv) {
+      const prevSibling = labelDiv.previousElementSibling;
+      if (prevSibling) {
+        labelDiv.parentNode.insertBefore(labelDiv, prevSibling);
+        saveFullSessionStateToLocalStorage();
+        updateJSONOutput();
+        updateLabelNumbers();
+        updateMoveButtons();
+      }
+    }
+
+    // Function to move a label block down in the list
+    function moveLabelDown(labelDiv) {
+      const nextSibling = labelDiv.nextElementSibling;
+      if (nextSibling) {
+        labelDiv.parentNode.insertBefore(nextSibling, labelDiv);
+        saveFullSessionStateToLocalStorage();
+        updateJSONOutput();
+        updateLabelNumbers();
+        updateMoveButtons();
+      }
+    }
+
+    // --- Floating Menu (Quick Access) Functions ---
+    function updateFloatingMenu() {
+      const quickAccessList = document.getElementById('label-quick-access-list');
+      quickAccessList.innerHTML = ''; // Clear existing list
+
+      // Get all current label blocks from the main container
+      const currentLabelBlocks = document.querySelectorAll('.label-block');
+      const existingLabelIdsInDOM = new Set(Array.from(currentLabelBlocks).map(div => div.id));
+
+      // Filter selectedLabelIds to ensure only currently existing labels are tracked
+      selectedLabelIds = new Set(Array.from(selectedLabelIds).filter(id => existingLabelIdsInDOM.has(id)));
+      console.log("selectedLabelIds filtered in updateFloatingMenu:", selectedLabelIds);
+
+
+      currentLabelBlocks.forEach((labelDiv, index) => {
+        const uniqueHtmlId = labelDiv.id;
+        // Only proceed if the labelDiv actually exists in the DOM
+        if (!document.getElementById(uniqueHtmlId)) {
+            console.warn(`Skipping Quick Access entry for non-existent labelDiv ID: ${uniqueHtmlId}`);
+            return; // Skip this iteration if the labelDiv is not found
+        }
+
+        // Safely get the identifier input, defaulting to a placeholder if not found
+        const identifierInput = labelDiv.querySelector('.identifier');
+        const identifier = identifierInput ? identifierInput.value : '(Untitled Label)';
+        
+        const listItem = document.createElement('li');
+        listItem.setAttribute('draggable', 'true'); // Make list items draggable
+        listItem.dataset.labelId = uniqueHtmlId; // Store the ID for drag/drop
+        listItem.dataset.index = index; // Store the current index
+
+        listItem.innerHTML = `
+          <div class="label-number-box">
+            <span class="label-number">${index + 1}</span>
+            <input type="checkbox" class="quick-access-select-checkbox" data-label-id="${uniqueHtmlId}" ${selectedLabelIds.has(uniqueHtmlId) ? 'checked' : ''} title="Select this label">
+          </div>
+          <a href="#${uniqueHtmlId}" title="Jump to this label">${identifier}</a>
+        `;
+        quickAccessList.appendChild(listItem);
+
+        // Add event listener for quick access checkbox
+        listItem.querySelector('.quick-access-select-checkbox').addEventListener('change', (event) => {
+            const labelId = event.target.dataset.labelId;
+            if (event.target.checked) {
+                selectedLabelIds.add(labelId);
+            } else {
+                selectedLabelIds.delete(labelId);
+            }
+            // Also update the main label block's checkbox
+            const mainLabelCheckbox = document.querySelector(`#${labelId} .bulk-select-checkbox`);
+            if (mainLabelCheckbox) {
+                mainLabelCheckbox.checked = event.target.checked;
+            }
+            populateBulkApplySnippetSelect(); // Update button disabled state
+            console.log("selectedLabelIds after quick access checkbox change:", selectedLabelIds);
+        });
+
+        // Add drag handlers for quick access list items
+        listItem.addEventListener('dragstart', dragStartQuickAccess);
+        listItem.addEventListener('dragenter', dragEnterQuickAccess);
+        listItem.addEventListener('dragover', dragOverQuickAccess);
+        listItem.addEventListener('dragleave', dragLeaveQuickAccess);
+        listItem.addEventListener('drop', dropQuickAccess);
+        listItem.addEventListener('dragend', dragEndQuickAccess);
+      });
+    }
+
+    function dragStartQuickAccess(e) {
+      dragSrcQuickAccessEl = this;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', this.dataset.labelId); // Pass the label ID
+      this.classList.add('is-dragging');
+    }
+
+    function dragEnterQuickAccess(e) {
+      if (this !== dragSrcQuickAccessEl) {
+        this.classList.add('over');
+      }
+    }
+
+    function dragOverQuickAccess(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function dragLeaveQuickAccess(e) {
+      this.classList.remove('over');
+    }
+
+    function dropQuickAccess(e) {
+      e.stopPropagation();
+      this.classList.remove('over');
+
+      if (dragSrcQuickAccessEl !== this) {
+        const srcLabelId = dragSrcQuickAccessEl.dataset.labelId;
+        const targetLabelId = this.dataset.labelId;
+
+        const srcLabelDiv = document.getElementById(srcLabelId);
+        const targetLabelDiv = document.getElementById(targetLabelId);
+
+        if (srcLabelDiv && targetLabelDiv) {
+          const container = document.getElementById('labels-container');
+          let nodes = Array.from(container.children);
+          let srcIndex = nodes.indexOf(srcLabelDiv);
+          let tgtIndex = nodes.indexOf(targetLabelDiv);
+
+          if (srcIndex < tgtIndex) {
+            container.insertBefore(srcLabelDiv, targetLabelDiv.nextSibling);
+          } else {
+            container.insertBefore(srcLabelDiv, targetLabelDiv);
+          }
+          saveFullSessionStateToLocalStorage();
+          updateJSONOutput();
+          updateLabelNumbers(); // Re-number both main and quick access lists
+          updateMoveButtons();
+        }
+      }
+      return false;
+    }
+
+    function dragEndQuickAccess(e) {
+      this.classList.remove('is-dragging');
+      document.querySelectorAll('#label-quick-access-list li.over').forEach(el => el.classList.remove('over'));
+    }
+
+    // --- Category Management Functions ---
+    function renderCategoryMenu() {
+      const categoryList = document.getElementById('category-list');
+      categoryList.innerHTML = ''; // Clear existing list
+
+      categories.forEach((categoryName, index) => {
+        const listItem = document.createElement('li');
+        listItem.className = 'category-list-item';
+        listItem.setAttribute('draggable', 'true'); // Make categories draggable
+        listItem.dataset.categoryName = categoryName; // Store category name for drag/drop
+        listItem.dataset.index = index; // Store index for drag/drop
+
+        listItem.innerHTML = `
+          <div class="label-category-select-box">
+            <input type="checkbox" class="category-select-checkbox" data-category-name="${categoryName}" ${selectedCategoryNames.has(categoryName) ? 'checked' : ''} title="Select this category">
+          </div>
+          <span>${categoryName}</span>
+          <button class="remove-category-btn" data-category-name="${categoryName}" title="Remove this category">×</button>
+        `;
+        categoryList.appendChild(listItem);
+
+        listItem.querySelector('.remove-category-btn').onclick = (event) => {
+          const nameToRemove = event.target.dataset.categoryName;
+          showCustomModal(`Are you sure you want to delete the category "${nameToRemove}"? Labels assigned to this category will become uncategorized.`, 'confirm', (response) => {
+            if (response) {
+              categories = categories.filter(cat => cat !== nameToRemove);
+              selectedCategoryNames.delete(nameToRemove); // Remove from selection
+              // Unassign this category from all labels
+              document.querySelectorAll('.label-category').forEach(select => {
+                if (select.value === nameToRemove) {
+                  select.value = ''; // Set to no category
+                }
+              });
+              renderCategoryMenu();
+              saveFullSessionStateToLocalStorage();
+              updateJSONOutput(); // Trigger JSON update and history save
+            }
+          });
+        };
+
+        listItem.querySelector('.category-select-checkbox').addEventListener('change', (event) => {
+            const categoryName = event.target.dataset.categoryName;
+            if (event.target.checked) {
+                selectedCategoryNames.add(categoryName);
+            } else {
+                selectedCategoryNames.delete(categoryName);
+            }
+        });
+
+        // Add drag handlers for category list items
+        listItem.addEventListener('dragstart', dragStartCategory);
+        listItem.addEventListener('dragenter', dragEnterCategory);
+        listItem.addEventListener('dragover', dragOverCategory);
+        listItem.addEventListener('dragleave', dragLeaveCategory);
+        listItem.addEventListener('drop', dropCategory);
+        listItem.addEventListener('dragend', dragEndCategory);
+      });
+    }
+
+    function dragStartCategory(e) {
+      dragSrcCategoryEl = this;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', this.dataset.categoryName); // Pass the category name
+      this.classList.add('is-dragging');
+    }
+
+    function dragEnterCategory(e) {
+      if (this !== dragSrcCategoryEl) {
+        this.classList.add('over');
+      }
+    }
+
+    function dragOverCategory(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function dragLeaveCategory(e) {
+      this.classList.remove('over');
+    }
+
+    function dropCategory(e) {
+      e.stopPropagation();
+      this.classList.remove('over');
+
+      if (dragSrcCategoryEl !== this) {
+        const srcCategoryName = dragSrcCategoryEl.dataset.categoryName;
+        const targetCategoryName = this.dataset.categoryName;
+
+        const srcIndex = categories.indexOf(srcCategoryName);
+        const targetIndex = categories.indexOf(targetCategoryName);
+
+        if (srcIndex > -1 && targetIndex > -1) {
+          const [movedCategory] = categories.splice(srcIndex, 1);
+          categories.splice(targetIndex, 0, movedCategory);
+          renderCategoryMenu();
+          saveFullSessionStateToLocalStorage();
+          updateJSONOutput(); // Trigger JSON update and history save
+        }
+      }
+      return false;
+    }
+
+    function dragEndCategory(e) {
+      this.classList.remove('is-dragging');
+      document.querySelectorAll('#category-list li.over').forEach(el => el.classList.remove('over'));
+    }
+
+
+    function addCategory() {
+      const newCategoryInput = document.getElementById('newCategoryInput');
+      const newCategoryName = newCategoryInput.value.trim();
+      if (newCategoryName && !categories.includes(newCategoryName)) {
+        categories.push(newCategoryName);
+        newCategoryInput.value = '';
+        renderCategoryMenu();
+        updateLabelCategoryDropdowns(); // Update all label category dropdowns
+        saveFullSessionStateToLocalStorage();
+        updateJSONOutput(); // Trigger JSON update and history save
+      } else if (categories.includes(newCategoryName)) {
+        showCustomModal('Category already exists!', 'alert');
+      }
+    }
+
+    // Function to update all label category dropdowns
+    function updateLabelCategoryDropdowns() {
+      const categorySelects = document.querySelectorAll('.label-category');
+      categorySelects.forEach(select => {
+        const currentSelectedCategory = select.value; // Preserve current selection
+        select.innerHTML = '<option value="">(No Category)</option>'; // Reset options
+        categories.forEach(cat => {
+          const option = document.createElement('option');
+          option.value = cat;
+          option.textContent = cat;
+          if (cat === currentSelectedCategory) {
+            option.selected = true;
+          }
+          select.appendChild(option);
+        });
+      });
+    }
+
+    // --- Bulk Actions Functions ---
+    function applyBulkProperties() {
+      if (selectedLabelIds.size === 0) {
+        showCustomModal('No labels selected for bulk action.', 'alert');
+        return;
+      }
+
+      showCustomModal('Are you sure you want to apply these bulk properties to the selected labels?', 'confirm', (response) => {
+        if (response) {
+          const bulkBlursControl = document.getElementById('bulkBlursControl').value;
+          const bulkSeverityControl = document.getElementById('bulkSeverityControl').value;
+          const bulkDefaultSettingControl = document.getElementById('bulkDefaultSettingControl').value;
+          const bulkAdultOnlyControl = document.getElementById('bulkAdultOnlyControl').checked;
+          const bulkEnabledControl = document.getElementById('bulkEnabledControl').checked;
+
+
+          document.querySelectorAll('.label-block').forEach(labelDiv => {
+            if (selectedLabelIds.has(labelDiv.id)) {
+              const blursSelect = labelDiv.querySelector('.blurs');
+              const severitySelect = labelDiv.querySelector('.severity');
+              const defaultSettingSelect = labelDiv.querySelector('.defaultSetting');
+              const adultOnlyCheckbox = labelDiv.querySelector('.adultOnly');
+              const enabledCheckbox = labelDiv.querySelector('.enabled');
+
+              if (bulkBlursControl) blursSelect.value = bulkBlursControl;
+              if (bulkSeverityControl) severitySelect.value = bulkSeverityControl;
+              if (bulkDefaultSettingControl) defaultSettingSelect.value = bulkDefaultSettingControl;
+
+              adultOnlyCheckbox.checked = bulkAdultOnlyControl;
+              enabledCheckbox.checked = bulkEnabledControl;
+
+              // Manually trigger change events to update visual state and save
+              blursSelect.dispatchEvent(new Event('change'));
+              severitySelect.dispatchEvent(new Event('change'));
+              defaultSettingSelect.dispatchEvent(new Event('change'));
+              adultOnlyCheckbox.dispatchEvent(new Event('change'));
+              enabledCheckbox.dispatchEvent(new Event('change'));
+            }
+          });
+          saveFullSessionStateToLocalStorage();
+          updateJSONOutput();
+          showCustomModal('Bulk properties applied successfully!', 'alert');
+        }
+      });
+    }
+
+    function clearSelectedLabels() {
+      selectedLabelIds.clear();
+      document.querySelectorAll('.bulk-select-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+      });
+      document.querySelectorAll('.quick-access-select-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+      });
+      updateFloatingMenu(); // Re-render quick access to reflect cleared checkboxes
+      populateBulkApplySnippetSelect(); // Update button disabled state
+      console.log("selectedLabelIds after clearSelectedLabels:", selectedLabelIds);
+    }
+
+    function deleteSelectedLabels() {
+      if (selectedLabelIds.size === 0) {
+        showCustomModal('No labels selected for deletion.', 'alert');
+        return;
+      }
+
+      showCustomModal(`Are you sure you want to delete ${selectedLabelIds.size} selected labels? This action cannot be undone.`, 'confirm', (response) => {
+        if (response) {
+          const idsToDelete = new Set(selectedLabelIds); // Create a copy to iterate
+          idsToDelete.forEach(id => {
+            const labelDiv = document.getElementById(id);
+            if (labelDiv) {
+              labelDiv.remove();
+            } else {
+              console.warn(`Attempted to delete non-existent label block with ID: ${id}`);
+            }
+            selectedLabelIds.delete(id); // Ensure it's removed from the main set
+          });
+          // No need for selectedLabelIds.clear() here as we iterated and deleted each
+          saveFullSessionStateToLocalStorage();
+          updateJSONOutput();
+          updateLabelNumbers(); // Re-number remaining labels
+          showCustomModal('Selected labels deleted successfully!', 'alert');
+          console.log("selectedLabelIds after deleteSelectedLabels:", selectedLabelIds);
+        }
+      });
+    }
+
+    function deleteSelectedCategories() {
+      if (selectedCategoryNames.size === 0) {
+        showCustomModal('No categories selected for deletion.', 'alert');
+        return;
+      }
+
+      showCustomModal(`Are you sure you want to delete ${selectedCategoryNames.size} selected categories? Labels assigned to these categories will become uncategorized.`, 'confirm', (response) => {
+        if (response) {
+          selectedCategoryNames.forEach(name => {
+            categories = categories.filter(cat => cat !== name);
+            // Unassign this category from all labels
+            document.querySelectorAll('.label-category').forEach(select => {
+              if (select.value === name) {
+                select.value = ''; // Set to no category
+              }
+            });
+          });
+          selectedCategoryNames.clear(); // Clear the set after deletion
+          renderCategoryMenu();
+          updateLabelCategoryDropdowns(); // Update dropdowns in existing labels
+          saveFullSessionStateToLocalStorage();
+          updateJSONOutput(); // Trigger JSON update and history save
+          showCustomModal('Selected categories deleted successfully!', 'alert');
+        }
+      });
+    }
+
+    // --- Description Snippet Management ---
+    // Removed renderSnippetManagementUI as the list is now in the modal
+
+    function addOrUpdateSnippet() {
+        const nameInput = document.getElementById('newSnippetName');
+        const contentInput = document.getElementById('newSnippetContent');
+        const name = nameInput.value.trim();
+        const content = contentInput.value.trim();
+        const addBtn = document.getElementById('addSnippetBtn');
+        const editIndex = addBtn.dataset.editIndex;
+
+        if (!name || !content) {
+            showCustomModal('Snippet name and content cannot be empty.', 'alert');
+            return;
+        }
+
+        if (editIndex !== undefined) {
+            // Update existing snippet
+            const index = parseInt(editIndex);
+            descriptionSnippets[index] = { name, content };
+            delete addBtn.dataset.editIndex; // Clear edit mode
+            addBtn.textContent = 'Add Snippet';
+            addBtn.style.background = 'var(--primary)'; // Reset to primary color
+        } else {
+            // Add new snippet, check for duplicates
+            if (descriptionSnippets.some(snippet => snippet.name === name)) {
+                showCustomModal('A snippet with this name already exists.', 'alert');
+                return;
+            }
+            descriptionSnippets.push({ name, content });
+        }
+
+        nameInput.value = '';
+        contentInput.value = '';
+        // No longer calling renderSnippetManagementUI here
+        populateBulkApplySnippetSelect();
+        saveFullSessionStateToLocalStorage();
+        updateJSONOutput();
+        showCustomModal('Snippet saved successfully!', 'alert');
+    }
+
+    function populateBulkApplySnippetSelect() {
+        const select = document.getElementById('bulkApplySnippetSelect');
+        const currentSelectedValue = select.value; // Store current value
+        select.innerHTML = '<option value="">(Select Snippet)</option>';
+        descriptionSnippets.forEach((snippet, index) => {
+            const option = document.createElement('option');
+            option.value = index; // This is good, it's the numerical index
+            option.textContent = snippet.name;
+            select.appendChild(option);
+        });
+        select.value = currentSelectedValue; // Restore current value
+        // The button is disabled if no labels are selected OR no snippet is chosen
+        document.getElementById('bulkApplySnippetBtn').disabled = selectedLabelIds.size === 0 || select.value === '';
+    }
+
+    function bulkApplySnippet() {
+        const snippetIndex = document.getElementById('bulkApplySnippetSelect').value;
+        if (selectedLabelIds.size === 0) {
+            showCustomModal('No labels selected for bulk action.', 'alert');
+            return;
+        }
+        if (snippetIndex === '') {
+            showCustomModal('Please select a snippet to apply.', 'alert');
+            return;
+        }
+
+        const snippetToApply = descriptionSnippets[parseInt(snippetIndex)];
+
+        showCustomModal(`Are you sure you want to apply the snippet "${snippetToApply.name}" to the descriptions of all selected labels? This will append the snippet content to existing descriptions.`, 'confirm', (response) => {
+            if (response) {
+                document.querySelectorAll('.label-block').forEach(labelDiv => {
+                    if (selectedLabelIds.has(labelDiv.id)) {
+                        labelDiv.querySelectorAll('.locale-block').forEach(localeDiv => {
+                            const descriptionTextarea = localeDiv.querySelector('.description');
+                            if (descriptionTextarea) {
+                                if (descriptionTextarea.value.trim() !== '') {
+                                    descriptionTextarea.value += '\n' + snippetToApply.content;
+                                } else {
+                                    descriptionTextarea.value = snippetToApply.content;
+                                }
+                                descriptionTextarea.dispatchEvent(new Event('input')); // Trigger input event to save
+                            }
+                        });
+                    }
+                });
+                saveFullSessionStateToLocalStorage();
+                updateJSONOutput();
+                showCustomModal('Snippet applied to selected labels successfully!', 'alert');
+            }
+        });
+    }
+
+    // --- View Snippets Modal Functions ---
+    function populateViewSnippetsModal() {
+        const viewSnippetsList = document.getElementById('view-snippets-list');
+        viewSnippetsList.innerHTML = ''; // Clear existing list
+
+        if (descriptionSnippets.length === 0) {
+            viewSnippetsList.innerHTML = '<li style="color: var(--gray); font-size: 0.9em; text-align: center;">No snippets added yet.</li>';
+        }
+
+        descriptionSnippets.forEach((snippet, index) => {
+            const listItem = document.createElement('li');
+            listItem.className = 'snippet-item';
+            listItem.innerHTML = `
+                <div class="snippet-item-header">
+                    <span>${snippet.name}</span>
+                    <div style="display: flex; gap: 0.5em;"> <button class="snippet-action-btn edit-snippet-from-modal-btn" data-index="${index}" title="Edit this snippet">✏️</button>
+                        <button class="snippet-action-btn delete-snippet-from-modal-btn" data-index="${index}" title="Delete this snippet">🗑️</button>
+                    </div>
+                </div>
+                <div class="snippet-item-content">${snippet.content}</div>
+            `;
+            viewSnippetsList.appendChild(listItem);
+        });
+
+        // Attach event listeners for edit/delete buttons
+        viewSnippetsList.querySelectorAll('.edit-snippet-from-modal-btn').forEach(button => {
+            button.onclick = (event) => {
+                const index = parseInt(event.target.dataset.index);
+                const snippet = descriptionSnippets[index];
+                document.getElementById('newSnippetName').value = snippet.name;
+                document.getElementById('newSnippetContent').value = snippet.content;
+                
+                const addSnippetBtn = document.getElementById('addSnippetBtn');
+                addSnippetBtn.dataset.editIndex = index; // Store index for update
+                addSnippetBtn.textContent = 'Update Snippet';
+                addSnippetBtn.style.background = '#f59e0b'; // Amber color
+                
+                document.getElementById('viewSnippetsModal').style.display = 'none'; // Close modal
+            };
+        });
+
+        viewSnippetsList.querySelectorAll('.delete-snippet-from-modal-btn').forEach(button => {
+            button.onclick = (event) => {
+                const index = parseInt(event.target.dataset.index);
+                showCustomModal(`Are you sure you want to delete the snippet "${descriptionSnippets[index].name}"?`, 'confirm', (response) => {
+                    if (response) {
+                        const addBtn = document.getElementById('addSnippetBtn');
+                        // If the deleted snippet was the one being edited, reset the form
+                        if (addBtn.dataset.editIndex && parseInt(addBtn.dataset.editIndex) === index) {
+                            delete addBtn.dataset.editIndex;
+                            addBtn.textContent = 'Add Snippet';
+                            addBtn.style.background = 'var(--primary)';
+                            document.getElementById('newSnippetName').value = '';
+                            document.getElementById('newSnippetContent').value = '';
+                        }
+                        descriptionSnippets.splice(index, 1);
+                        populateBulkApplySnippetSelect(); // Update bulk apply dropdown
+                        populateViewSnippetsModal(); // Re-populate the modal
+                        saveFullSessionStateToLocalStorage();
+                        updateJSONOutput();
+                    }
+                });
+            };
+        });
+    }
+
+    // --- Bulk Translate Functionality (New) ---
+    function populateBulkTranslateLanguageOptionsModal(sourceLangCode) {
+        const modalOptionsDiv = document.getElementById('bulkTranslateTargetLangsModal');
+        modalOptionsDiv.innerHTML = ''; // Clear previous options
+
+        commonLanguages.forEach(langObj => {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = langObj.code;
+            checkbox.dataset.langName = langObj.name;
+            checkbox.id = `bulk-translate-lang-${langObj.code}`;
+            checkbox.disabled = (langObj.code === sourceLangCode); // Disable source language
+
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(langObj.name));
+            modalOptionsDiv.appendChild(label);
+        });
+    }
+
+    async function startBulkTranslate() {
+        const sourceLangCode = document.getElementById('startBulkTranslateBtn').dataset.sourceLangCode;
+        const sourceName = document.getElementById('startBulkTranslateBtn').dataset.sourceName;
+        const sourceDescription = document.getElementById('startBulkTranslateBtn').dataset.sourceDescription;
+        const targetLabelId = document.getElementById('startBulkTranslateBtn').dataset.labelId;
+
+        const selectedTargetLangs = [];
+        document.querySelectorAll('#bulkTranslateTargetLangsModal input[type="checkbox"]:checked').forEach(checkbox => {
+            selectedTargetLangs.push({
+                code: checkbox.value,
+                name: checkbox.dataset.langName
+            });
+        });
+
+        if (selectedTargetLangs.length === 0) {
+            showCustomModal('Please select at least one target language for translation.', 'alert');
+            return;
+        }
+
+        document.getElementById('bulkTranslateModal').style.display = 'none'; // Hide the modal
+
+        showLoadingOverlay('Starting bulk translation...');
+
+        const labelDiv = document.getElementById(targetLabelId);
+        if (!labelDiv) {
+            hideLoadingOverlay();
+            showCustomModal('Error: Target label not found.', 'alert');
+            return;
+        }
+
+        let translationsPerformed = 0;
+        let translationsFailed = 0;
+        let issues = [];
+
+        for (const targetLang of selectedTargetLangs) {
+            const targetLangCode = targetLang.code;
+            const targetLangName = targetLang.name;
+
+            // Check if locale already exists
+            let localeDiv = labelDiv.querySelector(`.locale-block .lang[value="${targetLangCode}"]`)?.closest('.locale-block');
+            
+            if (!localeDiv) {
+                // If locale doesn't exist, create it and get the direct reference
+                const localesContainer = labelDiv.querySelector('.locales-container');
+                // Pass false for isFirstLocale as we are adding subsequent locales for translation
+                localeDiv = createLocaleBlock(localesContainer, targetLangCode, '', '', false);
+            }
+
+            // After creation (or if it already existed), ensure localeDiv is valid
+            if (!localeDiv) {
+                issues.push(`Failed to find or create locale for ${targetLangName}.`);
+                translationsFailed++;
+                continue;
+            }
+
+            const nameInput = localeDiv.querySelector('.name');
+            const descriptionTextarea = localeDiv.querySelector('.description');
+
+            try {
+                // Translate Name
+                if (sourceName) {
+                    showLoadingOverlay(`Translating name for ${targetLangName}...`);
+                    const namePrompt = `Translate the following content moderation label name into ${targetLangName}. Only provide the translated text, no additional commentary.
+Original name:
+'${sourceName}'`;
+                    const translatedName = await callGeminiAPI(namePrompt);
+                    nameInput.value = translatedName;
+                }
+
+                // Translate Description
+                if (sourceDescription) {
+                    showLoadingOverlay(`Translating description for ${targetLangName}...`);
+                    const descriptionPrompt = `Translate the following content moderation label description into ${targetLangName}. Only provide the translated text, no additional commentary.
+Original description:
+'${sourceDescription}'`;
+                    const translatedDescription = await callGeminiAPI(descriptionPrompt);
+                    descriptionTextarea.value = translatedDescription;
+                }
+                translationsPerformed++;
+            } catch (error) {
+                issues.push(`Failed to translate for locale ${sourceLangCode} to ${targetLangName}: ${error.message}`);
+                translationsFailed++;
+            }
+        }
+
+        hideLoadingOverlay();
+        saveFullSessionStateToLocalStorage();
+        updateJSONOutput();
+
+        let finalMessage = `Translation complete. ${translationsPerformed} translations performed.`;
+        if (translationsFailed > 0) {
+            finalMessage += ` Some translations encountered issues: ${issues.join('; ')}`;
+        }
+        showCustomModal(finalMessage, 'alert');
+    }
+
+    async function callGeminiAPI(prompt) {
+        let chatHistory = [];
+        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+        const payload = { contents: chatHistory };
+        // IMPORTANT: Replace with your actual Gemini API Key here.
+        const apiKey = "AIzaSyDiYlt8YhzSFIqgvEE7qSFZHVcjYLRXu-c"; 
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, body: ${errorBody}`);
+        }
+
+        const result = await response.json();
+
+        if (result.candidates && result.candidates.length > 0 &&
+            result.candidates[0].content && result.candidates[0].content.parts &&
+            result.candidates[0].content.parts.length > 0) {
+            return result.candidates[0].content.parts[0].text;
+        } else {
+            throw new Error('Unexpected API response structure or no content.');
+        }
+    }
+
+
+    // --- Event Listeners and Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // ALWAYS clear the labels container at the very beginning
+      document.getElementById('labels-container').innerHTML = '';
+      console.log("DOM Content Loaded. labels-container cleared.");
+
+      // Load saved state from local storage or initialize default
+      const savedState = localStorage.getItem(LOCAL_STORAGE_KEY);
+      let parsedState = null;
+      if (savedState) {
+        try {
+          parsedState = JSON.parse(savedState);
+        } catch (e) {
+          console.error("Error parsing saved state from local storage, resetting:", e);
+          localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear corrupted data
+        }
+      }
+
+      if (parsedState) {
+        loadState(JSON.stringify(parsedState)); // Pass the stringified parsed object back to loadState
+      } else {
+        // Initial state if no valid saved data or corrupted data was found
+        createLabelBlock('example_label', 'inform', 'content', 'ignore', false, true, [{lang: 'en', name: 'Example Label', description: 'This is an example label for demonstration purposes.'}], '', true);
+        updateJSONOutput(); // This will save the initial state and add to history
+      }
+
+      // Load history from local storage
+      const savedHistory = localStorage.getItem(HISTORY_LOCAL_STORAGE_KEY);
+      if (savedHistory) {
+          history = JSON.parse(savedHistory);
+          historyIndex = history.length - 1;
+      } else {
+          // If no history, and we just created an initial state, add it to history
+          // This check ensures we don't add a duplicate if loadState already populated history
+          if (history.length === 0 && document.querySelectorAll('.label-block').length > 0) {
+              addStateToHistoryForUndoAndRedo();
+          }
+      }
+      updateUndoRedoButtons();
+
+
+      // Attach event listeners to buttons
+      document.getElementById('addLabelBtn').onclick = () => {
+        createLabelBlock('', 'inform', 'content', 'ignore', false, true, [], '', false); // New labels are not the first
+        saveFullSessionStateToLocalStorage(); // Save full session state
+        updateJSONOutput(); // Update JSON output display
+      };
+
+      document.getElementById('copyJsonBtn').onclick = () => {
+        const outputText = document.getElementById('output').textContent;
+        // Use document.execCommand('copy') for better iframe compatibility
+        const textarea = document.createElement('textarea');
+        textarea.value = outputText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            const feedback = document.getElementById('copyFeedback');
+            feedback.classList.add('show');
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            showCustomModal('Failed to copy JSON to clipboard. Please copy manually.', 'alert');
+        } finally {
+            document.body.removeChild(textarea);
+        }
+      };
+
+      document.getElementById('pasteJsonBtn').onclick = () => {
+        const pasteJsonModal = document.getElementById('pasteJsonModal');
+        const pasteJsonTextarea = document.getElementById('pasteJsonTextarea');
+        const confirmPasteJsonBtn = document.getElementById('confirmPasteJsonBtn');
+        const cancelPasteJsonBtn = document.getElementById('cancelPasteJsonBtn');
+
+        pasteJsonTextarea.value = ''; // Clear previous content
+        pasteJsonModal.style.display = 'flex';
+
+        const handleConfirm = () => {
+          showCustomModal('Pasting JSON will overwrite your current labels. Are you sure?', 'confirm', (response) => {
+            if (response) {
+              try {
+                const text = pasteJsonTextarea.value;
+                const parsedData = JSON.parse(text);
+
+                // Check if it's the old format (labels array) or new format (labelValueDefinitions)
+                const labelsToLoad = parsedData.labelValueDefinitions || parsedData.labels;
+
+                if (!Array.isArray(labelsToLoad)) {
+                  throw new Error('Invalid JSON format. Expected an array of labels.');
+                }
+
+                // Clear selectedLabelIds before loading new labels
+                selectedLabelIds.clear();
+                console.log("selectedLabelIds cleared before paste JSON load:", selectedLabelIds);
+
+
+                document.getElementById('labels-container').innerHTML = ''; // Clear existing
+                labelsToLoad.forEach((label, index) => { // Pass index to createLabelBlock
+                  // Generate a unique HTML ID for this label block *before* creating it
+                  const uniqueHtmlId = `label-${crypto.randomUUID()}`;
+                  createLabelBlock(
+                    label.identifier || label.id || '', // Support old 'id' or new 'identifier'
+                    label.severity || 'inform',
+                    label.blurs || 'content',
+                    label.defaultSetting || 'ignore',
+                    label.adultOnly || false,
+                    label.enabled !== undefined ? label.enabled : true,
+                    label.locales || [],
+                    label.category || '',
+                    index === 0, // Pass true if it's the first label being loaded
+                    uniqueHtmlId // Pass the generated ID
+                  );
+                });
+
+                // If categories are present in the pasted JSON, update them
+                if (parsedData.categories && Array.isArray(parsedData.categories)) {
+                    categories = parsedData.categories;
+                    renderCategoryMenu();
+                    updateLabelCategoryDropdowns();
+                }
+
+                // If defaultLocaleLanguage is present, update it
+                if (parsedData.defaultLocaleLanguage) {
+                    defaultLocaleLanguage = parsedData.defaultLocaleLanguage;
+                    populateDefaultLocaleLanguageSelect();
+                }
+
+                // If descriptionSnippets are present, update them
+                if (parsedData.descriptionSnippets && Array.isArray(parsedData.descriptionSnippets)) {
+                    descriptionSnippets = parsedData.descriptionSnippets;
+                    // No longer calling renderSnippetManagementUI here
+                    populateBulkApplySnippetSelect();
+                }
+
+
+                saveFullSessionStateToLocalStorage(); // Save the new state
+                updateJSONOutput(); // Update output and history
+                showCustomModal('JSON pasted successfully!', 'alert');
+              } catch (error) {
+                console.error('Error pasting JSON:', error);
+                showCustomModal('Failed to paste JSON. Ensure it is valid JSON. Error: ' + error.message, 'alert');
+              } finally {
+                pasteJsonModal.style.display = 'none'; // Close the manual paste modal
+              }
+            }
+          });
+        };
+
+        confirmPasteJsonBtn.onclick = handleConfirm;
+        cancelPasteJsonBtn.onclick = () => {
+          pasteJsonModal.style.display = 'none';
+        };
+      };
+
+      document.getElementById('importJsonBtn').onclick = () => {
+        showCustomModal('Importing JSON from a file will overwrite your current labels. Are you sure?', 'confirm', (response) => {
+          if (response) {
+            document.getElementById('fileInput').click();
+          }
+        });
+      };
+
+      document.getElementById('fileInput').onchange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const parsedData = JSON.parse(e.target.result);
+              const labelsToLoad = parsedData.labelValueDefinitions || parsedData.labels;
+
+              if (!Array.isArray(labelsToLoad)) {
+                throw new Error('Invalid JSON format. Expected an array of labels.');
+              }
+
+              // Clear selectedLabelIds before loading new labels
+              selectedLabelIds.clear();
+              console.log("selectedLabelIds cleared before import JSON load:", selectedLabelIds);
+
+
+              document.getElementById('labels-container').innerHTML = ''; // Clear existing
+              labelsToLoad.forEach((label, index) => { // Pass index to createLabelBlock
+                // Generate a unique HTML ID for this label block *before* creating it
+                const uniqueHtmlId = `label-${crypto.randomUUID()}`;
+                createLabelBlock(
+                  label.identifier || label.id || '',
+                  label.severity || 'inform',
+                  label.blurs || 'content',
+                  label.defaultSetting || 'ignore',
+                  label.adultOnly || false,
+                  label.enabled !== undefined ? label.enabled : true,
+                  label.locales || [],
+                  label.category || '',
+                  index === 0, // Pass true if it's the first label being loaded
+                  uniqueHtmlId // Pass the generated ID
+                );
+              });
+
+              // If categories are present in the imported JSON, update them
+              if (parsedData.categories && Array.isArray(parsedData.categories)) {
+                  categories = parsedData.categories;
+                  renderCategoryMenu();
+                  updateLabelCategoryDropdowns();
+              }
+
+              // If defaultLocaleLanguage is present, update it
+              if (parsedData.defaultLocaleLanguage) {
+                  defaultLocaleLanguage = parsedData.defaultLocaleLanguage;
+                  populateDefaultLocaleLanguageSelect();
+              }
+
+              // If descriptionSnippets are present, update them
+              if (parsedData.descriptionSnippets && Array.isArray(parsedData.descriptionSnippets)) {
+                  descriptionSnippets = parsedData.descriptionSnippets;
+                  // No longer calling renderSnippetManagementUI here
+                  populateBulkApplySnippetSelect();
+              }
+
+              saveFullSessionStateToLocalStorage(); // Save the new state
+              updateJSONOutput(); // Update output and history
+              showCustomModal('JSON imported successfully!', 'alert');
+            } catch (error) {
+              console.error('Error importing JSON:', error);
+              showCustomModal('Failed to import JSON. Ensure the file is a valid JSON. Error: ' + error.message, 'alert');
+            }
+          };
+          reader.readAsText(file);
+        }
+      };
+
+      document.getElementById('exportJsonBtn').onclick = () => {
+        const outputText = document.getElementById('output').textContent;
+        const blob = new Blob([outputText], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ozone_labels.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      };
+
+      document.getElementById('searchInput').addEventListener('input', (event) => {
+        const searchTerm = event.target.value.toLowerCase();
+        document.querySelectorAll('.label-block').forEach(labelDiv => {
+          const identifier = labelDiv.querySelector('.identifier').value.toLowerCase();
+          const category = labelDiv.querySelector('.label-category').value.toLowerCase();
+          const locales = Array.from(labelDiv.querySelectorAll('.locale-block')).map(localeDiv => {
+            const lang = localeDiv.querySelector('.lang').options[localeDiv.querySelector('.lang').selectedIndex].textContent.toLowerCase();
+            const name = localeDiv.querySelector('.name').value.toLowerCase();
+            const description = localeDiv.querySelector('.description').value.toLowerCase();
+            return `${lang} ${name} ${description}`;
+          }).join(' ');
+
+          const isVisible = identifier.includes(searchTerm) ||
+                            locales.includes(searchTerm) ||
+                            category.includes(searchTerm);
+          labelDiv.style.display = isVisible ? 'block' : 'none';
+        });
+      });
+
+      document.getElementById('resetClearBtn').onclick = () => {
+        showCustomModal('Are you sure you want to clear all labels and reset to default? This action cannot be undone.', 'confirm', (response) => {
+          if (response) {
+            selectedLabelIds.clear(); // IMPORTANT: Clear selected IDs immediately on reset
+            console.log("selectedLabelIds cleared on reset button click:", selectedLabelIds);
+            document.getElementById('labels-container').innerHTML = '';
+            categories = []; // Clear categories too
+            descriptionSnippets = []; // Clear snippets
+            defaultLocaleLanguage = 'en'; // Reset default locale
+            
+            createLabelBlock('example_label', 'inform', 'content', 'ignore', false, true, [{lang: 'en', name: 'Example Label', description: 'This is an example label for demonstration purposes.'}], '', true); // Pass true for isFirstLabel
+            saveFullSessionStateToLocalStorage(); // Save the cleared state
+            updateJSONOutput(); // Update JSON output and history
+            renderCategoryMenu(); // Re-render category menu
+            updateLabelCategoryDropdowns(); // Update label dropdowns
+            populateBulkApplySnippetSelect(); // Update bulk apply snippet dropdown
+            updateFloatingMenu(); // Rebuild floating menu to reflect cleared selection
+            updateLabelNumbers(); // Re-numbers
+            updateMoveButtons(); // Updates move buttons
+            showCustomModal('All labels cleared and reset to default!', 'alert');
+          }
+        });
+      };
+
+      document.getElementById('collapseAllBtn').onclick = () => {
+        document.querySelectorAll('.label-block .collapse-btn').forEach(btn => {
+          const content = btn.closest('.label-block').querySelector('.label-content');
+          if (content.style.display !== 'none') {
+            content.style.display = 'none';
+            btn.textContent = 'Expand';
+          }
+        });
+        document.querySelectorAll('.locale-block .collapse-btn').forEach(btn => {
+          const content = btn.closest('.locale-block').querySelector('.locale-content-area');
+          if (content.style.display !== 'none') {
+            content.style.display = 'none';
+            btn.textContent = 'Expand';
+          }
+        });
+      };
+
+      document.getElementById('expandAllBtn').onclick = () => {
+        document.querySelectorAll('.label-block .collapse-btn').forEach(btn => {
+          const content = btn.closest('.label-block').querySelector('.label-content');
+          if (content.style.display === 'none') {
+            content.style.display = 'block';
+            btn.textContent = 'Collapse';
+          }
+        });
+        document.querySelectorAll('.locale-block .collapse-btn').forEach(btn => {
+          const content = btn.closest('.locale-block').querySelector('.locale-content-area');
+          if (content.style.display === 'none') {
+            content.style.display = 'block';
+            btn.textContent = 'Collapse';
+          }
+        });
+      };
+
+      document.getElementById('goTopBtn').onclick = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      document.getElementById('goToJsonBtn').onclick = () => {
+        document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+      };
+
+      // Mobile menu toggles
+      const mobileLeftMenuToggle = document.getElementById('mobileLeftMenuToggle');
+      const mobileRightMenuToggle = document.getElementById('mobileRightMenuToggle');
+      const leftFloatingMenu = document.getElementById('left-floating-menu');
+      const rightMenuWrapperMobile = document.getElementById('right-menu-wrapper-mobile');
+      const closeLeftMenuBtn = document.getElementById('closeLeftMenuBtn');
+      const closeRightMenuBtnMobile = document.getElementById('closeRightMenuBtnMobile');
+
+      // Move desktop right menus into mobile wrapper if on mobile
+      if (window.innerWidth <= 992) {
+          const categoryMenuDesktop = document.getElementById('category-menu');
+          const floatingMenuDesktop = document.getElementById('floating-menu');
+          const bulkActionsMenuDesktop = document.getElementById('bulk-actions-menu');
+
+          // Create mobile specific menu containers
+          const categoryMenuMobile = document.createElement('div');
+          categoryMenuMobile.id = 'category-menu-mobile';
+          categoryMenuMobile.className = 'category-menu'; // Keep class for styling
+          categoryMenuMobile.innerHTML = categoryMenuDesktop.innerHTML; // Copy content
+
+          const floatingMenuMobile = document.createElement('div');
+          floatingMenuMobile.id = 'floating-menu-mobile';
+          floatingMenuMobile.className = 'floating-menu'; // Keep class for styling
+          floatingMenuMobile.innerHTML = floatingMenuDesktop.innerHTML; // Copy content
+
+          const bulkActionsMenuMobile = document.createElement('div');
+          bulkActionsMenuMobile.id = 'bulk-actions-menu-mobile';
+          bulkActionsMenuMobile.className = 'bulk-actions-menu'; // Keep class for styling
+          bulkActionsMenuMobile.innerHTML = bulkActionsMenuDesktop.innerHTML; // Copy content
+
+
+          rightMenuWrapperMobile.appendChild(bulkActionsMenuMobile);
+          rightMenuWrapperMobile.appendChild(categoryMenuMobile);
+          rightMenuWrapperMobile.appendChild(floatingMenuMobile);
+
+          // Re-attach event listeners for elements moved to mobile menus
+          // Category Menu
+          categoryMenuMobile.querySelector('#addCategoryBtn').onclick = addCategory;
+          categoryMenuMobile.querySelector('#deleteSelectedCategoriesBtn').onclick = deleteSelectedCategories;
+          categoryMenuMobile.querySelector('#newCategoryInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addCategory();
+          });
+          // Note: category list item event listeners are re-attached by renderCategoryMenu()
+
+          // Quick Access Menu
+          floatingMenuMobile.querySelector('#deleteSelectedLabelsBtn').onclick = deleteSelectedLabels;
+          // Note: quick access list item event listeners are re-attached by updateFloatingMenu()
+
+          // Bulk Actions Menu
+          bulkActionsMenuMobile.querySelector('#bulkApplyPropertiesBtn').onclick = applyBulkProperties;
+          bulkActionsMenuMobile.querySelector('#addSnippetBtn').onclick = addOrUpdateSnippet;
+          bulkActionsMenuMobile.querySelector('#bulkApplySnippetBtn').onclick = bulkApplySnippet;
+          bulkActionsMenuMobile.querySelector('#bulkApplySnippetSelect').addEventListener('change', () => { // Corrected listener
+              document.getElementById('bulkApplySnippetBtn').disabled = selectedLabelIds.size === 0 || document.getElementById('bulkApplySnippetSelect').value === '';
+          });
+          bulkActionsMenuMobile.querySelector('#viewSnippetsBtn').onclick = () => { // Attach for mobile
+              populateViewSnippetsModal();
+              document.getElementById('viewSnippetsModal').style.display = 'flex';
+          };
+      }
+
+
+      mobileLeftMenuToggle.onclick = () => {
+        leftFloatingMenu.classList.toggle('open');
+        document.body.classList.toggle('menu-active');
+      };
+
+      closeLeftMenuBtn.onclick = () => {
+        leftFloatingMenu.classList.remove('open');
+        document.body.classList.remove('menu-active');
+      };
+
+      mobileRightMenuToggle.onclick = () => {
+        rightMenuWrapperMobile.classList.toggle('open');
+        document.body.classList.remove('menu-active');
+      };
+
+      closeRightMenuBtnMobile.onclick = () => {
+        rightMenuWrapperMobile.classList.remove('open');
+        document.body.classList.remove('menu-active');
+      };
+
+      // Desktop close buttons for right menus (only visible on desktop)
+      const closeCategoryMenuBtnDesktop = document.getElementById('closeCategoryMenuBtnDesktop');
+      const closeRightMenuBtnDesktop = document.getElementById('closeRightMenuBtnDesktop');
+      const closeBulkActionsMenuBtnDesktop = document.getElementById('closeBulkActionsMenuBtnDesktop');
+
+      if (closeCategoryMenuBtnDesktop) {
+          closeCategoryMenuBtnDesktop.onclick = () => {
+              document.getElementById('category-menu').style.display = 'none';
+          };
+      }
+      if (closeRightMenuBtnDesktop) {
+          closeRightMenuBtnDesktop.onclick = () => {
+              document.getElementById('floating-menu').style.display = 'none';
+          };
+      }
+      if (closeBulkActionsMenuBtnDesktop) {
+          closeBulkActionsMenuBtnDesktop.onclick = () => {
+              document.getElementById('bulk-actions-menu').style.display = 'none';
+          };
+      }
+
+
+      // Options Modal
+      const optionsModal = document.getElementById('optionsModal');
+      document.getElementById('optionsBtn').onclick = () => {
+        optionsModal.style.display = 'flex';
+      };
+      document.getElementById('closeOptionsModalBtn').onclick = () => {
+        optionsModal.style.display = 'none';
+      };
+
+      // Theme Switch
+      const themeToggle = document.getElementById('checkbox');
+      const currentTheme = localStorage.getItem('theme');
+      if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeToggle.checked = true;
+      }
+
+      themeToggle.addEventListener('change', function() {
+        if (this.checked) {
+          document.body.classList.add('dark-mode');
+          localStorage.setItem('theme', 'dark');
+        } else {
+          document.body.classList.remove('dark-mode');
+          localStorage.setItem('theme', 'light');
+        }
+      });
+
+      // Default Locale Language Select
+      const defaultLocaleLangSelect = document.getElementById('defaultLocaleLangSelect');
+      populateDefaultLocaleLanguageSelect(); // Populate on load
+      defaultLocaleLangSelect.addEventListener('change', () => {
+          defaultLocaleLanguage = defaultLocaleLangSelect.value;
+          saveFullSessionStateToLocalStorage();
+      });
+
+      // Bulk Actions
+      document.getElementById('bulkApplyPropertiesBtn').onclick = applyBulkProperties;
+      document.getElementById('deleteSelectedLabelsBtn').onclick = deleteSelectedLabels;
+      document.getElementById('deleteSelectedCategoriesBtn').onclick = deleteSelectedCategories;
+
+      // Snippet Management
+      document.getElementById('addSnippetBtn').onclick = addOrUpdateSnippet;
+      document.getElementById('bulkApplySnippetBtn').onclick = bulkApplySnippet;
+      document.getElementById('bulkApplySnippetSelect').addEventListener('change', () => { // Corrected listener
+          document.getElementById('bulkApplySnippetBtn').disabled = selectedLabelIds.size === 0 || document.getElementById('bulkApplySnippetSelect').value === '';
+      });
+      document.getElementById('viewSnippetsBtn').onclick = () => { // Attach for desktop
+          populateViewSnippetsModal();
+          document.getElementById('viewSnippetsModal').style.display = 'flex';
+      };
+      document.getElementById('closeViewSnippetsModalBtn').onclick = () => {
+          document.getElementById('viewSnippetsModal').style.display = 'none';
+      };
+
+      // Bulk Translate Modal buttons
+      document.getElementById('startBulkTranslateBtn').onclick = startBulkTranslate;
+      document.getElementById('cancelBulkTranslateBtn').onclick = () => {
+          document.getElementById('bulkTranslateModal').style.display = 'none';
+      };
+
+
+      // Save Session File
+      document.getElementById('saveSessionFileBtn').onclick = () => {
+          const currentSessionState = {
+              labels: getLabelsData(),
+              categories: categories,
+              defaultLocaleLanguage: defaultLocaleLanguage,
+              descriptionSnippets: descriptionSnippets
+          };
+          const blob = new Blob([JSON.stringify(currentSessionState, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'ozone_session.ozm'; // Use .ozm extension
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showCustomModal('Session file downloaded successfully!', 'alert');
+      };
+
+      // Load Session File
+      document.getElementById('loadSessionFileBtn').onclick = () => {
+          showCustomModal('Loading a session file will overwrite your current labels, categories, and settings. Are you sure?', 'confirm', (response) => {
+              if (response) {
+                  document.getElementById('sessionFileInput').click();
+              }
+          });
+      };
+
+      document.getElementById('sessionFileInput').onchange = (event) => {
+          const file = event.target.files[0];
+          if (file) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                  try {
+                      const sessionData = JSON.parse(e.target.result);
+                      loadState(JSON.stringify(sessionData)); // Use loadState to update everything
+                      showCustomModal('Session file loaded successfully!', 'alert');
+                  } catch (error) {
+                      console.error('Error loading session file:', error);
+                      showCustomModal('Failed to load session file. Ensure it is a valid .json or .ozm file. Error: ' + error.message, 'alert');
+                  }
+              };
+              reader.readAsText(file);
+          }
+      };
+
+      // Version History
+      document.getElementById('versionHistoryBtn').onclick = () => {
+        const historyListDiv = document.createElement('div');
+        historyListDiv.style.maxHeight = '300px';
+        historyListDiv.style.overflowY = 'auto';
+        historyListDiv.style.textAlign = 'left';
+
+        if (history.length === 0) {
+            historyListDiv.innerHTML = '<p>No history available yet.</p>';
+        } else {
+            const ul = document.createElement('ul');
+            ul.style.listStyle = 'none';
+            ul.style.padding = '0';
+            history.forEach((versionJson, index) => {
+                const version = JSON.parse(versionJson);
+                const li = document.createElement('li');
+                li.style.marginBottom = '0.5em';
+                li.style.padding = '0.5em';
+                li.style.border = '1px solid var(--block-border)';
+                li.style.borderRadius = 'var(--border-radius)';
+                li.style.display = 'flex';
+                li.style.alignItems = 'center';
+                li.style.gap = '0.5em';
+                li.style.background = (index === historyIndex) ? 'var(--primary)' : 'var(--header-background)';
+                li.style.color = (index === historyIndex) ? 'white' : 'var(--text-color)';
+
+
+                const date = new Date(version.timestamp).toLocaleString();
+                const labelCount = version.labelValueDefinitions ? version.labelValueDefinitions.length : 0;
+                const categoryCount = version.categories ? version.categories.length : 0;
+                const snippetCount = version.descriptionSnippets ? version.descriptionSnippets.length : 0;
+
+                li.innerHTML = `
+                    <span style="flex-grow: 1;">
+                        <strong>Version ${index + 1}</strong> (${date})<br>
+                        Labels: ${labelCount}, Categories: ${categoryCount}, Snippets: ${snippetCount}
+                    </span>
+                    <button class="action-button revert-version-btn" data-index="${index}" style="background: ${index === historyIndex ? 'white' : 'var(--primary)'}; color: ${index === historyIndex ? 'var(--primary)' : 'white'};">Revert</button>
+                `;
+                ul.appendChild(li);
+            });
+            historyListDiv.appendChild(ul);
+        }
+
+        showCustomModal('Version History', 'custom', null, historyListDiv);
+
+        // Attach event listeners to revert buttons inside the modal
+        historyListDiv.querySelectorAll('.revert-version-btn').forEach(button => {
+            button.onclick = (event) => {
+                const indexToRevert = parseInt(event.target.dataset.index);
+                showCustomModal(`Are you sure you want to revert to Version ${indexToRevert + 1}? All unsaved changes will be lost.`, 'confirm', (response) => {
+                    if (response) {
+                        historyIndex = indexToRevert;
+                        loadState(history[historyIndex]);
+                        document.querySelector('.custom-modal-overlay').remove(); // Close history modal
+                        showCustomModal(`Successfully reverted to Version ${indexToRevert + 1}.`, 'alert');
+                    }
+                });
+            };
+        });
+      };
+
+      document.getElementById('saveBtn').onclick = addVersionToHistory;
+      document.getElementById('undoBtn').onclick = undo;
+      document.getElementById('redoBtn').onclick = redo;
+
+      // --- New: Post Preview Blur Logic ---
+      const bulkBlursControl = document.getElementById('bulkBlursControl');
+      const postImage = document.querySelector('#blueskyPostPreview .post-image');
+
+      function updatePostImageBlur() {
+          if (bulkBlursControl.value === 'media') {
+              postImage.classList.add('blurred');
+          } else {
+              postImage.classList.remove('blurred');
+          }
+      }
+
+      // Initial state
+      updatePostImageBlur();
+
+      // Listen for changes
+      bulkBlursControl.addEventListener('change', updatePostImageBlur);
+      // --- End Post Preview Blur Logic ---
+
+
+      // Initial renders
+      renderCategoryMenu();
+      // No longer calling renderSnippetManagementUI here
+      populateBulkApplySnippetSelect();
+      updateLabelNumbers(); // Ensure initial numbering is correct
+      updateMoveButtons(); // Ensure initial button states are correct
+    });
+
+    // Helper to populate the default locale language select dropdown
+    function populateDefaultLocaleLanguageSelect() {
+        const select = document.getElementById('defaultLocaleLangSelect');
+        select.innerHTML = ''; // Clear existing options
+
+        commonLanguages.forEach(langObj => {
+            const option = document.createElement('option');
+            option.value = langObj.code;
+            option.textContent = langObj.name;
+            if (langObj.code === defaultLocaleLanguage) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+
+        // Add an option for an empty/unset default
+        const noDefaultOption = document.createElement('option');
+        noDefaultOption.value = '';
+        noDefaultOption.textContent = '(None)';
+        if (defaultLocaleLanguage === '') {
+            noDefaultOption.selected = true;
+        }
+        select.prepend(noDefaultOption); // Add to the top
+    }
+
+  </script>
+</body>
+</html>

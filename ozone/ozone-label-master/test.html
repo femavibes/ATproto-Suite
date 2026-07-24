@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urbanism+ Feed & Hashtag Analysis</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .main-wrapper {
+            display: flex;
+            flex-direction: column; /* Stack sections on small screens */
+            gap: 30px; /* Space between the two main sections */
+            width: 100%;
+            max-width: 1200px; /* Wider max-width for dual content */
+            margin: auto;
+        }
+        @media (min-width: 1024px) { /* Side-by-side on larger screens */
+            .main-wrapper {
+                flex-direction: row;
+            }
+            .section-wrapper {
+                flex: 1; /* Each section takes equal width */
+                min-width: 45%; /* Ensure they don't get too narrow */
+                display: flex; /* Make section-wrapper a flex container */
+                flex-direction: column; /* Stack cards within it vertically */
+            }
+        }
+
+        .section-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Allow cards to grow and fill space */
+        }
+        .section-title {
+            font-size: 1.75rem; /* Larger title */
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .post-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #3498db; /* Accent color */
+        }
+        .post-author {
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        .post-content {
+            color: #444;
+            line-height: 1.5;
+        }
+        .post-timestamp {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 10px;
+            text-align: right;
+        }
+        .analysis-item {
+            display: flex;
+            align-items: flex-start; /* Align items to the top if label wraps */
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+            gap: 10px; /* Add a small gap between label and value */
+        }
+        .analysis-item:last-child {
+            border-bottom: none;
+        }
+        .analysis-label {
+            font-weight: 500;
+            color: #555;
+            flex-grow: 1; /* Allow it to grow */
+            word-break: break-word; /* Ensure long words break */
+            min-width: 0; /* Important for flex items to shrink properly */
+        }
+        .analysis-value {
+            font-weight: bold;
+            color: #2c3e50;
+            flex-shrink: 0; /* Prevent it from shrinking */
+            white-space: nowrap; /* Keep the count on one line */
+        }
+        .loading-indicator {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+        .feed-name-display { /* This class is no longer used for display, but kept for consistency */
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #555;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .iframe-embed {
+            width: 100%;
+            height: 100%; /* Make iframe take full height of its container */
+            min-height: 500px; /* Ensure a minimum height for the iframe */
+            border: none;
+            border-radius: 8px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .timeframe-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+        .timeframe-selector label {
+            background-color: #e2e8f0;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #4a5568;
+            transition: background-color 0.2s, color 0.2s;
+            white-space: nowrap; /* Prevent text from wrapping inside label */
+        }
+        .timeframe-selector input[type="radio"] {
+            display: none;
+        }
+        .timeframe-selector input[type="radio"]:checked + label {
+            background-color: #3498db;
+            color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <!-- Section for Iframe Embed (Visual Feed) - Now on the left -->
+        <div class="section-wrapper">
+            <div class="section-card">
+                <h2 class="section-title">Urbanism+ Feed</h2>
+                <iframe
+                    src="https://graze.social/feeds/embed/3654"
+                    title="Urbanism+ Social Feed"
+                    class="iframe-embed"
+                    allowFullScreen
+                ></iframe>
+                <p class="text-sm text-gray-600 mt-4 text-center">
+                    This is the embedded feed from Graze Social, providing a pre-styled view.
+                </p>
+            </div>
+        </div>
+
+        <!-- Section for Live Analysis (Contrails data processed in background) - Now on the right -->
+        <div class="section-wrapper">
+            <div class="section-card">
+                <h2 class="section-title">Urbanism+</h2>
+                <!-- Connection status moved here -->
+                <div id="connectionStatus" class="text-center mt-4 mb-6 text-sm text-gray-600">
+                    Initializing...
+                </div>
+                
+                <!-- The actual live posts container is now hidden, but still updated -->
+                <div id="postsContainer" class="flex-grow overflow-y-auto border border-gray-200 rounded-md p-2" style="max-height: 500px; display: none;">
+                    <p id="noPostsMessage" class="text-gray-500 text-center py-4" style="display: none;">Waiting for new posts...</p>
+                </div>
+                <div id="loadingIndicator" class="loading-indicator" style="display: none;">Connecting to feed...</div>
+
+                <!-- Timeframe Selector -->
+                <div class="timeframe-selector">
+                    <input type="radio" id="timeframeAllTime" name="timeframe" value="allTime" checked>
+                    <label for="timeframeAllTime">All Time</label>
+                    <input type="radio" id="timeframeDay" name="timeframe" value="day">
+                    <label for="timeframeDay">Day</label>
+                    <input type="radio" id="timeframeWeek" name="timeframe" value="week">
+                    <label for="timeframeWeek">Week</label>
+                    <input type="radio" id="timeframeMonth" name="timeframe" value="month">
+                    <label for="timeframeMonth">Month</label>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Top Hashtags</h3>
+                        <div id="topTerms">
+                            <p class="text-gray-500 text-center">No hashtags yet to analyze.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Top Links</h3>
+                        <div id="topLinks">
+                            <p class="text-gray-500 text-center">No links yet to analyze.</p>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Top Websites (Domains)</h3>
+                        <div id="topDomains">
+                            <p class="text-gray-500 text-center">No domains yet to analyze.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase CDN imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Configuration (Provided by User) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAR1S1n8FPwuzeKgNhcRuMwjEEAAsEA9FE",
+            authDomain: "uplus-7b091.firebaseapp.com",
+            projectId: "uplus-7b091",
+            storageBucket: "uplus-7b091.firebasestorage.app",
+            messagingSenderId: "1085519102068",
+            appId: "1:1085519102068:web:5c66ffc28323dbb7981121",
+            measurementId: "G-SHJ3T3PWXW"
+        };
+
+        // --- Global variables (derived from firebaseConfig or defaults) ---
+        const appId = firebaseConfig.projectId; 
+
+        // --- Firebase Instances ---
+        let app;
+        let db;
+        let auth;
+        let currentUserId = null;
+        let isFirebaseReady = false; 
+
+        // --- Configuration ---
+        const GRAZE_FEED_URI = 'at://did:plc:lptjvw6ut224kwrj7ub3sqbe/app.bsky.feed.generator/aaaotfjzjplna';
+        const WEBSOCKET_URL = `wss://api.graze.social/app/contrail?feed=${GRAZE_FEED_URI}`;
+        const RECONNECT_DELAY = 5000; 
+
+        // --- DOM Elements ---
+        const postsContainer = document.getElementById('postsContainer');
+        const connectionStatusElem = document.getElementById('connectionStatus');
+        const loadingIndicatorElem = document.getElementById('loadingIndicator');
+        const topTermsDiv = document.getElementById('topTerms'); 
+        const topLinksDiv = document.getElementById('topLinks'); 
+        const topDomainsDiv = document.getElementById('topDomains'); 
+        const noPostsMessage = document.getElementById('noPostsMessage');
+
+        // --- Analysis Data (synced with Firestore) ---
+        // These will hold the ALL-TIME cumulative counts from the 'summary' document
+        let allTimeTermCounts = {}; 
+        let allTimeLinkCounts = {}; 
+        let allTimeDomainCounts = {}; 
+
+        // These will hold the counts for the CURRENTLY SELECTED timeframe
+        let currentDisplayTermCounts = {};
+        let currentDisplayLinkCounts = {};
+        let currentDisplayDomainCounts = {};
+
+        let currentSelectedTimeframe = 'allTime'; // Default timeframe
+
+        // --- WebSocket Variables ---
+        let ws = null;
+        let reconnectInterval = null;
+
+        // Debounce variables for Firestore updates
+        let debounceTimer = null;
+        const DEBOUNCE_DELAY = 1000; 
+
+        // Stop words for term analysis (still relevant for hashtags)
+        const stopWords = new Set([
+            'a', 'an', 'the', 'and', 'or', 'but', 'for', 'nor', 'on', 'at', 'to', 'from', 'by',
+            'with', 'in', 'of', 'is', 'am', 'are', 'was', 'were', 'be', 'been', 'being', 'have',
+            'has', 'had', 'do', 'does', 'did', 'not', 'no', 'yes', 'it', 'its', 'he', 'she', 'they',
+            'we', 'you', 'i', 'me', 'him', 'her', 'us', 'them', 'this', 'that', 'these', 'those',
+            'my', 'your', 'his', 'her', 'our', 'their', 'which', 'who', 'whom', 'where', 'when',
+            'why', 'how', 'what', 'then', 'than', 'as', 'so', 'if', 'else', 'about', 'just', 'can',
+            'will', 'would', 'should', 'could', 'get', 'like', 'one', 'two', 'new', 'time', 'good',
+            'great', 'very', 'much', 'more', 'also', 'up', 'down', 'out', 'in', 'on', 'off', 'all',
+            'any', 'some', 'such', 'only', 'very', 'through', 'into', 'from', 'here', 'there', 'when',
+            'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other',
+            'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very',
+            's', 't', 'can', 'will', 'just', 'don', 'should', 'now'
+        ]);
+
+        // Helper function to extract base domain from a URL
+        // Improved to handle multi-part TLDs like .co.uk
+        function getBaseDomain(url) {
+            try {
+                const hostname = new URL(url).hostname;
+                const parts = hostname.split('.');
+                const numParts = parts.length;
+
+                // Common multi-part TLDs (Public Suffix List relevant examples)
+                const multiPartTlds = [
+                    'co.uk', 'org.uk', 'ac.uk', 'gov.uk', 'mod.uk', 'net.uk', 'plc.uk', 'sch.uk',
+                    'com.au', 'net.au', 'org.au', 'edu.au', 'gov.au',
+                    'co.nz', 'org.nz', 'net.nz', 'ac.nz',
+                    'co.jp', 'ne.jp', 'or.jp', 'ac.jp', 'ad.jp', 'ed.jp', 'go.jp', 'gr.jp', 'lg.jp',
+                    'com.br', 'net.br', 'org.br',
+                    'com.cn', 'net.cn', 'org.cn',
+                    'com.hk', 'net.hk', 'org.hk'
+                ];
+
+                // Check if the last two parts form a known multi-part TLD
+                if (numParts >= 2) {
+                    const lastTwoParts = parts.slice(numParts - 2).join('.');
+                    if (multiPartTlds.includes(lastTwoParts)) {
+                        // If it's a multi-part TLD, include the part before it
+                        if (numParts >= 3) {
+                            return parts.slice(numParts - 3).join('.');
+                        }
+                    }
+                }
+                
+                // For standard TLDs or if no multi-part TLD found, return the last two parts
+                if (numParts >= 2) {
+                    return parts.slice(numParts - 2).join('.');
+                }
+                return hostname; 
+            } catch (e) {
+                console.error("Error parsing base domain from URL:", url, e);
+                return 'Invalid Domain';
+            }
+        }
+
+        // Helper function to getYYYY-MM-DD format for daily aggregate document IDs
+        function getYYYYMMDD(date) {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // --- Firebase Initialization ---
+        function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        currentUserId = user.uid;
+                        isFirebaseReady = true;
+                        console.log("Firebase authenticated and ready. User ID:", currentUserId);
+                        setupFirestoreListener(); // Setup listener for all-time data
+                        connectWebSocket(); // Connect WebSocket once Firebase is ready
+                        updateView(currentSelectedTimeframe); // Initial render based on default timeframe
+                    } else {
+                        try {
+                            await signInAnonymously(auth);
+                        } catch (error) {
+                            console.error("Firebase Auth error:", error);
+                            let errorMessage = `Auth Error: ${error.message}`;
+                            if (error.code === 'auth/configuration-not-found') {
+                                errorMessage += ". This usually means Anonymous Authentication is not enabled in your Firebase project. Please go to Firebase Console > Authentication > Sign-in method, and enable 'Anonymous' provider.";
+                            }
+                            connectionStatusElem.textContent = errorMessage;
+                            isFirebaseReady = false;
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                connectionStatusElem.textContent = `Firebase Init Error: ${error.message}`;
+            }
+        }
+
+        // --- Firestore Data Listener (onSnapshot for All-Time Summary) ---
+        function setupFirestoreListener() {
+            if (!db || !isFirebaseReady || !currentUserId) {
+                console.warn("Firestore listener cannot be set up: Firebase not ready or user not authenticated.");
+                return;
+            }
+
+            // Corrected path for summary document: artifacts/{appId}/public/data/summaries/grazeFeedAnalysisSummary
+            const analysisDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'summaries', 'grazeFeedAnalysisSummary');
+
+            onSnapshot(analysisDocRef, async (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    allTimeTermCounts = data.termCounts || {}; 
+                    allTimeLinkCounts = data.linkCounts || {}; 
+                    allTimeDomainCounts = data.domainCounts || {}; 
+
+                    console.log("Firestore All-Time data received via onSnapshot:", { allTimeTermCounts, allTimeLinkCounts, allTimeDomainCounts }); 
+                } else {
+                    console.log("All-Time summary document does not exist, initializing with empty counts.");
+                    setDoc(analysisDocRef, { 
+                        termCounts: {},
+                        linkCounts: {},
+                        domainCounts: {}
+                    }, { merge: true })
+                        .catch(e => console.error("Error creating all-time summary document:", e));
+                    allTimeTermCounts = {};
+                    allTimeLinkCounts = {};
+                    allTimeDomainCounts = {};
+                }
+                // Only update the view if 'allTime' is currently selected to avoid overwriting other views
+                if (currentSelectedTimeframe === 'allTime') {
+                    updateView('allTime'); 
+                }
+            }, (error) => {
+                console.error("Error listening to Firestore (All-Time Summary):", error);
+                connectionStatusElem.textContent = `Firestore Listener Error: ${error.message}`;
+            });
+        }
+
+        // --- WebSocket Connection Logic ---
+        function connectWebSocket() {
+            if (!isFirebaseReady) { 
+                console.warn("Firebase is not ready, delaying WebSocket connection.");
+                setTimeout(connectWebSocket, 1000); 
+                return;
+            }
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                return; 
+            }
+
+            loadingIndicatorElem.style.display = 'block';
+            connectionStatusElem.textContent = 'Connecting to feed...';
+
+            ws = new WebSocket(WEBSOCKET_URL);
+
+            ws.onopen = () => {
+                console.log('WebSocket connected!');
+                connectionStatusElem.textContent = 'Connected'; 
+                connectionStatusElem.classList.remove('text-red-600', 'text-orange-600');
+                connectionStatusElem.classList.add('text-green-600');
+                loadingIndicatorElem.style.display = 'none';
+                clearInterval(reconnectInterval);
+                reconnectInterval = null;
+            };
+
+            ws.onmessage = async (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    let authorDisplayName = 'User'; 
+                    let authorHandle = data.did; 
+                    let postText = '';
+                    let timestamp = ''; 
+                    let postEmbed = null; 
+
+                    if (data.commit && data.commit.record && data.commit.record.$type === 'app.bsky.feed.post') {
+                        const commitData = data.commit;
+                        const post = commitData.record; 
+                        
+                        if (typeof post.text === 'string') {
+                            postText = post.text;
+                        } else {
+                            console.warn("Post record text is not a string or is missing, defaulting to empty string:", post.text);
+                            postText = ''; 
+                        }
+                        
+                        timestamp = post.createdAt; 
+                        postEmbed = post.embed; 
+
+                        addPostToDisplay(postText, authorDisplayName, authorHandle, new Date(timestamp).toLocaleString()); 
+                        
+                        console.log("Scheduling Firestore update via debounce.");
+                        debouncedUpdateFirestoreAnalysis(authorHandle, postText, postEmbed); 
+                    } else {
+                        console.log("WebSocket message is not a recognized post type or missing expected fields.");
+                    }
+
+                } catch (e) {
+                    console.error('Failed to parse message or process data:', e);
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                connectionStatusElem.textContent = 'WebSocket error. Trying to reconnect...';
+                connectionStatusElem.classList.remove('text-green-600', 'text-orange-600');
+                connectionStatusElem.classList.add('text-red-600');
+                loadingIndicatorElem.style.display = 'none';
+            };
+
+            ws.onclose = (event) => {
+                console.warn('WebSocket closed:', event);
+                connectionStatusElem.textContent = `Disconnected. Code: ${event.code}, Reason: ${event.reason}. Reconnecting in ${RECONNECT_DELAY / 1000}s...`;
+                connectionStatusElem.classList.remove('text-green-600', 'text-red-600');
+                connectionStatusElem.classList.add('text-orange-600');
+                loadingIndicatorElem.style.display = 'none';
+                if (!reconnectInterval) {
+                    reconnectInterval = setInterval(connectWebSocket, RECONNECT_DELAY);
+                }
+            };
+        }
+
+        // --- UI Update Functions ---
+        function addPostToDisplay(content, displayName, handle, timestamp) {
+            const postCard = document.createElement('div');
+            postCard.className = 'post-card';
+            postCard.innerHTML = `
+                <div class="post-author">
+                    <div class="text-gray-700">${displayName}</div> 
+                    <div class="text-blue-600 text-sm">@${handle}</div> 
+                </div>
+                <div class="post-content">${content}</div>
+                <div class="post-timestamp">${timestamp}</div>
+            `;
+            if (postsContainer.firstChild) {
+                postsContainer.insertBefore(postCard, postsContainer.firstChild);
+            } else {
+                postsContainer.appendChild(postCard);
+            }
+            while (postsContainer.children.length > 50) {
+                postsContainer.removeChild(postsContainer.lastChild);
+            }
+        }
+
+        // --- Debounced Firestore Update Function ---
+        let accumulatedUpdates = { 
+            termCounts: {},
+            linkCounts: {},
+            domainCounts: {}
+        };
+
+        async function debouncedUpdateFirestoreAnalysis(authorDid, text, embed) { 
+            accumulatedUpdates = {
+                termCounts: accumulatedUpdates.termCounts || {},
+                linkCounts: accumulatedUpdates.linkCounts || {},
+                domainCounts: accumulatedUpdates.domainCounts || {}
+            };
+
+            const safeText = String(text || '');
+            
+            // --- Hashtag Counting ---
+            let hashtags = [];
+            try {
+                const matchedHashtags = safeText.toLowerCase().match(/#\b\w+\b/g);
+                hashtags = matchedHashtags ? [...matchedHashtags] : []; 
+            } catch (e) {
+                console.error("Error during hashtag matching:", e, "Text:", safeText);
+                hashtags = []; 
+            }
+            hashtags.forEach(tag => {
+                accumulatedUpdates.termCounts[tag] = (accumulatedUpdates.termCounts[tag] || 0) + 1;
+            });
+
+            // --- Link and Domain Counting ---
+            let extractedLink = null;
+            if (embed && embed.$type === 'app.bsky.embed.external' && embed.external && embed.external.uri) {
+                extractedLink = embed.external.uri;
+                accumulatedUpdates.linkCounts[extractedLink] = (accumulatedUpdates.linkCounts[extractedLink] || 0) + 1;
+
+                const baseDomain = getBaseDomain(extractedLink);
+                if (baseDomain && baseDomain !== 'Invalid Domain') {
+                    accumulatedUpdates.domainCounts[baseDomain] = (accumulatedUpdates.domainCounts[baseDomain] || 0) + 1;
+                }
+            }
+
+
+            // Clear any existing timer
+            if (debounceTimer) {
+                clearTimeout(debounceTimer);
+            }
+
+            debounceTimer = setTimeout(async () => {
+                if (!db || !isFirebaseReady) {
+                    console.warn("Firestore not ready for update after debounce. Cannot update analysis.");
+                    return;
+                }
+
+                // Corrected path for summary document: artifacts/{appId}/public/data/summaries/grazeFeedAnalysisSummary
+                const summaryDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'summaries', 'grazeFeedAnalysisSummary');
+                const today = new Date();
+                const dailyDocId = getYYYYMMDD(today);
+                // Corrected path for daily aggregates: artifacts/{appId}/public/data/dailyAggregates/{date}
+                const dailyDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'dailyAggregates', dailyDocId); 
+
+                try {
+                    // 1. Update All-Time Summary
+                    const summarySnap = await getDoc(summaryDocRef);
+                    let currentSummaryData = {
+                        termCounts: {},
+                        linkCounts: {},
+                        domainCounts: {}
+                    };
+                    if (summarySnap.exists()) {
+                        currentSummaryData = summarySnap.data();
+                        currentSummaryData.termCounts = currentSummaryData.termCounts || {};
+                        currentSummaryData.linkCounts = currentSummaryData.linkCounts || {};
+                        currentSummaryData.domainCounts = currentSummaryData.domainCounts || {};
+                    }
+
+                    for (const key in accumulatedUpdates.termCounts) {
+                        currentSummaryData.termCounts[key] = (currentSummaryData.termCounts[key] || 0) + accumulatedUpdates.termCounts[key];
+                    }
+                    for (const key in accumulatedUpdates.linkCounts) {
+                        currentSummaryData.linkCounts[key] = (currentSummaryData.linkCounts[key] || 0) + accumulatedUpdates.linkCounts[key];
+                    }
+                    for (const key in accumulatedUpdates.domainCounts) {
+                        currentSummaryData.domainCounts[key] = (currentSummaryData.domainCounts[key] || 0) + accumulatedUpdates.domainCounts[key];
+                    }
+                    await setDoc(summaryDocRef, currentSummaryData, { merge: true });
+
+                    // 2. Update Daily Aggregate
+                    const dailySnap = await getDoc(dailyDocRef);
+                    let currentDailyData = {
+                        termCounts: {},
+                        linkCounts: {},
+                        domainCounts: {}
+                    };
+                    if (dailySnap.exists()) {
+                        currentDailyData = dailySnap.data();
+                        currentDailyData.termCounts = currentDailyData.termCounts || {};
+                        currentDailyData.linkCounts = currentDailyData.linkCounts || {};
+                        currentDailyData.domainCounts = currentDailyData.domainCounts || {};
+                    }
+
+                    for (const key in accumulatedUpdates.termCounts) {
+                        currentDailyData.termCounts[key] = (currentDailyData.termCounts[key] || 0) + accumulatedUpdates.termCounts[key];
+                    }
+                    for (const key in accumulatedUpdates.linkCounts) {
+                        currentDailyData.linkCounts[key] = (currentDailyData.linkCounts[key] || 0) + accumulatedUpdates.linkCounts[key];
+                    }
+                    for (const key in accumulatedUpdates.domainCounts) {
+                        currentDailyData.domainCounts[key] = (currentDailyData.domainCounts[key] || 0) + accumulatedUpdates.domainCounts[key];
+                    }
+                    await setDoc(dailyDocRef, currentDailyData, { merge: true });
+
+                    console.log("Firestore update successful (debounced)!");
+
+                    // Reset accumulated updates after successful write
+                    accumulatedUpdates = { 
+                        termCounts: {},
+                        linkCounts: {},
+                        domainCounts: {}
+                    };
+
+                    // Re-render the current view to reflect latest data
+                    updateView(currentSelectedTimeframe);
+
+                } catch (e) {
+                    console.error("Error updating Firestore analysis (debounced):", e);
+                    // Updated error message to reflect the correct paths for security rules
+                    console.error("Firestore Permission Denied: Check your Firestore Security Rules! Ensure authenticated users can write to /artifacts/{appId}/public/data/summaries/grazeFeedAnalysisSummary AND /artifacts/{appId}/public/data/dailyAggregates/{date}");
+                }
+            }, DEBOUNCE_DELAY);
+        }
+
+        // --- Data Fetching Functions for different timeframes ---
+
+        async function fetchDailyData() {
+            const today = new Date();
+            const dailyDocId = getYYYYMMDD(today);
+            // Corrected path for daily aggregates
+            const dailyDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'dailyAggregates', dailyDocId); 
+            try {
+                const docSnap = await getDoc(dailyDocRef);
+                if (docSnap.exists()) {
+                    return docSnap.data();
+                }
+                return { termCounts: {}, linkCounts: {}, domainCounts: {} };
+            } catch (e) {
+                console.error("Error fetching daily data:", e);
+                return { termCounts: {}, linkCounts: {}, domainCounts: {} };
+            }
+        }
+
+        async function fetchTimeframeData(days) {
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(endDate.getDate() - days);
+
+            // Corrected path for daily aggregates collection
+            const dailyAggregatesRef = collection(db, 'artifacts', appId, 'public', 'data', 'dailyAggregates'); 
+            const q = query(dailyAggregatesRef); 
+            
+            try {
+                const querySnapshot = await getDocs(q);
+                let aggregatedTermCounts = {};
+                let aggregatedLinkCounts = {};
+                let aggregatedDomainCounts = {};
+
+                querySnapshot.forEach((doc) => {
+                    const docDateStr = doc.id; //YYYY-MM-DD
+                    const [year, month, day] = docDateStr.split('-').map(Number);
+                    const docDate = new Date(year, month - 1, day); // Month is 0-indexed
+
+                    // Only include documents within the specified date range
+                    if (docDate >= startDate && docDate <= endDate) {
+                        const data = doc.data();
+                        const terms = data.termCounts || {};
+                        const links = data.linkCounts || {};
+                        const domains = data.domainCounts || {};
+
+                        for (const term in terms) {
+                            aggregatedTermCounts[term] = (aggregatedTermCounts[term] || 0) + terms[term];
+                        }
+                        for (const link in links) {
+                            aggregatedLinkCounts[link] = (aggregatedLinkCounts[link] || 0) + links[link];
+                        }
+                        for (const domain in domains) {
+                            aggregatedDomainCounts[domain] = (aggregatedDomainCounts[domain] || 0) + domains[domain];
+                        }
+                    }
+                });
+                return { 
+                    termCounts: aggregatedTermCounts, 
+                    linkCounts: aggregatedLinkCounts, 
+                    domainCounts: aggregatedDomainCounts 
+                };
+            } catch (e) {
+                console.error(`Error fetching data for last ${days} days:`, e);
+                return { termCounts: {}, linkCounts: {}, domainCounts: {} };
+            }
+        }
+
+
+        // --- Update View Function based on Timeframe ---
+        async function updateView(timeframe) {
+            currentSelectedTimeframe = timeframe;
+            let dataToDisplay = { termCounts: {}, linkCounts: {}, domainCounts: {} };
+
+            if (!isFirebaseReady) {
+                console.warn("Firebase not ready for view update.");
+                return;
+            }
+
+            switch (timeframe) {
+                case 'allTime':
+                    dataToDisplay = {
+                        termCounts: allTimeTermCounts,
+                        linkCounts: allTimeLinkCounts,
+                        domainCounts: allTimeDomainCounts
+                    };
+                    break;
+                case 'day':
+                    dataToDisplay = await fetchDailyData();
+                    break;
+                case 'week':
+                    dataToDisplay = await fetchTimeframeData(7);
+                    break;
+                case 'month':
+                    dataToDisplay = await fetchTimeframeData(30);
+                    break;
+                default:
+                    dataToDisplay = {
+                        termCounts: allTimeTermCounts,
+                        linkCounts: allTimeLinkCounts,
+                        domainCounts: allTimeDomainCounts
+                    };
+            }
+
+            currentDisplayTermCounts = dataToDisplay.termCounts;
+            currentDisplayLinkCounts = dataToDisplay.linkCounts;
+            currentDisplayDomainCounts = dataToDisplay.domainCounts;
+
+            renderTopTerms(currentDisplayTermCounts);
+            renderTopLinks(currentDisplayLinkCounts);
+            renderTopDomains(currentDisplayDomainCounts);
+        }
+
+        // --- Render Functions for Analysis ---
+        // These now accept the specific counts object to render
+        function renderTopTerms(counts) { 
+            const sortedTerms = Object.entries(counts)
+                .sort(([, countA], [, countB]) => countB - countA)
+                .slice(0, 20); 
+
+            topTermsDiv.innerHTML = ''; 
+            if (sortedTerms.length === 0) {
+                topTermsDiv.innerHTML = '<p class="text-gray-500 text-center">No hashtags yet to analyze.</p>';
+                return;
+            }
+            sortedTerms.forEach(([term, count], index) => { 
+                const item = document.createElement('div');
+                item.className = 'analysis-item';
+                const displayTerm = term.startsWith('#') ? term : `#${term}`; 
+                item.innerHTML = `
+                    <span class="analysis-label">${index + 1}. ${displayTerm}</span>
+                    <span class="analysis-value">${count} uses</span>
+                `;
+                topTermsDiv.appendChild(item);
+            });
+        }
+
+        function renderTopLinks(counts) { 
+            const sortedLinks = Object.entries(counts)
+                .sort(([, countA], [, countB]) => countB - countA)
+                .slice(0, 20); 
+
+            topLinksDiv.innerHTML = ''; 
+            if (sortedLinks.length === 0) {
+                topLinksDiv.innerHTML = '<p class="text-gray-500 text-center">No links yet to analyze.</p>';
+                return;
+            }
+            sortedLinks.forEach(([url, count], index) => { 
+                const item = document.createElement('div');
+                item.className = 'analysis-item';
+                const displayUrl = url.length > 50 ? url.substring(0, 47) + '...' : url;
+                item.innerHTML = `
+                    <span class="analysis-label"><a href="${url}" target="_blank" class="text-blue-500 hover:underline">${index + 1}. ${displayUrl}</a></span>
+                    <span class="analysis-value">${count} shares</span>
+                `;
+                topLinksDiv.appendChild(item); 
+            });
+        }
+
+        function renderTopDomains(counts) { 
+            const sortedDomains = Object.entries(counts)
+                .sort(([, countA], [, countB]) => countB - countA)
+                .slice(0, 20); 
+
+            topDomainsDiv.innerHTML = ''; 
+            if (sortedDomains.length === 0) {
+                topDomainsDiv.innerHTML = '<p class="text-gray-500 text-center">No domains yet to analyze.</p>';
+                return;
+            }
+            sortedDomains.forEach(([domain, count], index) => { 
+                const item = document.createElement('div');
+                item.className = 'analysis-item';
+                item.innerHTML = `
+                    <span class="analysis-label"><a href="http://${domain}" target="_blank" class="text-blue-500 hover:underline">${index + 1}. ${domain}</a></span>
+                    <span class="analysis-value">${count} shares</span>
+                `;
+                topDomainsDiv.appendChild(item); 
+            });
+        }
+
+        // --- Event Listeners for Timeframe Selector ---
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input[name="timeframe"]').forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    updateView(event.target.value);
+                });
+            });
+        });
+
+        // --- Initialize on Window Load ---
+        window.onload = function () {
+            initializeFirebase(); 
+        };
+    </script>
+</body>
+</html>
