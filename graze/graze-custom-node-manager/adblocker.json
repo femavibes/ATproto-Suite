@@ -1,0 +1,2023 @@
+{
+  "order": "new",
+  "manifest": {
+    "filter": {
+      "and": [
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_UNIVERSAL_AFFILIATE_LINKS",
+                "==",
+                false
+              ]
+            },
+            {
+              "entity_excludes": [
+                "domains",
+                [
+                  "amzn.to",
+                  "urlgeni.us",
+                  "geni.us",
+                  "lbabi.nz"
+                ]
+              ]
+            },
+            {
+              "regex_none": [
+                "text",
+                [
+                  "amzn.to",
+                  "urlgeni.us",
+                  "geni.us",
+                  "lbabi.nz"
+                ],
+                true,
+                false
+              ]
+            }
+          ],
+          "metadata": {
+            "title": "GENERAL"
+          }
+        },
+        {
+          "or": [
+            {
+              "or": [
+                {
+                  "param_compare": [
+                    "$BLOCK_AMAZON_AFFILIATE_LINKS",
+                    "==",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "amazon.com",
+                      "amazon.ca",
+                      "amazon.co.uk",
+                      "amazon.de",
+                      "amazon.fr",
+                      "amazon.es",
+                      "amazon.it",
+                      "amazon.nl",
+                      "amazon.se",
+                      "amazon.pl",
+                      "amazon.com.be",
+                      "amazon.com.au",
+                      "amazon.co.jp",
+                      "amazon.in",
+                      "amazon.com.br",
+                      "amazon.com.mx",
+                      "amazon.sg",
+                      "amazon.com.tr",
+                      "amazon.ae",
+                      "amazon.sa",
+                      "amazon.eg",
+                      "amazon.cn",
+                      "amzn.com",
+                      "amzn.to",
+                      "m.amazon.com"
+                    ]
+                  ]
+                },
+                {
+                  "each": [
+                    "$WHITELIST_AFFILIATE",
+                    {
+                      "list_member": [
+                        "$WHITELIST_AFFILIATE_ITEM",
+                        "in"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "metadata": {}
+            },
+            {
+              "and": [
+                {
+                  "and": [
+                    {
+                      "entity_matches": [
+                        "domains",
+                        [
+                          "amazon.com",
+                          "amazon.ca",
+                          "amazon.co.uk",
+                          "amazon.de",
+                          "amazon.fr",
+                          "amazon.es",
+                          "amazon.it",
+                          "amazon.nl",
+                          "amazon.se",
+                          "amazon.pl",
+                          "amazon.com.be",
+                          "amazon.com.au",
+                          "amazon.co.jp",
+                          "amazon.in",
+                          "amazon.com.br",
+                          "amazon.com.mx",
+                          "amazon.sg",
+                          "amazon.com.tr",
+                          "amazon.ae",
+                          "amazon.sa",
+                          "amazon.eg",
+                          "amazon.cn",
+                          "amzn.com",
+                          "amzn.to",
+                          "m.amazon.com"
+                        ]
+                      ]
+                    },
+                    {
+                      "regex_negation_matches": [
+                        "facets[*].features[*].uri",
+                        "tag=",
+                        true
+                      ]
+                    },
+                    {
+                      "regex_negation_matches": [
+                        "embed.record.uri",
+                        "tag=",
+                        true
+                      ]
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "amzn.to",
+                      "urlgeni.us",
+                      "geni.us"
+                    ]
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "amazon"
+          }
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_AMAZON_WITH_TINY_URLS",
+                "==",
+                false
+              ]
+            },
+            {
+              "each": [
+                "$WHITELIST_AFFILIATE",
+                {
+                  "list_member": [
+                    "$WHITELIST_AFFILIATE_ITEM",
+                    "in"
+                  ]
+                }
+              ]
+            },
+            {
+              "regex_negation_matches": [
+                "text",
+                "amazon",
+                true
+              ]
+            },
+            {
+              "and": [
+                {
+                  "regex_matches": [
+                    "text",
+                    "amazon",
+                    true
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "buff.ly",
+                      "bit.ly",
+                      "tinyurl.com",
+                      "cutt.ly",
+                      "rebrand.ly",
+                      "t2m.io",
+                      "b.link",
+                      "short.io",
+                      "switchy.io"
+                    ]
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "AMAZON+LINK SHORTENER",
+            "pattern": "dots"
+          }
+        },
+        {
+          "or": [
+            {
+              "or": [
+                {
+                  "param_compare": [
+                    "$BLOCK_EBAY_AFFILIATE_LINKS",
+                    "==",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "ebay.com",
+                      "ebay.co.uk",
+                      " ebay.fr",
+                      "ebay.de",
+                      "ebay.ca",
+                      "ebay.it",
+                      "ebay.es",
+                      "ebay.com.au",
+                      "ebay.ie",
+                      "ebay.nl",
+                      "ebay.be",
+                      "ebay.at",
+                      "ebay.ch",
+                      "ebay.pl",
+                      "ebay.se",
+                      "ebay.cn",
+                      "ebay.com.hk",
+                      "ebay.com.sg",
+                      "ebay.in",
+                      "ebay.com.my",
+                      "ebay.ph",
+                      "rover.ebay.com"
+                    ]
+                  ]
+                },
+                {
+                  "each": [
+                    "$WHITELIST_AFFILIATE",
+                    {
+                      "list_member": [
+                        "$WHITELIST_AFFILIATE_ITEM",
+                        "in"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "metadata": {}
+            },
+            {
+              "and": [
+                {
+                  "entity_matches": [
+                    "domains",
+                    [
+                      "ebay.com",
+                      "ebay.co.uk",
+                      " ebay.fr",
+                      "ebay.de",
+                      "ebay.ca",
+                      "ebay.it",
+                      "ebay.es",
+                      "ebay.com.au",
+                      "ebay.ie",
+                      "ebay.nl",
+                      "ebay.be",
+                      "ebay.at",
+                      "ebay.ch",
+                      "ebay.pl",
+                      "ebay.se",
+                      "ebay.cn",
+                      "ebay.com.hk",
+                      "ebay.com.sg",
+                      "ebay.in",
+                      "ebay.com.my",
+                      "ebay.ph",
+                      "rover.ebay.com"
+                    ]
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "facets[*].features[*].uri",
+                    "campid=|customid=|toolid=|mkevt=",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.record.uri",
+                    "campid=|customid=|toolid=|mkevt=",
+                    true
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "ebay",
+            "description": "ebay"
+          }
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_EBAY_WITH_TINY_URLS",
+                "==",
+                false
+              ]
+            },
+            {
+              "each": [
+                "$WHITELIST_AFFILIATE",
+                {
+                  "list_member": [
+                    "$WHITELIST_AFFILIATE_ITEM",
+                    "in"
+                  ]
+                }
+              ]
+            },
+            {
+              "regex_negation_matches": [
+                "text",
+                "ebay",
+                true
+              ]
+            },
+            {
+              "and": [
+                {
+                  "regex_matches": [
+                    "text",
+                    "ebay",
+                    true
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "buff.ly",
+                      "bit.ly",
+                      "tinyurl.com",
+                      "cutt.ly",
+                      "rebrand.ly",
+                      "t2m.io",
+                      "b.link",
+                      "short.io",
+                      "switchy.io"
+                    ]
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "EBAY+LINK SHORTENER",
+            "pattern": "dots"
+          }
+        },
+        {
+          "or": [
+            {
+              "or": [
+                {
+                  "param_compare": [
+                    "$BLOCK_WALMART_AFFILIATE_LINKS",
+                    "==",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "walmart.com",
+                      "walmart.ca",
+                      "walmart.com.mx",
+                      "affiliates.walmart.com",
+                      "walmart.io"
+                    ]
+                  ]
+                },
+                {
+                  "each": [
+                    "$WHITELIST_AFFILIATE",
+                    {
+                      "list_member": [
+                        "$WHITELIST_AFFILIATE_ITEM",
+                        "in"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "metadata": {}
+            },
+            {
+              "and": [
+                {
+                  "entity_matches": [
+                    "domains",
+                    [
+                      "walmart.com",
+                      "walmart.ca",
+                      "walmart.com.mx",
+                      "affiliates.walmart.com",
+                      "walmart.io"
+                    ]
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "facets[*].features[*].uri",
+                    "affp1=|wmlspartner=",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.record.uri",
+                    "affp1=|wmlspartner=",
+                    true
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "walmart"
+          }
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_WALMART_WITH_TINY_URLS",
+                "==",
+                false
+              ]
+            },
+            {
+              "each": [
+                "$WHITELIST_AFFILIATE",
+                {
+                  "list_member": [
+                    "$WHITELIST_AFFILIATE_ITEM",
+                    "in"
+                  ]
+                }
+              ]
+            },
+            {
+              "regex_negation_matches": [
+                "text",
+                "walmart",
+                true
+              ]
+            },
+            {
+              "and": [
+                {
+                  "regex_matches": [
+                    "text",
+                    "walmart",
+                    true
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "buff.ly",
+                      "bit.ly",
+                      "tinyurl.com",
+                      "cutt.ly",
+                      "rebrand.ly",
+                      "t2m.io",
+                      "b.link",
+                      "short.io",
+                      "switchy.io"
+                    ]
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "WALMART+LINK SHORTENER",
+            "pattern": "dots"
+          }
+        },
+        {
+          "or": [
+            {
+              "or": [
+                {
+                  "param_compare": [
+                    "$BLOCK_BESTBUY_AFFILIATE_LINKS",
+                    "==",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "bestbuy.com",
+                      "bestbuy.ca",
+                      "affiliates.bestbuy.com"
+                    ]
+                  ]
+                },
+                {
+                  "each": [
+                    "$WHITELIST_AFFILIATE",
+                    {
+                      "list_member": [
+                        "$WHITELIST_AFFILIATE_ITEM",
+                        "in"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "metadata": {}
+            },
+            {
+              "and": [
+                {
+                  "entity_matches": [
+                    "domains",
+                    [
+                      "bestbuy.com",
+                      "bestbuy.ca",
+                      "affiliates.bestbuy.com"
+                    ]
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "facets[*].features[*].uri",
+                    "ref=",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.record.uri",
+                    "ref=",
+                    true
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "bestbuy"
+          }
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_BESTBUY_WITH_TINY_URLS",
+                "==",
+                false
+              ]
+            },
+            {
+              "each": [
+                "$WHITELIST_AFFILIATE",
+                {
+                  "list_member": [
+                    "$WHITELIST_AFFILIATE_ITEM",
+                    "in"
+                  ]
+                }
+              ]
+            },
+            {
+              "regex_negation_matches": [
+                "text",
+                "bestbuy|best buy",
+                true
+              ]
+            },
+            {
+              "and": [
+                {
+                  "regex_matches": [
+                    "text",
+                    "bestbuy|best buy",
+                    true
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "buff.ly",
+                      "bit.ly",
+                      "tinyurl.com",
+                      "cutt.ly",
+                      "rebrand.ly",
+                      "t2m.io",
+                      "b.link",
+                      "short.io",
+                      "switchy.io"
+                    ]
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "WALMART+LINK SHORTENER",
+            "pattern": "dots"
+          }
+        },
+        {
+          "or": [
+            {
+              "or": [
+                {
+                  "param_compare": [
+                    "$BLOCK_TARGET_AFFILIATE_LINKS",
+                    "==",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "target.com",
+                      "target.ca",
+                      "partners.target.com"
+                    ]
+                  ]
+                },
+                {
+                  "each": [
+                    "$WHITELIST_AFFILIATE",
+                    {
+                      "list_member": [
+                        "$WHITELIST_AFFILIATE_ITEM",
+                        "in"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "metadata": {}
+            },
+            {
+              "and": [
+                {
+                  "entity_matches": [
+                    "domains",
+                    [
+                      "target.com",
+                      "target.ca",
+                      "partners.target.com"
+                    ]
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "facets[*].features[*].uri",
+                    "clkid=|afid=|AID=",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.record.uri",
+                    "clkid=|afid=|AID=",
+                    true
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "target"
+          }
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_TARGET_WITH_TINY_URLS",
+                "==",
+                false
+              ]
+            },
+            {
+              "each": [
+                "$WHITELIST_AFFILIATE",
+                {
+                  "list_member": [
+                    "$WHITELIST_AFFILIATE_ITEM",
+                    "in"
+                  ]
+                }
+              ]
+            },
+            {
+              "regex_negation_matches": [
+                "text",
+                "target.com|Target.com|Target",
+                false
+              ]
+            },
+            {
+              "and": [
+                {
+                  "regex_matches": [
+                    "text",
+                    "target.com|Target.com|Target",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "buff.ly",
+                      "bit.ly",
+                      "tinyurl.com",
+                      "cutt.ly",
+                      "rebrand.ly",
+                      "t2m.io",
+                      "b.link",
+                      "short.io",
+                      "switchy.io"
+                    ]
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "TARGET+LINK SHORTENER",
+            "pattern": "dots"
+          }
+        },
+        {
+          "or": [
+            {
+              "or": [
+                {
+                  "param_compare": [
+                    "$BLOCK_ALIEXPRESS_AFFILIATE_LINKS",
+                    "==",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "aliexpress.com",
+                      "aliexpress.ru",
+                      "portals.aliexpress.com",
+                      "s.click.aliexpress.com",
+                      "a.aliexpress.com"
+                    ]
+                  ]
+                },
+                {
+                  "each": [
+                    "$WHITELIST_AFFILIATE",
+                    {
+                      "list_member": [
+                        "$WHITELIST_AFFILIATE_ITEM",
+                        "in"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "metadata": {}
+            },
+            {
+              "and": [
+                {
+                  "entity_matches": [
+                    "domains",
+                    [
+                      "aliexpress.com",
+                      "aliexpress.ru",
+                      "portals.aliexpress.com",
+                      "s.click.aliexpress.com",
+                      "a.aliexpress.com"
+                    ]
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "facets[*].features[*].uri",
+                    "aff_platform=|aff_trace_key=",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.record.uri",
+                    "aff_platform=|aff_trace_key=",
+                    true
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "aliexpress"
+          }
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_ALIEXPRESS_WITH_TINY_URLS",
+                "==",
+                false
+              ]
+            },
+            {
+              "each": [
+                "$WHITELIST_AFFILIATE",
+                {
+                  "list_member": [
+                    "$WHITELIST_AFFILIATE_ITEM",
+                    "in"
+                  ]
+                }
+              ]
+            },
+            {
+              "regex_negation_matches": [
+                "text",
+                "aliexpress|ali express",
+                true
+              ]
+            },
+            {
+              "and": [
+                {
+                  "regex_matches": [
+                    "text",
+                    "aliexpress|ali express",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "buff.ly",
+                      "bit.ly",
+                      "tinyurl.com",
+                      "cutt.ly",
+                      "rebrand.ly",
+                      "t2m.io",
+                      "b.link",
+                      "short.io",
+                      "switchy.io"
+                    ]
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "ALIEXPRESS+LINK SHORTENER",
+            "pattern": "dots"
+          }
+        },
+        {
+          "or": [
+            {
+              "or": [
+                {
+                  "param_compare": [
+                    "$BLOCK_APPLE_AFFILIATE_LINKS",
+                    "==",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "apple.com",
+                      "music.apple.com",
+                      "tv.apple.com",
+                      "podcasts.apple.com",
+                      "books.apple.com",
+                      "news.apple.com",
+                      "fitness.apple.com",
+                      "partners.applemediaservices.com",
+                      "performance-partners.apple.com"
+                    ]
+                  ]
+                },
+                {
+                  "each": [
+                    "$WHITELIST_AFFILIATE",
+                    {
+                      "list_member": [
+                        "$WHITELIST_AFFILIATE_ITEM",
+                        "in"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "metadata": {}
+            },
+            {
+              "and": [
+                {
+                  "entity_matches": [
+                    "domains",
+                    [
+                      "apple.com",
+                      "music.apple.com",
+                      "tv.apple.com",
+                      "podcasts.apple.com",
+                      "books.apple.com",
+                      "news.apple.com",
+                      "fitness.apple.com",
+                      "partners.applemediaservices.com",
+                      "performance-partners.apple.com"
+                    ]
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "facets[*].features[*].uri",
+                    "at=",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.record.uri",
+                    "at=",
+                    true
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "APPLE"
+          }
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_APPLE_WITH_TINY_URLS",
+                "==",
+                false
+              ]
+            },
+            {
+              "each": [
+                "$WHITELIST_AFFILIATE",
+                {
+                  "list_member": [
+                    "$WHITELIST_AFFILIATE_ITEM",
+                    "in"
+                  ]
+                }
+              ]
+            },
+            {
+              "regex_negation_matches": [
+                "text",
+                "apple.com|apple iphone",
+                true
+              ]
+            },
+            {
+              "and": [
+                {
+                  "regex_matches": [
+                    "text",
+                    "apple.com|apple iphone",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "buff.ly",
+                      "bit.ly",
+                      "tinyurl.com",
+                      "cutt.ly",
+                      "rebrand.ly",
+                      "t2m.io",
+                      "b.link",
+                      "short.io",
+                      "switchy.io"
+                    ]
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "APPLE+LINK SHORTENER",
+            "pattern": "dots"
+          }
+        },
+        {
+          "or": [
+            {
+              "or": [
+                {
+                  "param_compare": [
+                    "$BLOCK_TRAVEL_AFFILIATE_LINKS",
+                    "==",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "booking.com",
+                      "booking.co.uk",
+                      "booking.ca",
+                      "booking.com.au",
+                      "booking.de",
+                      "booking.fr",
+                      "booking.it",
+                      "booking.es",
+                      "booking.nl",
+                      "booking.be",
+                      "booking.at",
+                      "booking.ch",
+                      "booking.pl",
+                      "booking.se",
+                      "booking.no",
+                      "booking.dk",
+                      "booking.fi",
+                      "booking.ru",
+                      "booking.ua",
+                      "booking.com.br",
+                      "booking.com.mx",
+                      "booking.com.ar",
+                      "booking.com.co",
+                      "booking.com.pe",
+                      "booking.com.cl",
+                      "booking.com.ve",
+                      "booking.com.bo",
+                      "booking.com.ec",
+                      "booking.com.cr",
+                      "booking.com.pa",
+                      "booking.com.do",
+                      "booking.com.gt",
+                      "booking.com.sv",
+                      "booking.com.hn",
+                      "booking.com.ni",
+                      "booking.com.py",
+                      "booking.com.uy",
+                      "booking.com.jm",
+                      "booking.com.bs",
+                      "booking.com.bb",
+                      "tripadvisor.com",
+                      "tripadvisor.co.uk",
+                      "tripadvisor.ca",
+                      "tripadvisor.com.au",
+                      "tripadvisor.in",
+                      "tripadvisor.de",
+                      "tripadvisor.fr",
+                      "tripadvisor.it",
+                      "tripadvisor.es",
+                      "tripadvisor.nl",
+                      "tripadvisor.co.nz",
+                      "tripadvisor.co.za",
+                      "tripadvisor.co.in",
+                      "tripadvisor.cn",
+                      "tripadvisor.jp",
+                      "tripadvisor.kr",
+                      "tripadvisor.tw",
+                      "tripadvisor.hk",
+                      "tripadvisor.com.br",
+                      "tripadvisor.com.mx",
+                      "tripadvisor.com.sg",
+                      "tripadvisor.com.ph",
+                      "tripadvisor.com.my",
+                      "tripadvisor.com.tr",
+                      "tripadvisor.com.sa",
+                      "tripadvisor.com.eg",
+                      "tripadvisor.com.ar",
+                      "tripadvisor.com.cl",
+                      "tripadvisor.com.pe",
+                      "tripadvisor.com.co",
+                      "tripadvisor.com.ve",
+                      "tripadvisor.com.uy",
+                      "tripadvisor.com.bo",
+                      "tripadvisor.com.py",
+                      "tripadvisor.com.ec",
+                      "tripadvisor.com.hn",
+                      "tripadvisor.com.ni",
+                      "tripadvisor.com.cr",
+                      "tripadvisor.com.pa",
+                      "tripadvisor.com.do",
+                      "tripadvisor.com.gt",
+                      "tripadvisor.com.sv",
+                      "tripadvisor.com.bz",
+                      "tripadvisor.com.cu",
+                      "tripadvisor.com.jm",
+                      "tripadvisor.com.bs",
+                      "tripadvisor.com.bb",
+                      "tripadvisor.com.dm",
+                      "tripadvisor.com.lc",
+                      "tripadvisor.com.vc",
+                      "tripadvisor.com.kn",
+                      "tripadvisor.com.ai",
+                      "tripadvisor.com.ag",
+                      "tripadvisor.com.bm",
+                      "tripadvisor.com.pr",
+                      "tripadvisor.com.vi"
+                    ]
+                  ]
+                },
+                {
+                  "each": [
+                    "$WHITELIST_AFFILIATE",
+                    {
+                      "list_member": [
+                        "$WHITELIST_AFFILIATE_ITEM",
+                        "in"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "metadata": {}
+            },
+            {
+              "and": [
+                {
+                  "entity_matches": [
+                    "domains",
+                    [
+                      "booking.com",
+                      "booking.co.uk",
+                      "booking.ca",
+                      "booking.com.au",
+                      "booking.de",
+                      "booking.fr",
+                      "booking.it",
+                      "booking.es",
+                      "booking.nl",
+                      "booking.be",
+                      "booking.at",
+                      "booking.ch",
+                      "booking.pl",
+                      "booking.se",
+                      "booking.no",
+                      "booking.dk",
+                      "booking.fi",
+                      "booking.ru",
+                      "booking.ua",
+                      "booking.com.br",
+                      "booking.com.mx",
+                      "booking.com.ar",
+                      "booking.com.co",
+                      "booking.com.pe",
+                      "booking.com.cl",
+                      "booking.com.ve",
+                      "booking.com.bo",
+                      "booking.com.ec",
+                      "booking.com.cr",
+                      "booking.com.pa",
+                      "booking.com.do",
+                      "booking.com.gt",
+                      "booking.com.sv",
+                      "booking.com.hn",
+                      "booking.com.ni",
+                      "booking.com.py",
+                      "booking.com.uy",
+                      "booking.com.jm",
+                      "booking.com.bs",
+                      "booking.com.bb",
+                      "tripadvisor.com",
+                      "tripadvisor.co.uk",
+                      "tripadvisor.ca",
+                      "tripadvisor.com.au",
+                      "tripadvisor.in",
+                      "tripadvisor.de",
+                      "tripadvisor.fr",
+                      "tripadvisor.it",
+                      "tripadvisor.es",
+                      "tripadvisor.nl",
+                      "tripadvisor.co.nz",
+                      "tripadvisor.co.za",
+                      "tripadvisor.co.in",
+                      "tripadvisor.cn",
+                      "tripadvisor.jp",
+                      "tripadvisor.kr",
+                      "tripadvisor.tw",
+                      "tripadvisor.hk",
+                      "tripadvisor.com.br",
+                      "tripadvisor.com.mx",
+                      "tripadvisor.com.sg",
+                      "tripadvisor.com.ph",
+                      "tripadvisor.com.my",
+                      "tripadvisor.com.tr",
+                      "tripadvisor.com.sa",
+                      "tripadvisor.com.eg",
+                      "tripadvisor.com.ar",
+                      "tripadvisor.com.cl",
+                      "tripadvisor.com.pe",
+                      "tripadvisor.com.co",
+                      "tripadvisor.com.ve",
+                      "tripadvisor.com.uy",
+                      "tripadvisor.com.bo",
+                      "tripadvisor.com.py",
+                      "tripadvisor.com.ec",
+                      "tripadvisor.com.hn",
+                      "tripadvisor.com.ni",
+                      "tripadvisor.com.cr",
+                      "tripadvisor.com.pa",
+                      "tripadvisor.com.do",
+                      "tripadvisor.com.gt",
+                      "tripadvisor.com.sv",
+                      "tripadvisor.com.bz",
+                      "tripadvisor.com.cu",
+                      "tripadvisor.com.jm",
+                      "tripadvisor.com.bs",
+                      "tripadvisor.com.bb",
+                      "tripadvisor.com.dm",
+                      "tripadvisor.com.lc",
+                      "tripadvisor.com.vc",
+                      "tripadvisor.com.kn",
+                      "tripadvisor.com.ai",
+                      "tripadvisor.com.ag",
+                      "tripadvisor.com.bm",
+                      "tripadvisor.com.pr",
+                      "tripadvisor.com.vi"
+                    ]
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "facets[*].features[*].uri",
+                    "m=|c=|aid=|label=",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.record.uri",
+                    "m=|c=|aid=|label=",
+                    true
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "travel"
+          }
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_TRAVEL_WITH_TINY_URLS",
+                "==",
+                false
+              ]
+            },
+            {
+              "each": [
+                "$WHITELIST_AFFILIATE",
+                {
+                  "list_member": [
+                    "$WHITELIST_AFFILIATE_ITEM",
+                    "in"
+                  ]
+                }
+              ]
+            },
+            {
+              "regex_negation_matches": [
+                "text",
+                "trip advisor|tripadvisor|booking.com",
+                true
+              ]
+            },
+            {
+              "and": [
+                {
+                  "regex_matches": [
+                    "text",
+                    "trip advisor|tripadvisor|booking.com",
+                    true
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "buff.ly",
+                      "bit.ly",
+                      "tinyurl.com",
+                      "cutt.ly",
+                      "rebrand.ly",
+                      "t2m.io",
+                      "b.link",
+                      "short.io",
+                      "switchy.io"
+                    ]
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "TRAVEL+LINK SHORTENER",
+            "pattern": "dots"
+          }
+        },
+        {
+          "or": [
+            {
+              "or": [
+                {
+                  "param_compare": [
+                    "$BLOCK_RAKUTEN_AFFILIATE_LINKS",
+                    "==",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "rakuten.com",
+                      "rakuten.co.jp",
+                      "rakuten.net",
+                      "rakutenmarketing.com",
+                      "rakutenaffiliate.com",
+                      "rakutenadvertising.com"
+                    ]
+                  ]
+                },
+                {
+                  "each": [
+                    "$WHITELIST_AFFILIATE",
+                    {
+                      "list_member": [
+                        "$WHITELIST_AFFILIATE_ITEM",
+                        "in"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "metadata": {}
+            },
+            {
+              "and": [
+                {
+                  "entity_matches": [
+                    "domains",
+                    [
+                      "rakuten.com",
+                      "rakuten.co.jp",
+                      "rakuten.net",
+                      "rakutenmarketing.com",
+                      "rakutenaffiliate.com",
+                      "rakutenadvertising.com"
+                    ]
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "facets[*].features[*].uri",
+                    "subid=|u1=",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.record.uri",
+                    "subid=|u1=",
+                    true
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "rakuten"
+          }
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_RAKUTEN_WITH_TINY_URLS",
+                "==",
+                false
+              ]
+            },
+            {
+              "each": [
+                "$WHITELIST_AFFILIATE",
+                {
+                  "list_member": [
+                    "$WHITELIST_AFFILIATE_ITEM",
+                    "in"
+                  ]
+                }
+              ]
+            },
+            {
+              "regex_negation_matches": [
+                "text",
+                "rakuten",
+                true
+              ]
+            },
+            {
+              "and": [
+                {
+                  "regex_matches": [
+                    "text",
+                    "rakuten",
+                    true
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "buff.ly",
+                      "bit.ly",
+                      "tinyurl.com",
+                      "cutt.ly",
+                      "rebrand.ly",
+                      "t2m.io",
+                      "b.link",
+                      "short.io",
+                      "switchy.io"
+                    ]
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "RAKUTEN+LINK SHORTENER",
+            "pattern": "dots"
+          }
+        },
+        {
+          "or": [
+            {
+              "or": [
+                {
+                  "param_compare": [
+                    "$BLOCK_CLICKBANK_AFFILIATE_LINKS",
+                    "==",
+                    false
+                  ]
+                },
+                {
+                  "entity_excludes": [
+                    "domains",
+                    [
+                      "clickbank.net",
+                      "hop.clickbank.net"
+                    ]
+                  ]
+                },
+                {
+                  "each": [
+                    "$WHITELIST_AFFILIATE",
+                    {
+                      "list_member": [
+                        "$WHITELIST_AFFILIATE_ITEM",
+                        "in"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "metadata": {}
+            },
+            {
+              "and": [
+                {
+                  "entity_matches": [
+                    "domains",
+                    [
+                      "clickbank.net",
+                      "hop.clickbank.net"
+                    ]
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "facets[*].features[*].uri",
+                    "tid=|hop=",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.record.uri",
+                    "tid=|hop=",
+                    true
+                  ]
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {
+            "color": "yellow",
+            "title": "clickbank"
+          }
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_ADS",
+                "==",
+                false
+              ]
+            },
+            {
+              "each": [
+                "$WHITELIST_AD_BLOCKER",
+                {
+                  "list_member": [
+                    "$WHITELIST_AD_BLOCKER_ITEM",
+                    "in"
+                  ]
+                }
+              ]
+            },
+            {
+              "and": [
+                {
+                  "regex_negation_matches": [
+                    "text",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "reply",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.external.uri",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.external.title",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.external.description",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.media.external.uri",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.media.external.title",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.external.description",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.alt",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.media[*].alt",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.images[*].alt",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.media.images[*].alt",
+                    "(?<!\\w)(?:buy|shop|order|grab|claim|snag|pick\\s+up|score|cop|reserve|get\\s+your|secure)\\s+(?:now|today|yours|ASAP|before\\s+it's\\s+gone|while\\s+you\\s+can|instantly|fast)|(?:get|save|take|enjoy|redeem|unlock)\\s+(?:an?\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:now|instantly|your\\s+order|everything|sitewide|storewide|select\\s+items))?|(?:up\\s+to\\s+)?\\d{1,3}%\\s+off(?:[!?\\.]*|\\s+(?:sale|everything|all|select\\s+items|sitewide|storewide|today\\s+only))?|only\\s+\\$\\d+(?:\\.\\d{2})?|worth\\s+\\$\\d+(?:\\.\\d{2})?\\s+for\\s+free|(?:valued\\s+at|originally)\\s+\\$\\d+(?:\\.\\d{2})?|(?:limited\\s+time|today\\s+only|this\\s+week\\s+only|this\\s+weekend|this\\s+month\\s+only|ends\\s+(?:tonight|soon|today|tomorrow|in\\s+\\d+\\s+(?:hours|days))|while\\s+supplies\\s+last|while\\s+stocks\\s+last|flash\\s+deal|limited\\s+drop|midnight\\s+deal|countdown\\s+begins)|(?:free|‼️FREE)\\s+(?:shipping|trial|gift|bonus|entry|access|product|item|ebook|download|sample|upgrade)|use\\s+(?:promo|discount|coupon|referral)\\s+code(?:\\s+\\w+)?(?:\\s+at\\s+checkout)?|(?:exclusive|special|VIP|private|invite[-\\s]?only|early\\s+access|members\\s+only|limited)\\s+(?:deal|offer|access|drop|discount|launch|release)|(?:act\\s+now|don't\\s+miss\\s+(?:out)?|hurry\\s+(?:before|while)|last\\s+chance|grab\\s+it\\s+now|secure\\s+yours|selling\\s+fast|flying\\s+off\\s+the\\s+shelves|won't\\s+last\\s+long)|(?:lowest\\s+price|best\\s+deal|steal\\s+deal|hot\\s+deal|crazy\\s+deal|hot\\s+sale|blowout\\s+sale|mega\\s+sale|biggest\\s+sale|final\\s+markdown|price\\s+drop|deal\\s+alert|must[-\\s]?have|bestseller|staff\\s+pick)|(?:summer discount|‼️FREE)",
+                    true
+                  ]
+                }
+              ],
+              "metadata": {
+                "color": "green"
+              }
+            }
+          ],
+          "metadata": {
+            "color": "yellow"
+          }
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_HASHTAG_ADS",
+                "==",
+                false
+              ]
+            },
+            {
+              "each": [
+                "$WHITELIST_AD_BLOCKER",
+                {
+                  "list_member": [
+                    "$WHITELIST_AD_BLOCKER_ITEM",
+                    "in"
+                  ]
+                }
+              ]
+            },
+            {
+              "and": [
+                {
+                  "regex_negation_matches": [
+                    "text",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "reply",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.external.uri",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.external.title",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.external.description",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.media.external.uri",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.media.external.title",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.external.description",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.alt",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.media[*].alt",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.images[*].alt",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                },
+                {
+                  "regex_negation_matches": [
+                    "embed.media.images[*].alt",
+                    "#(?:ad|advertisement|affiliate|affiliatemarketing|affiliatepartner|affiliatepromo|affiliatecode|affiliatelink|affiliateadvertisement|sponsored|sp|paid|paidpost|paidpromotion|paidcontent|promotion|promo|promoted|promotedpost|partnership|partnered|partner|brandambassador|collab|collaboration|endorsement|referral|referralcode|commission|discountcode|coupon|couponcode|deal|sale|offer|giveaway|contest|freebie|gift|discount|flashsale|limitedoffer|exclusive|vip|earlyaccess|launch|launching|launchparty|newarrival|dealalert|dealofday|todayonly|salealert|shoppingaddict|shopnow|buy|shoplocal|smallbusiness|supportlocal|brand|brandpartner|influencer|blogger|contentcreator|socialmedia|adpartner|adcontent|advertorial|nativeadvertising|sponsoredpost|advertisementpost|affliate|makemoneyonline|businessopportunity|entrepreneurlife|financialfreedom|passiveincome|cryptocurrency|giveaway|promo|sponsoredpost)\n",
+                    true
+                  ]
+                }
+              ],
+              "metadata": {
+                "color": "green"
+              }
+            }
+          ],
+          "metadata": {
+            "color": "yellow"
+          }
+        }
+      ],
+      "metadata": {
+        "color": "green",
+        "customNodeParameters": [
+          {
+            "name": "WHITELIST_AD_BLOCKER",
+            "type": "list",
+            "description": "Whitelists Ad blocker restrictions. If you have monetized your feed, be sure to add the account(s) to one of these lists so that their sponsored posts are not removed from your feed(s).",
+            "displayName": "Whitelist: Exempt Users From Ad Blocker?",
+            "exampleValue": [
+              "https://bsky.app/profile/did:plc:3wh3o5qteklqxtz4d4iz3taq/lists/3lotyupowix25"
+            ]
+          },
+          {
+            "name": "BLOCK_ADS",
+            "type": "toggle",
+            "description": "Block posts which contain advertisement specific language. \"BUY NOW!\" \"CLAIM YOURS TODAY\"",
+            "displayName": "Block Ads",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_HASHTAG_ADS",
+            "type": "toggle",
+            "description": "Block posts with advertisement hashtags. #ad",
+            "displayName": "Block Hashtag Ads",
+            "exampleValue": false
+          },
+          {
+            "name": "WHITELIST_AFFILIATE",
+            "type": "list",
+            "description": "Whitelists all affiliate restrictions. Users on these lists will not be removed if they post links with affiliate links or URL shorteners with brand/website name.",
+            "displayName": "Whitelist: Exempt Users From Affiliate Link Restrictions?",
+            "exampleValue": [
+              "https://bsky.app/profile/did:plc:3wh3o5qteklqxtz4d4iz3taq/lists/3lotyupowix25"
+            ]
+          },
+          {
+            "name": "BLOCK_UNIVERSAL_AFFILIATE_LINKS",
+            "type": "toggle",
+            "description": "These domains are used for affiliate links. Examples include: urlgeni.us, geni.us. These domains are removed regardless of any other context.",
+            "displayName": "Block Universal Affiliate Links",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_AMAZON_AFFILIATE_LINKS",
+            "type": "toggle",
+            "description": "Searches many different amazon domains, amazon.com, amzn.com, a.co, a.to, amazon.co.jp, amazon.nl, and searches for affiliate tags in the URL. Posts that contain affiliate tags in these URL's will be removed.",
+            "displayName": "Block Amazon Affiliate Links",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_AMAZON_WITH_TINY_URLS",
+            "type": "toggle",
+            "description": "Searches for mentions of Amazon and the use of a URL shortener, bit.ly, tiny.url, etc. and removes these  posts. This option is HIGHLY recommended as the vast majority of these shortened URL's are affiliate spam, though the possibility of a false positive does exist (which is why this is a separate toggle). This does not block all URL shortener links, only those that include the text Amazon.",
+            "displayName": "Block Amazon With Tiny URLs",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_EBAY_AFFILIATE_LINKS",
+            "type": "toggle",
+            "description": "Searches many different amazon domains, ebay.com, ebay.co.uk, ebay.nl, etc and searches for affiliate tags in the URL. Posts that contain affiliate tags in these URL's will be removed.",
+            "displayName": "Block Ebay Affiliate Links",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_EBAY_WITH_TINY_URLS",
+            "type": "toggle",
+            "description": "Searches for mentions of ebay and the use of a URL shortener, bit.ly, tiny.url, etc. and removes these  posts. This option is HIGHLY recommended as the vast majority of these shortened URL's are affiliate spam, though the possibility of a false positive does exist (which is why this is a separate toggle). This does not block all URL shortener links, only those that include the text ebay.",
+            "displayName": "Block Ebay With Tiny URLs",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_WALMART_AFFILIATE_LINKS",
+            "type": "toggle",
+            "description": "Searches many different Walmart domains, Walmart.com, walmart.ca, walmar.com.mx, etc and searches for affiliate tags in the URL. Posts that contain affiliate tags in these URL's will be removed.",
+            "displayName": "Block Walmart Affiliate Links",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_WALMART_WITH_TINY_URLS",
+            "type": "toggle",
+            "description": "Searches for mentions of Walmart and the use of a URL shortener, bit.ly, tiny.url, etc. and removes these  posts. This option is HIGHLY recommended as the vast majority of these shortened URL's are affiliate spam, though the possibility of a false positive does exist (which is why this is a separate toggle). This does not block all URL shortener links, only those that include the text Walmart.",
+            "displayName": "Block Walmart With Tiny URLs",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_BESTBUY_AFFILIATE_LINKS",
+            "type": "toggle",
+            "description": "Searches many different BestBuy domains, Bestbuy.com, bestbuy.ca, etc and searches for affiliate tags in the URL. Posts that contain affiliate tags in these URL's will be removed.",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_BESTBUY_WITH_TINY_URLS",
+            "type": "toggle",
+            "description": "Searches for mentions of BestBuy and the use of a URL shortener, bit.ly, tiny.url, etc. and removes these  posts. This option is HIGHLY recommended as the vast majority of these shortened URL's are affiliate spam, though the possibility of a false positive does exist (which is why this is a separate toggle). This does not block all URL shortener links, only those that include the text BestBuy.",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_TARGET_AFFILIATE_LINKS",
+            "type": "toggle",
+            "description": "Searches many different Target domains, target.com, etc, and searches for affiliate tags in the URL. Posts that contain affiliate tags in these URL's will be removed.",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_TARGET_WITH_TINY_URLS",
+            "type": "toggle",
+            "description": "Searches for mentions of Target and the use of a URL shortener, bit.ly, tiny.url, etc. and removes these  posts. This option is HIGHLY recommended as the vast majority of these shortened URL's are affiliate spam, though the possibility of a false positive does exist (which is why this is a separate toggle). This does not block all URL shortener links, only those that include the text Target (case sensitive), target.com. (this was a tricky one any may be less effective with such a generic word)",
+            "exampleValue": false
+          },
+          {
+            "name": "BLOCK_ALIEXPRESS_AFFILIATE_LINKS",
+            "type": "toggle",
+            "description": "Searches many different AliExpress domains, AliExpress.com, etc, and searches for affiliate tags in the URL. Posts that contain affiliate tags in these URL's will be removed.",
+            "exampleValue": true
+          },
+          {
+            "name": "BLOCK_ALIEXPRESS_WITH_TINY_URLS",
+            "type": "toggle",
+            "description": "Searches for mentions of AliExpress and the use of a URL shortener, bit.ly, tiny.url, etc. and removes these  posts. This option is HIGHLY recommended as the vast majority of these shortened URL's are affiliate spam, though the possibility of a false positive does exist (which is why this is a separate toggle). This does not block all URL shortener links, only those that include the text AliExpress, Ali Express.",
+            "exampleValue": true
+          },
+          {
+            "name": "BLOCK_APPLE_AFFILIATE_LINKS",
+            "type": "toggle",
+            "description": "Searches many different Apple domains, Apple.com, etc, and searches for affiliate tags in the URL. Posts that contain affiliate tags in these URL's will be removed.",
+            "exampleValue": true
+          },
+          {
+            "name": "BLOCK_APPLE_WITH_TINY_URLS",
+            "type": "toggle",
+            "description": "Searches for mentions of Apple and the use of a URL shortener, bit.ly, tiny.url, etc. and removes these  posts. This option is HIGHLY recommended as the vast majority of these shortened URL's are affiliate spam, though the possibility of a false positive does exist (which is why this is a separate toggle). This does not block all URL shortener links, only those that include the text Apple.com, apple iphone (this was also tricky given the generic name, so it may be less effective)",
+            "exampleValue": true
+          },
+          {
+            "name": "BLOCK_TRAVEL_AFFILIATE_LINKS",
+            "type": "toggle",
+            "description": "Searches many different TripAdvisor/Booking domains, TripAdvisor.com, Booking.com etc, and searches for affiliate tags in the URL. Posts that contain affiliate tags in these URL's will be removed.",
+            "exampleValue": true
+          },
+          {
+            "name": "BLOCK_TRAVEL_WITH_TINY_URLS",
+            "type": "toggle",
+            "description": "Searches for mentions of TripAdvisor/Booking and the use of a URL shortener, bit.ly, tiny.url, etc. and removes these  posts. This option is HIGHLY recommended as the vast majority of these shortened URL's are affiliate spam, though the possibility of a false positive does exist (which is why this is a separate toggle). This does not block all URL shortener links, only those that include the text TripAdvisor, Booking.com, etc.",
+            "exampleValue": true
+          },
+          {
+            "name": "BLOCK_RAKUTEN_AFFILIATE_LINKS",
+            "type": "toggle",
+            "description": "Searches many different Rakuten domains, Rakuten.com, Rakuten.co.jp, Rakuten.net, etc and searches for affiliate tags in the URL. Posts that contain affiliate tags in these URL's will be removed.",
+            "exampleValue": true
+          },
+          {
+            "name": "BLOCK_RAKUTEN_WITH_TINY_URLS",
+            "type": "toggle",
+            "description": "Searches for mentions of Rakuten and the use of a URL shortener, bit.ly, tiny.url, etc. and removes these  posts. This option is HIGHLY recommended as the vast majority of these shortened URL's are affiliate spam, though the possibility of a false positive does exist (which is why this is a separate toggle). This does not block all URL shortener links, only those that include the text Rakuten.",
+            "exampleValue": true
+          },
+          {
+            "name": "BLOCK_CLICKBANK_AFFILIATE_LINKS",
+            "type": "toggle",
+            "description": "Blocks all clickbank links.",
+            "exampleValue": true
+          }
+        ]
+      }
+    }
+  }
+}

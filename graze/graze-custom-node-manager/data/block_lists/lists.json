@@ -1,0 +1,59 @@
+{
+  "lists": [
+    {
+      "param_name": "GREENSKY_LIST",
+      "url": "https://bsky.app/profile/blacksky.app/lists/3kaaqcnnxi72w",
+      "description": "Blacksky: Users who participate in hateful campaigns against Black users or otherwise engage in Anti-Blackness."
+    },
+    {
+      "param_name": "TROLLS",
+      "url": "https://bsky.app/profile/did:plc:e4elbtctnfqocyfcml6h2lf7/lists/3lbckxhgu3r2v",
+      "description": "Skywatch Blue: Label for posts and accounts which spam users with off-topic replies, engage in troll like behavior, or which engage in concern trolling."
+    },
+    {
+      "param_name": "TERFS",
+      "url": "https://bsky.app/profile/did:plc:e4elbtctnfqocyfcml6h2lf7/lists/3lcqjqjdejs2x",
+      "description": "Skywatch Blue: Applied to accounts who self describe as being a 'Trans-Exclusionary Radical Feminist' (TERF), 'Gender Critical' (GC), or 'Gender Realist', as well as high-profile individuals whose body of work identifies them as such, or accounts with multiple posts which attack trans people / use pejorative terms"
+    },
+    {
+      "param_name": "MAGA",
+      "url": "https://bsky.app/profile/did:plc:e4elbtctnfqocyfcml6h2lf7/lists/3l53cjwlt4o2s",
+      "description": "Skywatch Blue: Username, description, and / or handle which includes MAGA, MAHA, TRUMP, or TRUMP 2024, or posts with #MAGA and #TRUMP2024 hashtags or clear indicators of support for Trump."
+    },
+    {
+      "param_name": "ELON_MUSK",
+      "url": "https://bsky.app/profile/did:plc:e4elbtctnfqocyfcml6h2lf7/lists/3l72tte74wa2m",
+      "description": "Skywatch Blue: Username, handle, and / or description which includes reference to Elon Musk."
+    },
+    {
+      "param_name": "NAZI_SYMBOLISM",
+      "url": "https://bsky.app/profile/skywatch.blue/lists/3l6vdudxgeb2z",
+      "description": "Skywatch Blue: Username, handle, and / or description which includes Nazi and neo-nazi symbols, including swastikas, references to the 14 words and Hitler's initials, or double lightning bolts."
+    },
+    {
+      "param_name": "RMVE_IMVE",
+      "url": "https://bsky.app/profile/did:plc:e4elbtctnfqocyfcml6h2lf7/lists/3l6tfurf7li27",
+      "description": "Skywatch Blue: Account advocates for or supports racially, ethnically, or ideologically motivated extremism."
+    },
+    {
+      "param_name": "CASEYHO_LIST",
+      "url": "https://bsky.app/profile/did:plc:d7nr65djxrudtdg3tslzfiyr/lists/3lcm6ypfdj72r",
+      "description": "@caseyho.com: Accounts that engage in spammy activity. May be partially automated, bots, sock puppets, or compromised. Clusters of accounts on this list behave in near-identical ways to one another. Accounts added according to broadly applied objective criteria and not on an individual basis. (182508 total)"
+    },
+    {
+      "param_name": "AI_POSTERS",
+      "url": "https://bsky.app/profile/did:plc:bpkpvmwpd3nr2ry4btt55ack/lists/3koacxn77oh2v",
+      "description": "@aimod.social: Users who have posted content generated with AI. Users are added automatically if they use AI-related hashtags."
+    },
+    {
+      "param_name": "FOLLOW_FARMING",
+      "url": "https://bsky.app/profile/did:plc:e4elbtctnfqocyfcml6h2lf7/lists/3ljj5caa56l2k",
+      "description": "Skywatch Blue: Applied to posts using hashtags or linking to sites utilized for follow-farming, as well as accounts that frequently make posts of this nature, or those which contain follow-farming oriented hashtags in their bios."
+    },
+    {
+      "param_name": "AMPLIFIERS",
+      "url": "https://bsky.app/profile/did:plc:e4elbtctnfqocyfcml6h2lf7/lists/3lizkimvgez2s",
+      "description": "Skywatch Blue: Users who frequently posts links to sources which are used to launder fringe or extremist ideas into mainstream discourse."
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "fema.monster_options": {
+    "component_id": "1618",
+    "title": "Options",
+    "description": "Comprehensive feed customization with membership, content types, accessibility, language, and social graph filters.",
+    "color": "green",
+    "config": {},
+    "last_pushed": "2026-02-12T17:07:34.203225"
+  },
+  "fema.monster_master_term_search": {
+    "component_id": "1619",
+    "title": "Master Term Search",
+    "description": "Search for terms across post text, embeds, alt-text, video alt-text, and websites with case sensitivity and regex options.\n\n---\n\nCheck out my other starterpacks!\n\nUltimate Starterpack Collection\nFeature Starterpack: Better Term Search\n\n[Moderation Starterpack](https://www.graze.social/app/custom-nodes/35/view)\n\n[Moderation Starterpack: NSWF](https://www.graze.social/app/custom-nodes/34/view)\n\n[Moderation Starterpack: Website Blocklist](https://www.graze.social/app/custom-nodes/45/view)\n\n[Feature Starterpack: Options](https://www.graze.social/app/custom-nodes/598/view)",
+    "config": {},
+    "last_pushed": "2026-02-12T02:07:52.679520"
+  },
+  "fema.monster_video_options": {
+    "component_id": "1620",
+    "title": "Video Options - Vertical Video & Resolution",
+    "description": "Did you make a fancy new video feed? Neat! But is it pulling in some nasty horizontal video? Use this to filter them out for majestic 9:16 goodness. You can also remove SD, HD, or UHD resolutions, allowing you to create a lo-fi video feed or a high-quality only feed. Filter by file size to target longer videos, set custom dimension limits for precise control, or exclude GIFs entirely.\n\n---\n\nCheck out my other starterpacks!\n\nUltimate Starterpack Collection\nFeature Starterpack: Better Term Search\n\n[Moderation Starterpack](https://www.graze.social/app/custom-nodes/35/view)\n\n[Moderation Starterpack: NSWF](https://www.graze.social/app/custom-nodes/34/view)\n\n[Moderation Starterpack: Website Blocklist](https://www.graze.social/app/custom-nodes/45/view)\n\n[Feature Starterpack: Options](https://www.graze.social/app/custom-nodes/598/view)\n\n---\n\nCheck out my other starterpacks!\n\nUltimate Starterpack Collection\nFeature Starterpack: Better Term Search\n\n[Moderation Starterpack](https://www.graze.social/app/custom-nodes/35/view)\n\n[Moderation Starterpack: NSWF](https://www.graze.social/app/custom-nodes/34/view)\n\n[Moderation Starterpack: Website Blocklist](https://www.graze.social/app/custom-nodes/45/view)\n\n[Feature Starterpack: Options](https://www.graze.social/app/custom-nodes/598/view)",
+    "color": "green",
+    "config": {},
+    "last_pushed": "2026-02-12T17:29:21.430125"
+  },
+  "fema.monster_any_x_of_these": {
+    "component_id": "1621",
+    "title": "Any X of These",
+    "description": "Require a minimum number of different terms to match. Useful for reducing false positives by requiring multiple related terms to appear together.",
+    "color": "green",
+    "config": {
+      "num_terms": 15
+    },
+    "last_pushed": "2026-02-12T17:29:08.687457"
+  },
+  "fema.monster_nsfw_filter": {
+    "component_id": "1622",
+    "title": "NSFW Content Filter",
+    "description": "Block NSFW content by category. Manage terms via the gear icon.\n\n---\n\nCheck out my other starterpacks!\n\nUltimate Starterpack Collection\nFeature Starterpack: Better Term Search\n\n[Moderation Starterpack](https://www.graze.social/app/custom-nodes/35/view)\n\n[Moderation Starterpack: NSWF](https://www.graze.social/app/custom-nodes/34/view)\n\n[Moderation Starterpack: Website Blocklist](https://www.graze.social/app/custom-nodes/45/view)\n\n[Feature Starterpack: Options](https://www.graze.social/app/custom-nodes/598/view)",
+    "config": {},
+    "last_pushed": "2026-02-12T02:08:18.891825"
+  },
+  "fema.monster_adblocker": {
+    "component_id": "1623",
+    "title": "Ad & Affiliate Link Blocker",
+    "description": "Block ads, affiliate links, and promotional spam. Manage brands, domains, and ad phrases via settings.\n\n---\n\nCheck out the other starterpacks!\n\nUltimate Starterpack Collection\nFeature Starterpack: Better Term Search\n\n[Moderation Starterpack](https://www.graze.social/app/custom-nodes/35/view)\n\n[Moderation Starterpack: NSWF](https://www.graze.social/app/custom-nodes/34/view)\n\nModeration Starterpack: Website Blocklist\n\nFeature Starterpack: Options\n\nFeature Starterpack: Require Alt-Text (included in options)\n\nFeature Starterpack: Remove Bridged Users\n\n---\n\nCheck out my other starterpacks!\n\nUltimate Starterpack Collection\nFeature Starterpack: Better Term Search\n\n[Moderation Starterpack](https://www.graze.social/app/custom-nodes/35/view)\n\n[Moderation Starterpack: NSWF](https://www.graze.social/app/custom-nodes/34/view)\n\n[Moderation Starterpack: Website Blocklist](https://www.graze.social/app/custom-nodes/45/view)\n\n[Feature Starterpack: Options](https://www.graze.social/app/custom-nodes/598/view)\n\n---\n\nCheck out my other starterpacks!\n\nUltimate Starterpack Collection\nFeature Starterpack: Better Term Search\n\n[Moderation Starterpack](https://www.graze.social/app/custom-nodes/35/view)\n\n[Moderation Starterpack: NSWF](https://www.graze.social/app/custom-nodes/34/view)\n\n[Moderation Starterpack: Website Blocklist](https://www.graze.social/app/custom-nodes/45/view)\n\n[Feature Starterpack: Options](https://www.graze.social/app/custom-nodes/598/view)\n\n---\n\nCheck out my other starterpacks!\n\nUltimate Starterpack Collection\nFeature Starterpack: Better Term Search\n\n[Moderation Starterpack](https://www.graze.social/app/custom-nodes/35/view)\n\n[Moderation Starterpack: NSWF](https://www.graze.social/app/custom-nodes/34/view)\n\n[Moderation Starterpack: Website Blocklist](https://www.graze.social/app/custom-nodes/45/view)\n\n[Feature Starterpack: Options](https://www.graze.social/app/custom-nodes/598/view)\n\n---\n\nCheck out my other starterpacks!\n\nUltimate Starterpack Collection\nFeature Starterpack: Better Term Search\n\n[Moderation Starterpack](https://www.graze.social/app/custom-nodes/35/view)\n\n[Moderation Starterpack: NSWF](https://www.graze.social/app/custom-nodes/34/view)\n\n[Moderation Starterpack: Website Blocklist](https://www.graze.social/app/custom-nodes/45/view)\n\n[Feature Starterpack: Options](https://www.graze.social/app/custom-nodes/598/view)",
+    "color": "yellow",
+    "config": {},
+    "last_pushed": "2026-02-12T17:13:14.448790"
+  },
+  "fema.monster_time_master": {
+    "component_id": "1624",
+    "title": "Time Master",
+    "description": "Filter posts by year, month, day, and time. Perfect for seasonal content or time-based filtering.\n\n---\n\nCheck out my other starterpacks!\n\nUltimate Starterpack Collection\nFeature Starterpack: Better Term Search\n\n[Moderation Starterpack](https://www.graze.social/app/custom-nodes/35/view)\n\n[Moderation Starterpack: NSWF](https://www.graze.social/app/custom-nodes/34/view)\n\n[Moderation Starterpack: Website Blocklist](https://www.graze.social/app/custom-nodes/45/view)\n\n[Feature Starterpack: Options](https://www.graze.social/app/custom-nodes/598/view)",
+    "color": "green",
+    "config": {},
+    "last_pushed": "2026-02-12T17:28:57.177853"
+  },
+  "fema.monster_block_lists": {
+    "component_id": "1625",
+    "title": "Block Lists",
+    "description": "Block users from multiple curated lists. Manage lists in settings.\n\n---\n\nCheck out my other starterpacks!\n\nUltimate Starterpack Collection\nFeature Starterpack: Better Term Search\n\n[Moderation Starterpack](https://www.graze.social/app/custom-nodes/35/view)\n\n[Moderation Starterpack: NSWF](https://www.graze.social/app/custom-nodes/34/view)\n\n[Moderation Starterpack: Website Blocklist](https://www.graze.social/app/custom-nodes/45/view)\n\n[Feature Starterpack: Options](https://www.graze.social/app/custom-nodes/598/view)",
+    "config": {},
+    "last_pushed": "2026-02-12T03:09:16.858296"
+  },
+  "fema.monster_spam_blocker": {
+    "component_id": "1626",
+    "title": "Spam Blocker",
+    "description": "Block spam accounts by scanning user bios and post content. Targets cryptobros, engagement farmers, adult content promoters, MLM schemes, and grifters.",
+    "color": "yellow",
+    "config": {},
+    "last_pushed": "2026-02-12T06:39:32.596174"
+  },
+  "fema.monster_test_feed": {
+    "component_id": "1628",
+    "title": "Moderation Tester",
+    "description": "Include lists of known spammers, NSFW posters, and advertisers to test your custom node filters.",
+    "color": "brown",
+    "config": {},
+    "last_pushed": "2026-02-12T18:34:55.469867"
+  },
+  "fema.monster_after_dark": {
+    "component_id": "1629",
+    "title": "After Dark Time Filter",
+    "description": "Filter posts by time of day (10pm-4am UTC). Perfect for 'after dark' feeds or late-night content.",
+    "color": "gold",
+    "config": {
+      "description": "Filter posts by time of day (10pm-4am UTC). Toggle on to enable time filtering.",
+      "title": "After Dark Time Filter"
+    },
+    "last_pushed": "2026-02-12T17:16:04.873678"
+  },
+  "fema.monster_hidden_hashtag_filter": {
+    "component_id": "1630",
+    "title": "Hidden Hashtag Filter",
+    "description": "Filter posts by hidden hashtags (hashtags that exist for discoverability but aren't visible in the post text)",
+    "color": "green",
+    "config": {},
+    "last_pushed": "2026-02-12T21:01:25.395014"
+  },
+  "fema.monster_account_quality": {
+    "component_id": "1631",
+    "title": "Account Quality Filter",
+    "description": "Filter by account age, follower count, post count, engagement, and follower/following ratio",
+    "color": "yellow",
+    "config": {},
+    "last_pushed": "2026-02-12T22:18:39.698018"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "affiliate_domains": [
+    "geni.us",
+    "urlgeni.us",
+    "lbabi.nz",
+    "amzn.to"
+  ],
+  "tiny_url_shorteners": [
+    "bit.ly",
+    "tinyurl.com",
+    "t.co",
+    "ow.ly",
+    "buff.ly",
+    "cutt.ly",
+    "rebrand.ly",
+    "t2m.io",
+    "b.link",
+    "short.io",
+    "switchy.io"
+  ]
+}

@@ -1,0 +1,307 @@
+{
+  "order": "new",
+  "manifest": {
+    "filter": {
+      "and": [
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$MIN_FOLLOWERS",
+                "==",
+                0
+              ]
+            },
+            {
+              "attribute_compare": [
+                "hydrated_metadata.user.followers_count",
+                ">=",
+                "$MIN_FOLLOWERS"
+              ]
+            }
+          ]
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$MAX_FOLLOWERS",
+                "==",
+                0
+              ]
+            },
+            {
+              "attribute_compare": [
+                "hydrated_metadata.user.followers_count",
+                "<=",
+                "$MAX_FOLLOWERS"
+              ]
+            }
+          ]
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$MIN_FOLLOWING",
+                "==",
+                0
+              ]
+            },
+            {
+              "attribute_compare": [
+                "hydrated_metadata.user.follows_count",
+                ">=",
+                "$MIN_FOLLOWING"
+              ]
+            }
+          ]
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$MAX_FOLLOWING",
+                "==",
+                0
+              ]
+            },
+            {
+              "attribute_compare": [
+                "hydrated_metadata.user.follows_count",
+                "<=",
+                "$MAX_FOLLOWING"
+              ]
+            }
+          ]
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$MIN_POSTS",
+                "==",
+                0
+              ]
+            },
+            {
+              "attribute_compare": [
+                "hydrated_metadata.user.posts_count",
+                ">=",
+                "$MIN_POSTS"
+              ]
+            }
+          ]
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_NO_BIO",
+                "==",
+                false
+              ]
+            },
+            {
+              "regex_matches": [
+                "hydrated_metadata.user.description",
+                ".+",
+                true
+              ]
+            }
+          ]
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_NO_AVATAR",
+                "==",
+                false
+              ]
+            },
+            {
+              "regex_matches": [
+                "hydrated_metadata.user.avatar",
+                ".+",
+                true
+              ]
+            }
+          ]
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_NO_DISPLAY_NAME",
+                "==",
+                false
+              ]
+            },
+            {
+              "regex_matches": [
+                "hydrated_metadata.user.display_name",
+                ".+",
+                true
+              ]
+            }
+          ]
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$BLOCK_BRIDGED",
+                "==",
+                false
+              ]
+            },
+            {
+              "and": [
+                {
+                  "attribute_compare": [
+                    "hydrated_metadata.user.labels[*].val",
+                    "!=",
+                    "bridged-from-bridgy-fed-activitypub"
+                  ]
+                },
+                {
+                  "attribute_compare": [
+                    "hydrated_metadata.user.labels[*].val",
+                    "!=",
+                    "bridged-from-bridgy-fed-web"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "or": [
+            {
+              "param_compare": [
+                "$VERIFIED_ONLY",
+                "==",
+                false
+              ]
+            },
+            {
+              "attribute_compare": [
+                "hydrated_metadata.user.verification.verified_status",
+                "==",
+                "valid"
+              ]
+            }
+          ]
+        }
+      ],
+      "metadata": {
+        "color": "yellow",
+        "customNodeParameters": [
+          {
+            "name": "MIN_FOLLOWERS",
+            "type": "number",
+            "displayName": "Min Followers",
+            "description": "Require at least this many followers (0 = disabled)",
+            "exampleValue": 0,
+            "group": "followers"
+          },
+          {
+            "name": "MAX_FOLLOWERS",
+            "type": "number",
+            "displayName": "Max Followers",
+            "description": "Block accounts with more than this many followers (0 = disabled)",
+            "exampleValue": 0,
+            "group": "followers"
+          },
+          {
+            "name": "MIN_FOLLOWING",
+            "type": "number",
+            "displayName": "Min Following",
+            "description": "Require account follows at least this many people (0 = disabled)",
+            "exampleValue": 0,
+            "group": "following"
+          },
+          {
+            "name": "MAX_FOLLOWING",
+            "type": "number",
+            "displayName": "Max Following",
+            "description": "Block accounts following more than this many people (0 = disabled)",
+            "exampleValue": 0,
+            "group": "following"
+          },
+          {
+            "name": "MIN_POSTS",
+            "type": "number",
+            "displayName": "Min Posts",
+            "description": "Require at least this many posts (0 = disabled)",
+            "exampleValue": 0,
+            "group": "posts"
+          },
+          {
+            "name": "BLOCK_NO_BIO",
+            "type": "toggle",
+            "displayName": "Block No Bio",
+            "description": "Block accounts with empty bio",
+            "exampleValue": false,
+            "group": "quality"
+          },
+          {
+            "name": "BLOCK_NO_AVATAR",
+            "type": "toggle",
+            "displayName": "Block No Avatar",
+            "description": "Block accounts without profile picture",
+            "exampleValue": false,
+            "group": "quality"
+          },
+          {
+            "name": "BLOCK_NO_DISPLAY_NAME",
+            "type": "toggle",
+            "displayName": "Block No Display Name",
+            "description": "Block accounts with empty display name",
+            "exampleValue": false,
+            "group": "quality"
+          },
+          {
+            "name": "BLOCK_BRIDGED",
+            "type": "toggle",
+            "displayName": "Block Bridged Accounts",
+            "description": "Block accounts bridged from other platforms (Mastodon, web, etc.)",
+            "exampleValue": false,
+            "group": "quality"
+          },
+          {
+            "name": "VERIFIED_ONLY",
+            "type": "toggle",
+            "displayName": "Verified Only",
+            "description": "Only allow verified accounts",
+            "exampleValue": false,
+            "group": "quality"
+          }
+        ],
+        "customNodeParameterGroups": [
+          {
+            "id": "followers",
+            "name": "Followers",
+            "description": "Filter by follower count"
+          },
+          {
+            "id": "following",
+            "name": "Following",
+            "description": "Filter by following count"
+          },
+          {
+            "id": "posts",
+            "name": "Posts",
+            "description": "Filter by post count"
+          },
+          {
+            "id": "quality",
+            "name": "Account Quality",
+            "description": "Profile completeness and verification"
+          }
+        ]
+      }
+    }
+  }
+}

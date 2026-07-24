@@ -1,0 +1,25 @@
+{
+  "bio_terms": [
+    "link in bio",
+    "check my bio",
+    "bio link"
+  ],
+  "bio_exceptions": [],
+  "post_terms": [
+    "link in bio",
+    "check my bio",
+    "more on my page",
+    "click link",
+    "swipe up",
+    "DM for link",
+    "link in comments",
+    "check profile",
+    "visit my page",
+    "see bio for link"
+  ],
+  "hashtags": [
+    "linkinbio",
+    "checkbio",
+    "linkinprofile"
+  ]
+}

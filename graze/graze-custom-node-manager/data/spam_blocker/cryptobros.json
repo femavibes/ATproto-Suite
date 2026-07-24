@@ -1,0 +1,43 @@
+{
+  "bio_terms": [
+    "crypto expert",
+    "trading signals",
+    "DM for profits",
+    "web3 guru",
+    "NFT collector",
+    "blockchain expert",
+    "crypto trader",
+    "investment advice",
+    "financial freedom",
+    "passive income crypto",
+    "bitcoin millionaire",
+    "crypto mentor",
+    "trading coach"
+  ],
+  "bio_exceptions": [
+    "fuck crypto",
+    "anti crypto",
+    "crypto scam",
+    "hate crypto",
+    "crypto is a scam",
+    "fuck cryptobros",
+    "anti cryptobro"
+  ],
+  "post_terms": [
+    "buy crypto now",
+    "crypto pump",
+    "moon soon",
+    "to the moon",
+    "100x gains",
+    "crypto signal",
+    "trading alert",
+    "DM for crypto"
+  ],
+  "hashtags": [
+    "cryptotrading",
+    "cryptosignals",
+    "cryptopump",
+    "cryptogains",
+    "bitcointrading"
+  ]
+}

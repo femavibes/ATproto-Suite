@@ -1,0 +1,29 @@
+{
+  "bio_terms": [
+    "giveaway host",
+    "prize coordinator",
+    "contest runner"
+  ],
+  "bio_exceptions": [],
+  "post_terms": [
+    "RT to win",
+    "retweet to win",
+    "tag 3 friends",
+    "tag friends to enter",
+    "giveaway ends",
+    "claim your prize",
+    "you've won",
+    "congratulations you won",
+    "winner announced",
+    "enter to win",
+    "free giveaway",
+    "like and repost to win"
+  ],
+  "hashtags": [
+    "giveaway",
+    "contest",
+    "freeprize",
+    "win",
+    "giveawayalert"
+  ]
+}

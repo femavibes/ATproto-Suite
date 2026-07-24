@@ -1,0 +1,24 @@
+{
+  "domains": [
+    "tripadvisor.com",
+    "tripadvisor.co.uk",
+    "tripadvisor.ca",
+    "booking.com",
+    "hotels.com",
+    "expedia.com",
+    "priceline.com",
+    "kayak.com"
+  ],
+  "affiliate_tags": [
+    "aid=",
+    "label=",
+    "partner_id=",
+    "clickref="
+  ],
+  "keywords": [
+    "tripadvisor",
+    "booking.com",
+    "hotels.com",
+    "expedia"
+  ]
+}

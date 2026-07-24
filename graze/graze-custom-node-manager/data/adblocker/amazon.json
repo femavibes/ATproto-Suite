@@ -1,0 +1,38 @@
+{
+  "domains": [
+    "amazon.com",
+    "amazon.ca",
+    "amazon.co.uk",
+    "amazon.de",
+    "amazon.fr",
+    "amazon.es",
+    "amazon.it",
+    "amazon.nl",
+    "amazon.se",
+    "amazon.pl",
+    "amazon.com.be",
+    "amazon.com.au",
+    "amazon.co.jp",
+    "amazon.in",
+    "amazon.com.br",
+    "amazon.com.mx",
+    "amazon.sg",
+    "amazon.com.tr",
+    "amazon.ae",
+    "amazon.sa",
+    "amazon.eg",
+    "amazon.cn",
+    "amzn.com",
+    "amzn.to",
+    "m.amazon.com"
+  ],
+  "affiliate_tags": [
+    "tag=",
+    "linkCode=",
+    "ascsubtag="
+  ],
+  "keywords": [
+    "amazon",
+    "amzn"
+  ]
+}

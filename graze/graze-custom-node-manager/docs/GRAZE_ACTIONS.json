@@ -1,0 +1,42 @@
+[
+  {
+    "id": "remove-users-list",
+    "title": "Remove Users (via Bluesky List)",
+    "description": "Exclude posts from users in a Bluesky list",
+    "difficulty": "beginner",
+    "logic": {
+      "list_member": [
+        "https://bsky.app/profile/user.bsky.social/lists/...",
+        "not_in"
+      ]
+    },
+    "notes": "✓ Easy to manage users via Bluesky UI\n✓ List is public (visible to others)\n✗ Requires maintaining a Bluesky list"
+  },
+  {
+    "id": "remove-users-direct",
+    "title": "Remove Users (Direct DIDs)",
+    "description": "Exclude posts from specific users by their DIDs",
+    "difficulty": "beginner",
+    "logic": {
+      "social_list": [
+        ["did:plc:example1", "did:plc:example2"],
+        "not_in"
+      ]
+    },
+    "notes": "✓ Private (not visible if feed logic is private)\n✓ Persists after handle changes\n✗ Must manually manage DID list\n\nFind user DIDs from their profile URL or use a DID resolver."
+  },
+  {
+    "id": "remove-users-social-graph",
+    "title": "Remove Users (Social Graph)",
+    "description": "Exclude posts from users followed by or following a specific account",
+    "difficulty": "beginner",
+    "logic": {
+      "social_graph": [
+        "user.bsky.social",
+        "not_in",
+        "follows"
+      ]
+    },
+    "notes": "✓ Dynamic - updates as the user's follows/followers change\n✓ Useful for excluding entire communities\n\nOptions:\n• not_in + follows = exclude users that user.bsky.social follows\n• not_in + followers = exclude users that follow user.bsky.social\n• in + follows = include only users that user.bsky.social follows\n• in + followers = include only users that follow user.bsky.social"
+  }
+]

@@ -1,0 +1,189 @@
+<div class="doc-category">
+    <h3>Logical Operators</h3>
+    <div class="doc-cards">
+        <div class="doc-card">
+            <div class="doc-card-header"><code>and</code> <span style="color: #888; font-weight: normal;">(All of these)</span></div>
+            <p>All conditions must be true</p>
+            <pre>{"and": [{...}, {...}], "metadata": {}}</pre>
+        </div>
+        <div class="doc-card">
+            <div class="doc-card-header"><code>or</code> <span style="color: #888; font-weight: normal;">(Any of these)</span></div>
+            <p>At least one condition must be true</p>
+            <pre>{"or": [{...}, {...}], "metadata": {}}</pre>
+        </div>
+    </div>
+</div>
+        
+        <div class="doc-category">
+            <h3>Text Matching</h3>
+            <div class="doc-cards">
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>regex_matches</code> <span style="color: #888; font-weight: normal;">(Regex - Contains)</span></div>
+                    <p>Match single regex pattern (manual regex control)</p>
+                    <pre>{"regex_matches": ["text", "\\\\bword\\\\b", true]}</pre>
+                    <div class="doc-meta">Parameters: field, pattern, case_insensitive</div>
+                    <div class="doc-meta" style="margin-top: 0.5rem;">case_insensitive: true (default) | false (case sensitive)</div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>regex_negation_matches</code> <span style="color: #888; font-weight: normal;">(Regex - Missing)</span></div>
+                    <p>Negation match - excludes matching patterns</p>
+                    <pre>{"regex_negation_matches": ["text", "\\\\bword\\\\b", true]}</pre>
+                    <div class="doc-meta">Parameters: field, pattern, case_insensitive</div>
+                    <div class="doc-meta" style="margin-top: 0.5rem;">case_insensitive: true (default) | false (case sensitive)</div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>regex_any</code> <span style="color: #888; font-weight: normal;">(Word List - Contains)</span></div>
+                    <p>Match any pattern from list</p>
+                    <pre>{"regex_any": ["text", ["cat", "dog"], true, false]}</pre>
+                    <div class="doc-meta">Parameters: field, patterns, case_insensitive, multiline</div>
+                    <div class="doc-meta" style="margin-top: 0.5rem;">case_insensitive: true (default) | false (case sensitive)</div>
+                    <div class="doc-meta">multiline: false (word list, auto \b) | true (regex mode)</div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>regex_none</code> <span style="color: #888; font-weight: normal;">(Word List - Missing)</span></div>
+                    <p>Match none of the patterns - excludes all</p>
+                    <pre>{"regex_none": ["text", ["spam"], true, false]}</pre>
+                    <div class="doc-meta">Parameters: field, patterns, case_insensitive, multiline</div>
+                    <div class="doc-meta" style="margin-top: 0.5rem;">case_insensitive: true (default) | false (case sensitive)</div>
+                    <div class="doc-meta">multiline: false (word list, auto \b) | true (regex mode)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="doc-category">
+            <h3>Content Type</h3>
+            <div class="doc-cards">
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>embed_type</code></div>
+                    <p>Filter by embed type</p>
+                    <pre>{"embed_type": ["==", "video"]}</pre>
+                    <div class="doc-meta">Types: video, image, image_group, link, post, gif</div>
+                    <div class="doc-meta" style="color: #3b82f6; margin-top: 0.5rem;">ℹ️ Note: "video" type has special behavior - it enables video feed UI mode. This cannot be toggled conditionally in custom nodes.</div>
+                    <div class="doc-meta" style="color: #ef4444; margin-top: 0.5rem;">⚠️ Note: The "gif" type may be unreliable. Use attribute_compare with embed.presentation instead:</div>
+                    <pre style="margin-top: 0.5rem;">{"attribute_compare": ["embed.presentation", "==", "gif"]}</pre>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>post_type</code></div>
+                    <p>Filter by post type</p>
+                    <pre>{"post_type": ["not_in", ["reply"]]}</pre>
+                    <div class="doc-meta">Types: reply, quote</div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>entity_matches</code></div>
+                    <p>Match hashtags, langs, domains, mentions</p>
+                    <pre>{"entity_matches": ["langs", ["en", "es"]]}</pre>
+                    <div class="doc-meta">Entities: langs, urls, domains, mentions, hashtags</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="doc-category">
+            <h3>Social Graph</h3>
+            <div class="doc-cards">
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>social_graph</code></div>
+                    <p>Check follower/following relationships</p>
+                    <pre>{"social_graph": ["user.bsky.social", "in", "followers"]}</pre>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>list_member</code></div>
+                    <p>Check list membership</p>
+                    <pre>{"list_member": ["https://bsky.app/profile/.../lists/...", "in"]}</pre>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>starter_pack_member</code></div>
+                    <p>Check starter pack membership</p>
+                    <pre>{"starter_pack_member": ["https://bsky.app/starter-pack/...", "in"]}</pre>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>social_list</code></div>
+                    <p>Explicit DID list</p>
+                    <pre>{"social_list": [["did:plc:abc", "did:plc:def"], "in"]}</pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="doc-category">
+            <h3>Comparison</h3>
+            <div class="doc-cards">
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>attribute_compare</code></div>
+                    <p>Compare post attributes to values</p>
+                    <pre>{"attribute_compare": ["embed.video.size", ">=", "$MIN_SIZE"]}</pre>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>param_compare</code></div>
+                    <p>Compare parameter values</p>
+                    <pre>{"param_compare": ["$ENABLED", "==", true]}</pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="doc-category">
+            <h3>ML Models</h3>
+            <div class="doc-cards">
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>sentiment_analysis</code></div>
+                    <p>Sentiment classification</p>
+                    <pre>{"sentiment_analysis": ["Positive", ">=", 0.5]}</pre>
+                    <div class="doc-meta">Categories: Positive, Negative, Neutral</div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>emotion_sentiment_analysis</code></div>
+                    <p>Emotion detection (GoEmotions)</p>
+                    <pre>{"emotion_sentiment_analysis": ["Joy", ">=", 0.5]}</pre>
+                    <div class="doc-meta">28 emotions: Joy, Anger, Fear, Sadness, etc.</div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>toxicity_analysis</code></div>
+                    <p>Toxicity detection</p>
+                    <pre>{"toxicity_analysis": ["Toxic", "<=", 0.5]}</pre>
+                    <div class="doc-meta">Categories: Toxic, Severe Toxicity, Obscene, Threat, Insult, Identity Hate</div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>topic_analysis</code></div>
+                    <p>Topic classification</p>
+                    <pre>{"topic_analysis": ["Gaming", ">=", 0.5]}</pre>
+                    <div class="doc-meta">20+ topics: Gaming, Sports, Tech, News, etc.</div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>language_analysis</code></div>
+                    <p>Advanced language detection</p>
+                    <pre>{"language_analysis": ["Spanish", ">=", 0.5]}</pre>
+                    <div class="doc-meta">20+ languages supported</div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>text_similarity</code></div>
+                    <p>Semantic similarity using transformers</p>
+                    <pre>{"text_similarity": ["text", {"anchor_text": "...", "model_name": "all-MiniLM-L6-v2"}, ">=", 0.3]}</pre>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>text_arbitrary</code></div>
+                    <p>Custom text label classification</p>
+                    <pre>{"text_arbitrary": ["scotland", ">=", 0.5]}</pre>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>image_nsfw</code></div>
+                    <p>NSFW image detection</p>
+                    <pre>{"image_nsfw": ["NSFW", "<=", 0.5]}</pre>
+                    <div class="doc-meta">Categories: NSFW, SFW</div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>image_arbitrary</code></div>
+                    <p>Custom image label classification (CLIP)</p>
+                    <pre>{"image_arbitrary": ["scotland", ">=", 0.5, 0.0]}</pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="doc-category">
+            <h3>Special Operations</h3>
+            <div class="doc-cards">
+                <div class="doc-card">
+                    <div class="doc-card-header"><code>each</code></div>
+                    <p>Loop over list parameters (not a logic node)</p>
+                    <pre>{"each": ["$LIST", {...}]}</pre>
+                    <div class="doc-meta">Use $PARAM_NAME_ITEM to reference current item</div>
+                </div>
+            </div>
+        </div>

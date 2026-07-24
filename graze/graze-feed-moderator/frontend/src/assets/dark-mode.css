@@ -1,0 +1,355 @@
+/* Dark Mode Variables */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-card: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --border-primary: #e2e8f0;
+  --border-secondary: #cbd5e1;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+:root.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-card: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --border-primary: #334155;
+  --border-secondary: #475569;
+  --shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* Global Dark Mode Styles */
+.dark {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.dark .card,
+.dark .feed-card,
+.dark .section-card,
+.dark .modal,
+.dark .emergency-modal,
+.dark .restore-modal,
+.dark .history-modal,
+.dark .reports-modal,
+.dark .info-modal {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.dark .card-header,
+.dark .feeds-header,
+.dark .section-header,
+.dark .dark-mode-header,
+.dark .credentials-form,
+.dark .global-settings-form,
+.dark .emergency-tools {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+
+.dark .activity-item,
+.dark .trending-item,
+.dark .banned-user-item,
+.dark .post-preview,
+.dark .category-section {
+  background: var(--bg-tertiary);
+  border-color: var(--border-primary);
+}
+
+.dark .input,
+.dark .post-url-input,
+.dark .password-input,
+.dark .emergency-input,
+.dark .threshold-input,
+.dark .timeframe-select,
+.dark .report-type-select,
+.dark .post-count-select,
+.dark .list-dropdown {
+  background: var(--bg-primary);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.dark .toggle-label,
+.dark .card-description,
+.dark .section-desc,
+.dark .communal-description {
+  color: var(--text-secondary);
+}
+
+.dark .activity-time,
+.dark .ban-date,
+.dark .time-span,
+.dark .history-time,
+.dark .report-time {
+  color: var(--text-tertiary);
+}
+
+.dark .post-id-btn {
+  background: var(--bg-tertiary);
+  color: #3b82f6;
+}
+
+.dark .post-id-btn:hover {
+  background: var(--border-primary);
+}
+
+.dark .feed-id {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.dark .status-badge.hidden {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.dark .tab-navigation,
+.dark .sub-tab-navigation {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+
+.dark .tab-btn:hover:not(.active),
+.dark .sub-tab-btn:hover:not(.active) {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Text and Label Colors */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: var(--text-primary);
+}
+
+.dark label, .dark .user-handle, .dark .author-name, .dark .post-text {
+  color: var(--text-primary);
+}
+
+.dark .author-handle, .dark .reporter-info, .dark .empty-state {
+  color: var(--text-secondary);
+}
+
+/* Form Elements */
+.dark .edit-btn, .dark .cancel-btn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+.dark .edit-btn:hover, .dark .cancel-btn:hover {
+  background: var(--border-primary);
+}
+
+/* Results and Messages */
+.dark .result-item, .dark .report-entry, .dark .history-entry {
+  background: var(--bg-tertiary);
+  border-color: var(--border-primary);
+}
+
+/* Badges and Chips */
+.dark .feed-chip, .dark .global-list-chip {
+  background: var(--bg-tertiary);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.dark .target-handle {
+  background: #92400e;
+  color: #fef3c7;
+}
+
+.dark .feed-name {
+  background: #166534;
+  color: #dcfce7;
+}
+
+/* Modals */
+.dark .close-btn {
+  color: var(--text-secondary);
+}
+
+.dark .close-btn:hover {
+  color: var(--text-primary);
+}
+
+/* Specific Components */
+.dark .backfill-remaining-box {
+  background: var(--bg-tertiary);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.dark .threshold-count {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.dark .external-embed {
+  background: var(--bg-tertiary);
+  border-color: var(--border-primary);
+}
+
+.dark .embed-title {
+  color: var(--text-primary);
+}
+
+.dark .embed-description {
+  color: var(--text-secondary);
+}
+
+.dark .info-btn-small, .dark .info-btn-inline {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.dark .emergency-card {
+  background: #1e1b1b;
+  border-color: var(--border-primary);
+}
+
+/* Bluesky Client Dark Mode Styles */
+.dark .bsky-client,
+.dark .bsky-layout,
+.dark .bsky-main {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.dark .post-card,
+.dark .composer,
+.dark .profile-modal,
+.dark .modal-content {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.dark .feed-sidebar,
+.dark .moderation-sidebar {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+
+.dark .composer-textarea,
+.dark .thread-textarea,
+.dark .gif-search,
+.dark .alt-text-input {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+.dark .composer-textarea::placeholder,
+.dark .thread-textarea::placeholder,
+.dark .gif-search::placeholder {
+  color: var(--text-secondary);
+}
+
+.dark .feed-item,
+.dark .mobile-feed-item,
+.dark .nav-tab {
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+.dark .feed-item:hover,
+.dark .mobile-feed-item:hover,
+.dark .nav-tab:hover {
+  background: var(--bg-tertiary);
+}
+
+.dark .post-actions .action-btn,
+.dark .formatting-toolbar .format-btn,
+.dark .formatting-toolbar .action-btn {
+  color: var(--text-secondary);
+}
+
+.dark .post-actions .action-btn:hover,
+.dark .formatting-toolbar .format-btn:hover,
+.dark .formatting-toolbar .action-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.dark .quoted-post-preview,
+.dark .quote-post,
+.dark .external-link {
+  background: var(--bg-primary);
+  border-color: var(--border-primary);
+}
+
+.dark .gif-picker {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.dark .suggestions-dropdown {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.dark .suggestion-item:hover,
+.dark .suggestion-item.active {
+  background: var(--bg-tertiary);
+}
+
+.dark .repost-menu {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.dark .repost-option:hover {
+  background: var(--bg-tertiary);
+}
+
+.dark .profile-header,
+.dark .profile-info,
+.dark .profile-stats {
+  color: var(--text-primary);
+}
+
+.dark .profile-handle,
+.dark .author-handle,
+.dark .post-time,
+.dark .char-count {
+  color: var(--text-secondary);
+}
+
+.dark .bottom-nav {
+  background: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+
+.dark .bottom-nav-item {
+  color: var(--text-secondary);
+}
+
+.dark .bottom-nav-item.active,
+.dark .bottom-nav-item:hover {
+  color: var(--text-primary);
+}
+
+.dark .link-preview-card {
+  background: var(--bg-tertiary);
+  border-color: var(--border-primary);
+}
+
+.dark .link-preview-title {
+  color: var(--text-primary);
+}
+
+.dark .link-preview-description {
+  color: var(--text-secondary);
+}

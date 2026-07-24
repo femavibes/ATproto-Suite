@@ -1,0 +1,8 @@
+services:
+  graze-post-remover:
+    image: ghcr.io/femavibes/graze-post-remover:latest
+    env_file:
+      - .env
+    volumes:
+      - .:/app/data
+    restart: unless-stopped

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Decryption Audit Log</title>
+    <style>
+        body { font-family: monospace; background: #1a1a1a; color: #00ff00; padding: 20px; }
+        .log-entry { margin: 10px 0; padding: 10px; border: 1px solid #333; }
+        .suspicious { background: #ff000020; border-color: #ff0000; }
+        .legitimate { background: #00ff0020; border-color: #00ff00; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Decryption Audit Log</h1>
+    <p>Every password decryption request is logged here with full details.</p>
+    <div id="logs">
+        <div class="log-entry legitimate">
+            <strong>✅ LEGITIMATE REQUEST</strong><br>
+            Time: 2024-01-15 14:30:22<br>
+            Reason: GRAZE_POST_REMOVAL<br>
+            User: alice.bsky.social<br>
+            IP: 192.168.1.100
+        </div>
+        <div class="log-entry suspicious">
+            <strong>🚨 SUSPICIOUS REQUEST</strong><br>
+            Time: 2024-01-15 14:25:10<br>
+            Reason: MANUAL_DECRYPT<br>
+            User: alice.bsky.social<br>
+            IP: 192.168.1.100<br>
+            <em>BLOCKED - Invalid reason</em>
+        </div>
+    </div>
+</body>
+</html>

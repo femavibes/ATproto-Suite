@@ -1,0 +1,26 @@
+{
+  "domains": [
+    "ebay.com",
+    "ebay.co.uk",
+    "ebay.de",
+    "ebay.fr",
+    "ebay.it",
+    "ebay.es",
+    "ebay.nl",
+    "ebay.ca",
+    "ebay.com.au",
+    "ebay.ie",
+    "ebay.at",
+    "ebay.be",
+    "ebay.ch",
+    "ebay.pl"
+  ],
+  "affiliate_tags": [
+    "campid=",
+    "customid=",
+    "toolid="
+  ],
+  "keywords": [
+    "ebay"
+  ]
+}

@@ -1,0 +1,1483 @@
+<template>
+  <div>
+    <div class="feeds-header">
+      <h2>My Feeds</h2>
+      <div class="header-actions">
+        <button @click="showGroupManager = true" class="btn btn-secondary">Manage Groups</button>
+        <button v-if="moderatedGroups.length > 0" @click="showModeratedGroups = !showModeratedGroups" class="btn btn-secondary">
+          {{ showModeratedGroups ? 'Hide' : 'Show' }} Groups I Moderate ({{ moderatedGroups.length }})
+        </button>
+        <button @click="$emit('show-add-feed')" class="btn btn-primary">+ Add Feed</button>
+      </div>
+    </div>
+    
+    <!-- Groups I Can Moderate Section -->
+    <div v-if="showModeratedGroups && moderatedGroups.length > 0" class="moderated-groups-section">
+      <h3>Groups I Can Moderate</h3>
+      <div class="moderated-groups-grid">
+        <div v-for="group in moderatedGroups" :key="group.id" class="moderated-group-card">
+          <div class="group-info">
+            <h4>{{ group.group_name }}</h4>
+            <span class="permissions-badge">{{ group.permissions.join(', ') }}</span>
+          </div>
+          <div class="group-actions">
+            <span class="owner-info">Owned by {{ getGroupOwnerHandle(group.id) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Feed Groups Manager Modal -->
+    <div v-if="showGroupManager" class="modal-overlay" @click="showGroupManager = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Feed Groups</h3>
+          <button @click="showGroupManager = false" class="close-btn">×</button>
+        </div>
+        
+    <!-- Moderator Manager Modal -->
+    <div v-if="showModeratorModal" class="modal-overlay" @click="showModeratorModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Group Moderators</h3>
+          <button @click="showModeratorModal = false" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="add-moderator">
+            <input v-model="newModeratorHandle" placeholder="Bluesky handle (e.g., alice.bsky.social)" class="moderator-input">
+            <button @click="addModerator" class="btn btn-primary" :disabled="!newModeratorHandle.trim()">Add Moderator</button>
+          </div>
+          
+          <div v-if="currentGroupModerators.length > 0" class="moderators-list">
+            <div v-for="moderator in currentGroupModerators" :key="moderator.moderator_did" class="moderator-item">
+              <div class="moderator-info">
+                <strong>{{ moderator.moderator_handle }}</strong>
+                <span class="permissions">{{ moderator.permissions.join(', ') }}</span>
+              </div>
+              <button @click="removeModerator(moderator.moderator_did)" class="delete-btn-small">Remove</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+        <div class="modal-body">
+          <div class="create-group">
+            <input v-model="newGroupName" placeholder="Group name (e.g., urbanism)" class="group-input">
+            <button @click="createGroup" class="btn btn-primary" :disabled="!newGroupName.trim()">Create Group</button>
+          </div>
+          
+          <div v-if="feedGroups.length > 0" class="groups-list">
+            <div v-for="group in feedGroups" :key="group.id" class="group-item">
+              <div class="group-header">
+                <h4>{{ group.group_name }}</h4>
+                <button @click="deleteGroup(group.id)" class="delete-btn-small">Delete</button>
+              </div>
+              <div class="group-feeds">
+                <div class="feed-checkboxes">
+                  <label v-for="feed in feeds" :key="feed.feed_id" class="feed-checkbox">
+                    <input 
+                      type="checkbox" 
+                      :checked="isInGroup(feed.feed_id, group.id)"
+                      @change="toggleFeedInGroup(feed.feed_id, group.id, $event.target.checked)"
+                    >
+                    {{ feed.feed_name }}
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div v-if="feeds.length === 0" class="empty-state">
+      <p>No feeds configured yet.</p>
+      <p>Add your first feed to start moderating!</p>
+    </div>
+    
+    <div v-else class="feeds-grid">
+      <div v-for="feed in feeds" :key="feed.id" class="feed-card">
+        <div class="feed-header" @click="toggleExpansion(feed.id)">
+          <div class="feed-info">
+            <h3>{{ feed.feed_name }}</h3>
+            <span class="feed-id">{{ feed.feed_id }}</span>
+          </div>
+          <svg class="expand-icon" :class="{ expanded: expandedFeeds.has(feed.id) }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 12,15 18,9"/>
+          </svg>
+        </div>
+        
+        <div v-if="expandedFeeds.has(feed.id)" class="feed-content">
+          <div v-if="userTier !== 'free'" class="per-feed-ban-list">
+            <div class="ban-list-header">
+              <h4>Per-Feed Ban List</h4>
+              <button @click.stop="$emit('edit-ban-list', feed)" class="edit-btn">Edit</button>
+            </div>
+          </div>
+          
+          <!-- Feed Groups -->
+          <div class="feed-groups-section">
+            <h4>Groups</h4>
+            <div class="feed-groups">
+              <span v-for="group in getFeedGroups(feed.feed_id)" :key="group.id" class="group-tag">
+                {{ group.group_name }}
+              </span>
+              <span v-if="getFeedGroups(feed.feed_id).length === 0" class="no-groups">Not in any groups</span>
+            </div>
+          </div>
+          
+          <!-- Moderator Permissions -->
+          <div class="moderator-section">
+            <div class="moderator-header">
+              <h4>Moderators</h4>
+              <button @click="showModeratorManager(feed.feed_id)" class="btn btn-secondary btn-small">Manage</button>
+            </div>
+            <div class="moderator-list">
+              <span v-for="mod in getGroupModerators(feed.feed_id)" :key="mod.moderator_did" class="moderator-tag">
+                {{ mod.moderator_handle }}
+              </span>
+              <span v-if="getGroupModerators(feed.feed_id).length === 0" class="no-moderators">No moderators</span>
+            </div>
+          </div>
+          
+          <div class="communal-settings">
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="feed.communal_enabled" @change="updateFeed(feed)">
+                <span>{{ feed.communal_enabled ? 'Disable' : 'Enable' }} Communal Moderation for this Feed</span>
+              </label>
+              <small>When enabled, uses per-feed thresholds with global settings as fallback. When disabled, completely excludes this feed from communal moderation.</small>
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="feed.disable_global_for_feed" @change="updateFeed(feed)">
+                <span>{{ feed.disable_global_for_feed ? 'Allow' : 'Block' }} Global Moderation for this Feed</span>
+              </label>
+              <small>When blocked, global thresholds will not apply to this feed, regardless of global settings being enabled.</small>
+            </div>
+            <h4>Communal Moderation (Ozone Reports)</h4>
+            <p class="communal-description">Auto-ban users after X Ozone reports of each type</p>
+          
+          <!-- Hierarchical Report Types Configuration -->
+          <div v-for="(category, categoryKey) in reportTypes" :key="categoryKey" class="category-section" :class="{ 'disabled-setting': isExcludedFromCommunal(categoryKey) }" v-if="categoryKey !== 'other'">
+            <h5 class="category-title">{{ category.name }}</h5>
+            <div class="category-threshold">
+              <label class="main-threshold-label" :class="{ disabled: isExcludedFromCommunal(categoryKey) }">
+                <span>Default {{ category.name }} Threshold:</span>
+                <input 
+                  type="number" 
+                  :value="feed[`threshold_${categoryKey.replace('-', '_')}`] || 3" 
+                  @input="updateMainThreshold(feed, categoryKey, $event.target.value)"
+                  min="1" max="100" 
+                  class="threshold-input"
+                  :disabled="isExcludedFromCommunal(categoryKey)"
+                >
+              </label>
+              <span v-if="isExcludedFromCommunal(categoryKey)" class="excluded-note">
+                (Excluded from communal moderation)
+              </span>
+            </div>
+            <div v-for="(subName, subKey) in category.subcategories" :key="subKey" class="threshold-setting" :class="{ 'disabled-setting': isExcludedFromCommunal(subKey) }">
+              <label class="checkbox-label" :class="{ disabled: isExcludedFromCommunal(subKey) }">
+                <input 
+                  type="checkbox" 
+                  :checked="feed[`opt_in_${subKey.replace('-', '_')}`] ?? true" 
+                  @change="updateSubcategoryOptIn(feed, subKey, $event.target.checked)"
+                  :disabled="isExcludedFromCommunal(subKey)"
+                >
+                <div class="label-with-reset">
+                  <span>{{ subName }}</span>
+                  <button 
+                    v-if="feed[`threshold_${subKey.replace('-', '_')}`] !== null && feed[`threshold_${subKey.replace('-', '_')}`] !== undefined && !isExcludedFromCommunal(subKey)"
+                    @click.stop="resetFeedToInherit(feed, subKey, 'threshold')"
+                    class="reset-btn"
+                    title="Reset to inherit from main category"
+                  >↺</button>
+                </div>
+                <input 
+                  v-if="(feed[`opt_in_${subKey.replace('-', '_')}`] ?? true) && !isExcludedFromCommunal(subKey)" 
+                  type="number" 
+                  :value="feed[`threshold_${subKey.replace('-', '_')}`] || feed[`threshold_${categoryKey.replace('-', '_')}`] || 3"
+                  @input="updateSubcategoryThreshold(feed, subKey, $event.target.value)"
+                  :placeholder="`Inherits: ${feed[`threshold_${categoryKey.replace('-', '_')}`] || 3}`"
+                  min="1" max="100" 
+                  class="threshold-input"
+                >
+                <span v-if="isExcludedFromCommunal(subKey)" class="excluded-note">
+                  (Excluded from communal moderation)
+                </span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="cross-type-setting">
+            <label>Same-category: <span class="percentage">{{ feed.same_category_cross_percentage }}%</span></label>
+            <input type="range" v-model.number="feed.same_category_cross_percentage" @change="updateFeed(feed)" min="0" max="50" class="percentage-slider">
+            <small>Allow same main category subtypes to contribute (e.g., misleading-spam → misleading-bot)</small>
+          </div>
+          
+          <div class="cross-type-setting">
+            <label>Cross-type: <span class="percentage">{{ feed.cross_type_percentage }}%</span></label>
+            <input type="range" v-model.number="feed.cross_type_percentage" @change="updateFeed(feed)" min="0" max="40" class="percentage-slider">
+            <small>Allow different main categories to contribute (e.g., harassment → misleading)</small>
+          </div>
+          
+          <div class="user-ban-settings">
+            <h4>User Ban Thresholds</h4>
+            <p class="communal-description">Auto-ban users after X reports of each type. Uses same hierarchical structure as post removal.</p>
+            
+            <!-- Hierarchical User Ban Report Types Configuration -->
+            <div v-for="(category, categoryKey) in reportTypes" :key="'user_ban_' + categoryKey" class="category-section" :class="{ 'disabled-setting': isExcludedFromCommunal(categoryKey) }" v-if="categoryKey !== 'other'">
+              <h5 class="category-title">{{ category.name }}</h5>
+              <div class="category-threshold">
+                <label class="main-threshold-label" :class="{ disabled: isExcludedFromCommunal(categoryKey) }">
+                  <span>Default {{ category.name }} User Ban Threshold:</span>
+                  <input 
+                    type="number" 
+                    :value="feed[`user_ban_threshold_${categoryKey.replace('-', '_')}`] || getUserBanDefaultThreshold(categoryKey)" 
+                    @input="updateUserBanMainThreshold(feed, categoryKey, $event.target.value)"
+                    min="1" max="100" 
+                    class="threshold-input"
+                    :disabled="isExcludedFromCommunal(categoryKey)"
+                  >
+                </label>
+                <span v-if="isExcludedFromCommunal(categoryKey)" class="excluded-note">
+                  (Excluded from communal moderation)
+                </span>
+              </div>
+              <div v-for="(subName, subKey) in category.subcategories" :key="'user_ban_' + subKey" class="threshold-setting" :class="{ 'disabled-setting': isExcludedFromCommunal(subKey) }">
+                <label class="checkbox-label" :class="{ disabled: isExcludedFromCommunal(subKey) }">
+                  <input 
+                    type="checkbox" 
+                    :checked="feed[`user_ban_opt_in_${subKey.replace('-', '_')}`] ?? true" 
+                    @change="updateUserBanSubcategoryOptIn(feed, subKey, $event.target.checked)"
+                    :disabled="isExcludedFromCommunal(subKey)"
+                  >
+                  <div class="label-with-reset">
+                    <span>{{ subName }}</span>
+                    <button 
+                      v-if="feed[`user_ban_threshold_${subKey.replace('-', '_')}`] !== null && feed[`user_ban_threshold_${subKey.replace('-', '_')}`] !== undefined && !isExcludedFromCommunal(subKey)"
+                      @click.stop="resetFeedToInherit(feed, subKey, 'user_ban_threshold')"
+                      class="reset-btn"
+                      title="Reset to inherit from main category"
+                    >↺</button>
+                  </div>
+                  <input 
+                    v-if="(feed[`user_ban_opt_in_${subKey.replace('-', '_')}`] ?? true) && !isExcludedFromCommunal(subKey)" 
+                    type="number" 
+                    :value="feed[`user_ban_threshold_${subKey.replace('-', '_')}`] || feed[`user_ban_threshold_${categoryKey.replace('-', '_')}`] || getUserBanDefaultThreshold(categoryKey)"
+                    @input="updateUserBanSubcategoryThreshold(feed, subKey, $event.target.value)"
+                    :placeholder="`Inherits: ${feed[`user_ban_threshold_${categoryKey.replace('-', '_')}`] || getUserBanDefaultThreshold(categoryKey)}`"
+                    min="1" max="100" 
+                    class="threshold-input"
+                  >
+                  <span v-if="isExcludedFromCommunal(subKey)" class="excluded-note">
+                    (Excluded from communal moderation)
+                  </span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="cross-type-setting">
+              <label>User ban same-category: <span class="percentage">{{ feed.user_ban_same_category_cross_percentage }}%</span></label>
+              <input type="range" v-model.number="feed.user_ban_same_category_cross_percentage" @change="updateFeed(feed)" min="0" max="50" class="percentage-slider">
+              <small>Allow same main category subtypes to contribute to user ban thresholds</small>
+            </div>
+            
+            <div class="cross-type-setting">
+              <label>User ban cross-type: <span class="percentage">{{ feed.user_ban_cross_type_percentage }}%</span></label>
+              <input type="range" v-model.number="feed.user_ban_cross_type_percentage" @change="updateFeed(feed)" min="0" max="40" class="percentage-slider">
+              <small>Allow different main categories to contribute to user ban thresholds</small>
+            </div>
+          </div>
+          
+          <button @click="deleteFeed(feed)" class="delete-btn">Delete Feed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
+interface Feed {
+  id: number
+  feed_id: string
+  feed_name: string
+  communal_enabled?: boolean
+  disable_global_for_feed?: boolean
+  [key: string]: any
+}
+
+interface FeedGroup {
+  id: number
+  group_name: string
+  owner_user_id: number
+  created_at: string
+}
+
+interface ReportTypes {
+  [key: string]: {
+    name: string
+    subcategories: { [key: string]: string }
+  }
+}
+
+const props = defineProps<{
+  feeds: Feed[]
+  reportTypes: ReportTypes
+  userTier: string
+}>()
+
+const emit = defineEmits<{
+  'show-add-feed': []
+  'edit-ban-list': [feed: Feed]
+  'show-user-ban-info': [type: string]
+  'feed-updated': [feed: Feed]
+  'feed-deleted': [feedId: string]
+}>()
+
+const expandedFeeds = ref(new Set<number>())
+const showGroupManager = ref(false)
+const newGroupName = ref('')
+const feedGroups = ref<FeedGroup[]>([])
+const groupMemberships = ref<Record<number, string[]>>({})
+const showModeratorModal = ref(false)
+const newModeratorHandle = ref('')
+const currentGroupId = ref<number | null>(null)
+const currentGroupModerators = ref<any[]>([])
+const groupModerators = ref<Record<number, any[]>>({})
+const moderatedGroups = ref<any[]>([])
+const showModeratedGroups = ref(false)
+
+onMounted(() => {
+  // Initialize percentage values for all feeds to prevent undefined issues
+  props.feeds.forEach(feed => {
+    if (feed.same_category_cross_percentage === undefined || feed.same_category_cross_percentage === null) {
+      feed.same_category_cross_percentage = 50
+    }
+    if (feed.cross_type_percentage === undefined || feed.cross_type_percentage === null) {
+      feed.cross_type_percentage = 20
+    }
+    if (feed.user_ban_same_category_cross_percentage === undefined || feed.user_ban_same_category_cross_percentage === null) {
+      feed.user_ban_same_category_cross_percentage = 50
+    }
+    if (feed.user_ban_cross_type_percentage === undefined || feed.user_ban_cross_type_percentage === null) {
+      feed.user_ban_cross_type_percentage = 20
+    }
+  })
+  
+  loadFeedGroups()
+  loadModeratedGroups()
+})
+
+const loadFeedGroups = async () => {
+  try {
+    const response = await axios.get('/api/feed-groups')
+    feedGroups.value = response.data.groups
+    groupMemberships.value = response.data.memberships
+  } catch (error) {
+    console.error('Failed to load feed groups:', error)
+  }
+}
+
+const loadModeratedGroups = async () => {
+  try {
+    const response = await axios.get('/api/feed-groups/moderated')
+    moderatedGroups.value = response.data
+  } catch (error) {
+    console.error('Failed to load moderated groups:', error)
+  }
+}
+
+const createGroup = async () => {
+  if (!newGroupName.value.trim()) return
+  
+  try {
+    await axios.post('/api/feed-groups', { groupName: newGroupName.value.trim() })
+    newGroupName.value = ''
+    await loadFeedGroups()
+  } catch (error: any) {
+    if (error.response?.status === 400 && error.response?.data?.error?.includes('already exists')) {
+      alert(`Group name "${newGroupName.value.trim()}" is already taken by another user. Please choose a different name.`)
+    } else {
+      alert('Failed to create group. Please try again.')
+    }
+    console.error('Failed to create group:', error)
+  }
+}
+
+const deleteGroup = async (groupId: number) => {
+  if (!confirm('Delete this group? Feeds will not be deleted.')) return
+  
+  try {
+    await axios.delete(`/api/feed-groups/${groupId}`)
+    await loadFeedGroups()
+  } catch (error) {
+    console.error('Failed to delete group:', error)
+  }
+}
+
+const isInGroup = (feedId: string, groupId: number): boolean => {
+  return groupMemberships.value[groupId]?.includes(feedId) || false
+}
+
+const toggleFeedInGroup = async (feedId: string, groupId: number, add: boolean) => {
+  try {
+    if (add) {
+      await axios.post(`/api/feed-groups/${groupId}/feeds`, { feedId })
+    } else {
+      await axios.delete(`/api/feed-groups/${groupId}/feeds/${feedId}`)
+    }
+    await loadFeedGroups()
+  } catch (error) {
+    console.error('Failed to update group membership:', error)
+  }
+}
+
+const getFeedGroups = (feedId: string): FeedGroup[] => {
+  return feedGroups.value.filter(group => 
+    groupMemberships.value[group.id]?.includes(feedId)
+  )
+}
+
+const getGroupModerators = (feedId: string): any[] => {
+  const groups = getFeedGroups(feedId)
+  const allModerators: any[] = []
+  
+  for (const group of groups) {
+    const mods = groupModerators.value[group.id] || []
+    allModerators.push(...mods)
+  }
+  
+  // Remove duplicates by moderator_did
+  const unique = allModerators.filter((mod, index, self) => 
+    index === self.findIndex(m => m.moderator_did === mod.moderator_did)
+  )
+  
+  return unique
+}
+
+const showModeratorManager = async (feedId: string) => {
+  const groups = getFeedGroups(feedId)
+  if (groups.length === 0) {
+    alert('This feed is not in any groups. Add it to a group first to manage moderators.')
+    return
+  }
+  
+  // For simplicity, use the first group
+  const group = groups[0]
+  currentGroupId.value = group.id
+  
+  try {
+    const response = await axios.get(`/api/feed-groups/${group.id}/moderators`)
+    currentGroupModerators.value = response.data
+    showModeratorModal.value = true
+  } catch (error) {
+    console.error('Failed to load moderators:', error)
+  }
+}
+
+const addModerator = async () => {
+  if (!newModeratorHandle.value.trim() || !currentGroupId.value) return
+  
+  try {
+    await axios.post(`/api/feed-groups/${currentGroupId.value}/moderators`, {
+      moderatorHandle: newModeratorHandle.value.trim()
+    })
+    newModeratorHandle.value = ''
+    
+    // Reload moderators
+    const response = await axios.get(`/api/feed-groups/${currentGroupId.value}/moderators`)
+    currentGroupModerators.value = response.data
+  } catch (error: any) {
+    if (error.response?.status === 400) {
+      alert('Invalid handle or handle not found')
+    } else {
+      alert('Failed to add moderator')
+    }
+    console.error('Failed to add moderator:', error)
+  }
+}
+
+const removeModerator = async (moderatorDid: string) => {
+  if (!currentGroupId.value) return
+  
+  try {
+    await axios.delete(`/api/feed-groups/${currentGroupId.value}/moderators/${moderatorDid}`)
+    
+    // Reload moderators
+    const response = await axios.get(`/api/feed-groups/${currentGroupId.value}/moderators`)
+    currentGroupModerators.value = response.data
+  } catch (error) {
+    console.error('Failed to remove moderator:', error)
+  }
+}
+
+const getGroupOwnerHandle = (groupId: number): string => {
+  const group = moderatedGroups.value.find(g => g.id === groupId)
+  return group?.owner_handle || 'Unknown'
+}
+
+const toggleExpansion = (feedId: number) => {
+  if (expandedFeeds.value.has(feedId)) {
+    expandedFeeds.value.delete(feedId)
+  } else {
+    expandedFeeds.value.add(feedId)
+  }
+}
+
+const updateMainThreshold = async (feed: Feed, categoryKey: string, value: string) => {
+  const thresholdKey = `threshold_${categoryKey.replace('-', '_')}`
+  feed[thresholdKey] = parseInt(value) || 3
+  
+  // Don't trigger full feed update to prevent re-ordering
+  try {
+    const updateData = { [thresholdKey]: feed[thresholdKey] }
+    await axios.put(`/api/feeds/${feed.feed_id}`, updateData)
+  } catch (error) {
+    console.error('Failed to update main threshold:', error)
+  }
+}
+
+const updateSubcategoryOptIn = async (feed: Feed, subKey: string, checked: boolean) => {
+  const optInKey = `opt_in_${subKey.replace('-', '_')}`
+  feed[optInKey] = checked
+  
+  // Don't trigger full feed update to prevent re-ordering
+  try {
+    const updateData = { [optInKey]: checked }
+    await axios.put(`/api/feeds/${feed.feed_id}`, updateData)
+  } catch (error) {
+    console.error('Failed to update opt-in:', error)
+  }
+}
+
+const updateSubcategoryThreshold = async (feed: Feed, subKey: string, value: string) => {
+  const thresholdKey = `threshold_${subKey.replace('-', '_')}`
+  feed[thresholdKey] = value ? parseInt(value) : null
+  
+  // Don't trigger full feed update to prevent re-ordering
+  try {
+    const updateData = { [thresholdKey]: feed[thresholdKey] }
+    await axios.put(`/api/feeds/${feed.feed_id}`, updateData)
+  } catch (error) {
+    console.error('Failed to update threshold:', error)
+  }
+}
+
+const updateUserBanMainThreshold = async (feed: Feed, categoryKey: string, value: string) => {
+  const thresholdKey = `user_ban_threshold_${categoryKey.replace('-', '_')}`
+  feed[thresholdKey] = parseInt(value) || getUserBanDefaultThreshold(categoryKey)
+  
+  // Don't trigger full feed update to prevent re-ordering
+  try {
+    const updateData = { [thresholdKey]: feed[thresholdKey] }
+    await axios.put(`/api/feeds/${feed.feed_id}`, updateData)
+  } catch (error) {
+    console.error('Failed to update user ban main threshold:', error)
+  }
+}
+
+const updateUserBanSubcategoryOptIn = async (feed: Feed, subKey: string, checked: boolean) => {
+  const optInKey = `user_ban_opt_in_${subKey.replace('-', '_')}`
+  feed[optInKey] = checked
+  
+  // Don't trigger full feed update to prevent re-ordering
+  try {
+    const updateData = { [optInKey]: checked }
+    await axios.put(`/api/feeds/${feed.feed_id}`, updateData)
+  } catch (error) {
+    console.error('Failed to update user ban opt-in:', error)
+  }
+}
+
+const updateUserBanSubcategoryThreshold = async (feed: Feed, subKey: string, value: string) => {
+  const thresholdKey = `user_ban_threshold_${subKey.replace('-', '_')}`
+  feed[thresholdKey] = value ? parseInt(value) : null
+  
+  // Don't trigger full feed update to prevent re-ordering
+  try {
+    const updateData = { [thresholdKey]: feed[thresholdKey] }
+    await axios.put(`/api/feeds/${feed.feed_id}`, updateData)
+  } catch (error) {
+    console.error('Failed to update user ban threshold:', error)
+  }
+}
+
+const getUserBanDefaultThreshold = (category: string): number => {
+  const defaults = {
+    misleading: 15,
+    harassment: 8,
+    violence: 5,
+    sexual: 8,
+    child_safety: 3,
+    self_harm: 5,
+    rule: 8
+  }
+  return defaults[category as keyof typeof defaults] || 15
+}
+
+const updatePercentage = async (feed: Feed, field: string, value: string) => {
+  try {
+    const numValue = parseInt(value) || 0
+    feed[field] = numValue
+    
+    const updateData = { [field]: numValue }
+    await axios.put(`/api/feeds/${feed.feed_id}`, updateData)
+    emit('feed-updated', feed)
+  } catch (error) {
+    console.error('Failed to update percentage:', error)
+  }
+}
+
+const updateFeed = async (feed: Feed) => {
+  try {
+    const updateData = {
+      communal_enabled: feed.communal_enabled !== false,
+      disable_global_for_feed: feed.disable_global_for_feed || false,
+      cross_type_percentage: feed.cross_type_percentage ?? 20,
+      same_category_cross_percentage: feed.same_category_cross_percentage ?? 50,
+      global_ban_list: feed.global_ban_list,
+      feed_ban_list: feed.feed_ban_list,
+
+      user_ban_cross_type_percentage: feed.user_ban_cross_type_percentage ?? 20,
+      user_ban_same_category_cross_percentage: feed.user_ban_same_category_cross_percentage ?? 50
+    }
+    
+    // Add hierarchical thresholds for post removal
+    Object.entries(props.reportTypes).forEach(([categoryKey, category]) => {
+      const mainThresholdKey = `threshold_${categoryKey.replace('-', '_')}`
+      if (feed[mainThresholdKey] !== undefined) {
+        updateData[mainThresholdKey] = feed[mainThresholdKey]
+      }
+      
+      Object.keys(category.subcategories).forEach((subKey: string) => {
+        const optInKey = `opt_in_${subKey.replace('-', '_')}`
+        const thresholdKey = `threshold_${subKey.replace('-', '_')}`
+        
+        if (feed[optInKey] !== undefined) {
+          updateData[optInKey] = feed[optInKey]
+        }
+        if (feed[thresholdKey] !== undefined) {
+          updateData[thresholdKey] = feed[thresholdKey]
+        }
+      })
+    })
+    
+    // Add hierarchical thresholds for user bans
+    Object.entries(props.reportTypes).forEach(([categoryKey, category]) => {
+      const mainThresholdKey = `user_ban_threshold_${categoryKey.replace('-', '_')}`
+      if (feed[mainThresholdKey] !== undefined) {
+        updateData[mainThresholdKey] = feed[mainThresholdKey]
+      }
+      
+      Object.keys(category.subcategories).forEach((subKey: string) => {
+        const optInKey = `user_ban_opt_in_${subKey.replace('-', '_')}`
+        const thresholdKey = `user_ban_threshold_${subKey.replace('-', '_')}`
+        
+        if (feed[optInKey] !== undefined) {
+          updateData[optInKey] = feed[optInKey]
+        }
+        if (feed[thresholdKey] !== undefined) {
+          updateData[thresholdKey] = feed[thresholdKey]
+        }
+      })
+    })
+    
+    await axios.put(`/api/feeds/${feed.feed_id}`, updateData)
+    emit('feed-updated', feed)
+  } catch (error) {
+    console.error('Failed to update feed:', error)
+  }
+}
+
+// Helper to check if a subcategory is excluded from communal moderation
+const isExcludedFromCommunal = (subKey: string): boolean => {
+  const excludedTypes = ['misleading-other', 'harassment-other', 'violence-other', 'sexual-other', 'self-harm-other', 'rule-other', 'other']
+  return excludedTypes.includes(subKey)
+}
+
+const resetFeedToInherit = async (feed: Feed, subKey: string, prefix: string) => {
+  const thresholdKey = `${prefix}_${subKey.replace('-', '_')}`
+  feed[thresholdKey] = null
+  
+  try {
+    const updateData = { [thresholdKey]: null }
+    await axios.put(`/api/feeds/${feed.feed_id}`, updateData)
+  } catch (error) {
+    console.error('Failed to reset to inherit:', error)
+  }
+}
+
+const deleteFeed = async (feed: Feed) => {
+  if (confirm(`Delete feed "${feed.feed_name}"?`)) {
+    try {
+      await axios.delete(`/api/feeds/${feed.feed_id}`)
+      emit('feed-deleted', feed.feed_id)
+    } catch (error) {
+      console.error('Failed to delete feed:', error)
+    }
+  }
+}
+</script>
+
+<style scoped>
+.feeds-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  background: white;
+  padding: 0.75rem;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .feeds-header {
+    padding: 1rem;
+    flex-wrap: nowrap;
+  }
+}
+
+@media (min-width: 768px) {
+  .feeds-header {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem 2rem;
+  }
+}
+
+.feeds-header h2 {
+  margin: 0;
+  color: #1e293b;
+}
+
+.btn {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 2px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.empty-state {
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem;
+}
+
+.feeds-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .feeds-grid {
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .feeds-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+.feed-card {
+  background: var(--bg-card, white);
+  padding: 1rem;
+  border-radius: 2px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+@media (min-width: 640px) {
+  .feed-card {
+    padding: 1.5rem;
+  }
+}
+
+.feed-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.feed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.feed-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+}
+
+.expand-icon {
+  width: 20px;
+  height: 20px;
+  color: #6b7280;
+  transition: transform 0.2s;
+}
+
+.expand-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.feed-content {
+  margin-top: 1rem;
+}
+
+.feed-header h3 {
+  margin: 0;
+  color: var(--text-primary, #1e293b);
+}
+
+.feed-id {
+  background: var(--bg-tertiary, #f1f5f9);
+  color: var(--text-secondary, #64748b);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-family: monospace;
+}
+
+.per-feed-ban-list {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ban-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.ban-list-header h4 {
+  margin: 0;
+  color: #374151;
+}
+
+.edit-btn {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 2px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.edit-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.communal-settings h4 {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary, #374151);
+}
+
+.communal-description {
+  margin: 0 0 1rem 0;
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  background: #374151;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #374151;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.checkbox-label:hover {
+  background: #4b5563;
+  border-color: #4b5563;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkbox-label:has(input:checked) {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.checkbox-label small {
+  color: rgba(255, 255, 255, 0.8);
+  font-style: italic;
+  font-weight: normal;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.threshold-setting .checkbox-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.category-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary, #f8fafc);
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.category-title {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary, #1e293b);
+  font-size: 1rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.category-threshold {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #d1d5db;
+}
+
+.main-threshold-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #3b82f6;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #3b82f6;
+  font-weight: 700;
+}
+
+.main-threshold-label:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.threshold-setting {
+  margin-bottom: 0.75rem;
+}
+
+.threshold-setting.disabled-setting {
+  opacity: 0.6;
+}
+
+.checkbox-label.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background: #6b7280;
+}
+
+.checkbox-label.disabled:hover {
+  background: #6b7280;
+  border-color: #6b7280;
+}
+
+.threshold-input {
+  width: 60px;
+  padding: 0.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 2px;
+  text-align: center;
+  background: white;
+  margin-left: auto;
+}
+
+.label-with-reset {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.reset-btn {
+  background: #6b7280;
+  color: white;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.reset-btn:hover {
+  background: #4b5563;
+  transform: scale(1.1);
+}
+
+.main-threshold-label .threshold-input {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  font-weight: 600;
+}
+
+.excluded-note {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  margin-left: 0.5rem;
+}
+
+.info-btn-small {
+  background: #374151;
+  color: white;
+  border: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  transition: all 0.2s;
+}
+
+.info-btn-small svg {
+  width: 12px;
+  height: 12px;
+}
+
+.info-btn-small:hover {
+  background: #4b5563;
+}
+
+.user-ban-settings {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.user-ban-settings h4 {
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.cross-type-setting {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.percentage-slider {
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+.percentage {
+  font-weight: 600;
+  color: #1d4ed8;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 2px;
+  cursor: pointer;
+  margin-top: 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+/* Feed Groups Styles */
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #4b5563;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #1e293b;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #374151;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.create-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.group-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.groups-list {
+  space-y: 1rem;
+}
+
+.group-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.group-header h4 {
+  margin: 0;
+  color: #374151;
+}
+
+.delete-btn-small {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.delete-btn-small:hover {
+  background: #dc2626;
+}
+
+.feed-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.feed-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f9fafb;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.feed-checkbox:hover {
+  background: #f3f4f6;
+}
+
+.feed-checkbox input[type="checkbox"] {
+  margin: 0;
+}
+
+.feed-groups-section {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.feed-groups-section h4 {
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+}
+
+.feed-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.group-tag {
+  background: #3b82f6;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.no-groups {
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.moderator-section {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.moderator-section h4 {
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+}
+
+.coming-soon {
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Moderator Management Styles */
+.moderator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.btn-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.moderator-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.moderator-tag {
+  background: #10b981;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.no-moderators {
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.add-moderator {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.moderator-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.moderators-list {
+  space-y: 1rem;
+}
+
+.moderator-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.moderator-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.permissions {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Moderated Groups Styles */
+.moderated-groups-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.moderated-groups-section h3 {
+  margin: 0 0 1rem 0;
+  color: #1e293b;
+  font-size: 1.125rem;
+}
+
+.moderated-groups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.moderated-group-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.moderated-group-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.moderated-group-card h4 {
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.permissions-badge {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.group-actions {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.owner-info {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
+}
+</style>

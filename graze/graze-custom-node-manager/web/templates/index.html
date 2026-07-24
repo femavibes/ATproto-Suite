@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedmaker Resources</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav>
+        <h1>Feedmaker Resources</h1>
+        <div id="auth-status">
+            <span id="logged-in-status" style="display:none;">
+                Logged in as <strong id="user-handle"></strong>
+                <button onclick="logout()">Logout</button>
+            </span>
+            <button id="login-btn" onclick="showLoginModal()">Admin</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('metadata')">Post Metadata</button>
+            <button class="tab" onclick="showTab('actions')">Actions</button>
+            <button class="tab" onclick="showTab('graze')">Filter Operations</button>
+            <button class="tab" onclick="showTab('nodes')">Custom Nodes</button>
+            <button class="tab" onclick="showTab('reference')">Raw Reference</button>
+        </div>
+
+        <!-- Post Metadata Tab -->
+        <div id="metadata-tab" class="tab-content active">
+            <div class="section">
+                <h2>Post Metadata</h2>
+                <input type="text" id="metadata-search" placeholder="Search metadata fields..." style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                <div id="metadata-content" class="docs-content"></div>
+            </div>
+        </div>
+
+        <!-- Actions Tab -->
+        <div id="actions-tab" class="tab-content">
+            <div class="section" style="display: flex; gap: 2rem;">
+                <div id="actions-toc" style="width: 250px; flex-shrink: 0; position: sticky; top: 1rem; align-self: flex-start; max-height: calc(100vh - 4rem); overflow-y: auto;">
+                    <h3 style="margin-bottom: 1rem; font-size: 0.9rem; text-transform: uppercase; color: #666;">Actions</h3>
+                    <div id="actions-toc-list"></div>
+                    <button id="add-action-btn" onclick="window.showActionEditor()" style="display: none; width: 100%; margin-top: 1rem; padding: 0.75rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">+ New Action</button>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <h2>Actions</h2>
+                    <input type="text" id="actions-search" placeholder="Search actions..." style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                    <div id="actions-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Operations Tab -->
+        <div id="graze-tab" class="tab-content">
+            <div class="section">
+                <h2>Filter Operations</h2>
+                <input type="text" id="graze-search" placeholder="Search filter operations..." style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                <div id="graze-content" class="docs-content"></div>
+            </div>
+        </div>
+
+        <!-- Nodes Tab -->
+        <div id="nodes-tab" class="tab-content">
+            <div class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="margin: 0;">Available Custom Nodes</h2>
+                        <p class="subtitle" style="margin: 0.5rem 0 0 0;">Select a node to configure and push to Graze</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <select onchange="setSortMode(this.value)" style="padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px; cursor: pointer;">
+                            <option value="popularity">Sort: Color Count</option>
+                            <option value="name">Sort: Name (A-Z)</option>
+                            <option value="recent">Sort: Recently Pushed</option>
+                        </select>
+                        <button onclick="showPromoFooterModal()" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">⚙ Promo Footer</button>
+                    </div>
+                </div>
+                <div id="nodes-grid" class="nodes-grid" style="margin-top: 1.5rem;"></div>
+            </div>
+        </div>
+
+        <!-- Raw Reference Tab -->
+        <div id="reference-tab" class="tab-content">
+            <div class="section">
+                <h2>Technical Reference (Raw)</h2>
+                <input type="text" id="reference-search" placeholder="Search reference..." style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                <div id="reference-content" class="docs-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <h2>Login to Manager</h2>
+            <form onsubmit="login(event)">
+                <label>Bluesky Handle:</label>
+                <input type="text" id="handle" placeholder="user.bsky.social" autocomplete="username" required>
+                
+                <label>App Password:</label>
+                <input type="password" id="password" placeholder="xxxx-xxxx-xxxx-xxxx" autocomplete="current-password" required>
+                
+                <div class="modal-actions">
+                    <button type="submit">Login</button>
+                    <button type="button" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+            <div id="login-error" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Node Detail Modal -->
+    <div id="node-modal" class="modal">
+        <div class="modal-content large">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <h2 id="node-title" style="margin: 0; flex: 1;"></h2>
+                <div id="node-graze-link" style="margin-left: 1rem;"></div>
+            </div>
+            <p id="node-description"></p>
+            
+            <div class="node-meta" style="display: none;">
+                <span class="badge" id="node-version"></span>
+                <span class="badge" id="node-author"></span>
+                <span id="node-status"></span>
+            </div>
+
+            <div class="form-section">
+                <h3>Configure Node</h3>
+                <form id="node-form">
+                    <label>Title:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="text" id="node-form-title" required style="flex: 1;" oninput="updateResetButtons()">
+                        <button type="button" id="title-reset" onclick="resetTitle()" style="display: none; padding: 0.5rem 1rem; background: #e5e5e5; border: none; border-radius: 4px; cursor: pointer;">Reset</button>
+                    </div>
+                    
+                    <label>Description:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                        <textarea id="node-form-description" rows="3" required style="flex: 1;" oninput="updateResetButtons()"></textarea>
+                        <button type="button" id="desc-reset" onclick="resetDescription()" style="display: none; padding: 0.5rem 1rem; background: #e5e5e5; border: none; border-radius: 4px; cursor: pointer;">Reset</button>
+                    </div>
+                    
+                    <label>Color:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <select id="node-form-color" style="flex: 1; padding: 0.75rem; border: 1px solid #e5e5e5; border-radius: 4px;" onchange="updateResetButtons()">
+                            <option value="slate">Slate</option>
+                            <option value="tomato">Tomato</option>
+                            <option value="red">Red</option>
+                            <option value="ruby">Ruby</option>
+                            <option value="crimson">Crimson</option>
+                            <option value="pink">Pink</option>
+                            <option value="plum">Plum</option>
+                            <option value="purple">Purple</option>
+                            <option value="violet">Violet</option>
+                            <option value="iris">Iris</option>
+                            <option value="indigo">Indigo</option>
+                            <option value="blue">Blue</option>
+                            <option value="cyan">Cyan</option>
+                            <option value="teal">Teal</option>
+                            <option value="jade">Jade (Mini Feature)</option>
+                            <option value="green">Green (Feature)</option>
+                            <option value="grass">Grass (Feature Starterpack)</option>
+                            <option value="brown">Brown (Utility)</option>
+                            <option value="bronze">Bronze</option>
+                            <option value="gold">Gold</option>
+                            <option value="orange">Orange</option>
+                            <option value="amber">Amber (Mini Mod)</option>
+                            <option value="yellow">Yellow (Moderation)</option>
+                            <option value="lime">Lime (Moderation Starterpack)</option>
+                            <option value="mint">Mint</option>
+                            <option value="sky">Sky</option>
+                        </select>
+                        <button type="button" id="color-reset" onclick="resetColor()" style="display: none; padding: 0.5rem 1rem; background: #e5e5e5; border: none; border-radius: 4px; cursor: pointer;">Reset</button>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 0.5rem;">
+                            <input type="checkbox" id="include-promo-footer" checked>
+                            <span>Include promotional footer</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="override-component-id" onchange="toggleComponentIdOverride()">
+                            <span>Link to existing Graze node (advanced)</span>
+                        </label>
+                        <div id="component-id-override" style="display: none; margin-top: 0.5rem;">
+                            <input type="number" id="component-id-input" placeholder="Enter component ID (e.g., 1615)" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                            <small style="color: #666; display: block; margin-top: 0.25rem;">This will update the existing node instead of creating a new one</small>
+                        </div>
+                    </div>
+                    
+                    <div id="node-options"></div>
+                    
+                    <div id="push-result" class="result"></div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" onclick="pushNode()" class="primary" id="push-btn">Push to Graze</button>
+                        <button type="button" onclick="closeNodeModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="form-section">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>JSON</h3>
+                    <button onclick="copyManifest()" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Copy
+                    </button>
+                </div>
+                <pre id="manifest-preview"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- NSFW Manager Modal -->
+    <div id="nsfw-manager-modal" class="modal">
+        <div class="modal-content large">
+            <h2>NSFW Content Manager</h2>
+            <p>Manage terms, hashtags, and domains for NSFW filtering</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <!-- Categories List -->
+                <div>
+                    <h3>Categories</h3>
+                    <div id="nsfw-categories-list" style="max-height: 500px; overflow-y: auto;"></div>
+                </div>
+                
+                <!-- Editor -->
+                <div id="nsfw-editor" style="display: none;">
+                    <h3 id="nsfw-category-name"></h3>
+                    
+                    <!-- Tabs -->
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 2px solid #e5e5e5;">
+                        <button class="nsfw-tab-btn active" onclick="showNSFWTab('terms')" style="background: none; border: none; padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">Terms</button>
+                        <button class="nsfw-tab-btn" onclick="showNSFWTab('hashtags')" style="background: none; border: none; padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">Hashtags</button>
+                        <button class="nsfw-tab-btn" onclick="showNSFWTab('domains')" style="background: none; border: none; padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">Domains</button>
+                    </div>
+                    
+                    <!-- Terms Tab -->
+                    <div id="nsfw-terms-tab" class="nsfw-tab-content">
+                        <input type="text" id="nsfw-terms-search" placeholder="Search terms..." style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                        <div id="nsfw-terms-list" style="margin-bottom: 0.5rem; max-height: 300px; overflow-y: auto;"></div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="nsfw-terms-input" placeholder="Add term..." style="flex: 1; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                            <button onclick="addNSFWTerm('terms')" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                            <button onclick="showBulkAdd('terms')" style="padding: 0.5rem 1rem; background: #8b5cf6; color: white; border: none; border-radius: 4px; cursor: pointer;">Bulk Add</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Hashtags Tab -->
+                    <div id="nsfw-hashtags-tab" class="nsfw-tab-content" style="display: none;">
+                        <input type="text" id="nsfw-hashtags-search" placeholder="Search hashtags..." style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                        <div id="nsfw-hashtags-list" style="margin-bottom: 0.5rem; max-height: 300px; overflow-y: auto;"></div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="nsfw-hashtags-input" placeholder="Add hashtag (without #)..." style="flex: 1; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                            <button onclick="addNSFWTerm('hashtags')" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                            <button onclick="showBulkAdd('hashtags')" style="padding: 0.5rem 1rem; background: #8b5cf6; color: white; border: none; border-radius: 4px; cursor: pointer;">Bulk Add</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Domains Tab -->
+                    <div id="nsfw-domains-tab" class="nsfw-tab-content" style="display: none;">
+                        <input type="text" id="nsfw-domains-search" placeholder="Search domains..." style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                        <div id="nsfw-domains-list" style="margin-bottom: 0.5rem; max-height: 300px; overflow-y: auto;"></div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="nsfw-domains-input" placeholder="Add domain..." style="flex: 1; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                            <button onclick="addNSFWTerm('domains')" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                            <button onclick="showBulkAdd('domains')" style="padding: 0.5rem 1rem; background: #8b5cf6; color: white; border: none; border-radius: 4px; cursor: pointer;">Bulk Add</button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <button id="nsfw-ai-suggest-btn" style="display: none; padding: 0.75rem 1.5rem; background: #8b5cf6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">AI Suggest</button>
+                        <button onclick="saveNSFWCategory()" style="padding: 0.75rem 1.5rem; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 1.5rem;">
+                <button onclick="closeNSFWManager()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Add Modal -->
+    <div id="bulk-add-modal" class="modal">
+        <div class="modal-content">
+            <h2>Bulk Add <span id="bulk-add-type"></span></h2>
+            <p>Paste your list in any format:</p>
+            <ul style="margin: 0.5rem 0; padding-left: 1.5rem; color: #666;">
+                <li>One per line: <code>onlyfans\npatreon</code></li>
+                <li>Comma-separated: <code>onlyfans, patreon</code></li>
+                <li>JSON array: <code>["onlyfans", "patreon"]</code></li>
+            </ul>
+            <textarea id="bulk-add-input" rows="10" style="width: 100%; padding: 0.75rem; border: 1px solid #e5e5e5; border-radius: 4px; font-family: monospace;"></textarea>
+            <div class="modal-actions">
+                <button onclick="processBulkAdd()" class="primary">Add Items</button>
+                <button onclick="closeBulkAdd()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AdBlocker Manager Modal -->
+    <div id="adblocker-manager-modal" class="modal">
+        <div class="modal-content large">
+            <h2>Ad & Affiliate Link Manager</h2>
+            <p>Manage brands, domains, affiliate tags, ad phrases, and hashtags</p>
+            
+            <div style="display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <!-- Left: Categories + Search -->
+                <div>
+                    <div style="margin-bottom: 1rem;">
+                        <input type="text" id="adblocker-search-input" placeholder="Search for item..." 
+                               style="width: 100%; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px; margin-bottom: 0.5rem;">
+                        <button onclick="adBlockerSearchTerm()" style="width: 100%; padding: 0.5rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+                    </div>
+                    
+                    <h3>Categories</h3>
+                    <input type="text" id="adblocker-category-search" placeholder="Filter categories..." 
+                           oninput="window.adBlockerLoadCategory ? renderCategoryList() : null"
+                           style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                    <div id="adblocker-category-list" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+                
+                <!-- Right: Editor -->
+                <div>
+                    <div id="adblocker-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 2px solid #e5e5e5;"></div>
+                    
+                    <div id="adblocker-items-list" style="margin-bottom: 1rem; max-height: 350px; overflow-y: auto; border: 1px solid #e5e5e5; border-radius: 4px; padding: 0.5rem;"></div>
+                    
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <input type="text" id="adblocker-add-input" placeholder="Add item..." 
+                               onkeypress="if(event.key==='Enter') adBlockerAddItem()"
+                               style="flex: 1; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                        <button onclick="adBlockerAddItem()" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                        <button onclick="adBlockerShowBulkAdd()" style="padding: 0.5rem 1rem; background: #8b5cf6; color: white; border: none; border-radius: 4px; cursor: pointer;">Bulk Add</button>
+                        <button id="adblocker-ai-suggest-btn" style="display: none; padding: 0.5rem 1rem; background: #a855f7; color: white; border: none; border-radius: 4px; cursor: pointer;">AI</button>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button onclick="adBlockerSaveChanges()" class="primary">Save Changes</button>
+                        <button onclick="closeAdBlockerManager()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AdBlocker Bulk Add Modal -->
+    <div id="adblocker-bulk-add-modal" class="modal">
+        <div class="modal-content">
+            <h2>Bulk Add Items</h2>
+            <p>Paste your list in any format:</p>
+            <ul style="margin: 0.5rem 0; padding-left: 1.5rem; color: #666;">
+                <li>One per line: <code>amazon.com\nebay.com</code></li>
+                <li>Comma-separated: <code>amazon.com, ebay.com</code></li>
+                <li>JSON array: <code>["amazon.com", "ebay.com"]</code></li>
+            </ul>
+            <textarea id="adblocker-bulk-textarea" rows="10" style="width: 100%; padding: 0.75rem; border: 1px solid #e5e5e5; border-radius: 4px; font-family: monospace;"></textarea>
+            <div class="modal-actions">
+                <button onclick="adBlockerProcessBulkAdd()" class="primary">Add Items</button>
+                <button onclick="adBlockerCloseBulkAdd()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Node Config Modal -->
+    <div id="node-config-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="node-config-title"></h2>
+            <p id="node-config-description" style="color: #666; margin-bottom: 1.5rem;"></p>
+            <div id="node-config-options"></div>
+            <div class="modal-actions">
+                <button onclick="saveNodeConfig()" class="primary">Save Configuration</button>
+                <button onclick="closeNodeConfig()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promotional Footer Modal -->
+    <div id="promo-footer-modal" class="modal">
+        <div class="modal-content">
+            <h2>Promotional Footer</h2>
+            <p style="color: #666; margin-bottom: 1rem;">This content will be automatically added to the bottom of every custom node you push. Supports markdown and line breaks.</p>
+            
+            <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; cursor: pointer;">
+                <input type="checkbox" id="promo-footer-enabled" checked>
+                <span>Enable promotional footer</span>
+            </label>
+            
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Footer Content:</label>
+            <textarea id="promo-footer-input" rows="6" placeholder="Example:\n\nCheck out my other custom nodes:\n- [NSFW Filter](https://graze.social/...)\n- [Ad Blocker](https://graze.social/...)" style="width: 100%; padding: 0.75rem; border: 1px solid #e5e5e5; border-radius: 4px; font-family: monospace; font-size: 0.9rem;"></textarea>
+            
+            <div style="margin-top: 1rem; padding: 1rem; background: #f9fafb; border: 1px solid #e5e5e5; border-radius: 4px;">
+                <strong style="display: block; margin-bottom: 0.5rem;">Preview:</strong>
+                <div id="promo-footer-preview" style="color: #666; font-size: 0.9rem; white-space: pre-wrap;">No content yet...</div>
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 1rem;">
+                <button onclick="savePromoFooter()" class="primary">Save Footer</button>
+                <button onclick="closePromoFooterModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Block Lists Manager Modal -->
+    <div id="block-lists-modal" class="modal">
+        <div class="modal-content large">
+            <h2>Block Lists Manager</h2>
+            <p>Add or remove block lists. Each list will appear as a toggle in the custom node.</p>
+            
+            <div style="margin-top: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>Your Lists</h3>
+                    <button onclick="window.blockListsModule.showAddListModal()" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">Add List</button>
+                </div>
+                <div id="block-lists-container" style="max-height: 500px; overflow-y: auto;"></div>
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 1.5rem;">
+                <button onclick="window.blockListsModule.saveBlockLists()" class="primary">Save Changes</button>
+                <button onclick="window.blockListsModule.closeBlockListsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Block List Modal -->
+    <div id="add-block-list-modal" class="modal">
+        <div class="modal-content">
+            <h2>Add Block List</h2>
+            <p>Enter the details for the new block list</p>
+            
+            <div style="margin-top: 1.5rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Parameter Name:</label>
+                    <input type="text" id="add-list-param-name" placeholder="e.g., MY_LIST" style="width: 100%; padding: 0.75rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">Will be uppercased and used as the toggle name</small>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">List URL:</label>
+                    <input type="text" id="add-list-url" placeholder="https://bsky.app/profile/user.bsky.social/lists/abc123" style="width: 100%; padding: 0.75rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">Full Bluesky list URL</small>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Description:</label>
+                    <textarea id="add-list-description" rows="3" placeholder="What does this list block?" style="width: 100%; padding: 0.75rem; border: 1px solid #e5e5e5; border-radius: 4px; resize: vertical;"></textarea>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">Shown to users in the toggle description</small>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button onclick="window.blockListsModule.confirmAddList()" class="primary">Add List</button>
+                <button onclick="window.blockListsModule.closeAddListModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unified Settings Modal -->
+    <div id="unified-settings-modal" class="modal">
+        <div class="modal-content large">
+            <h2 id="unified-settings-title"></h2>
+            <p id="unified-settings-description" style="color: #666; margin-bottom: 1rem;"></p>
+            <div class="tabs" id="unified-settings-tabs"></div>
+            <div id="unified-settings-content"></div>
+            <div class="modal-actions" style="margin-top: 1.5rem;">
+                <button onclick="closeNodeConfig()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Feed Manager Modal -->
+    <div id="test-feed-modal" class="modal">
+        <div class="modal-content large">
+            <h2>Test Feed Manager</h2>
+            <p>Add lists of known spammers, NSFW posters, and advertisers to test your filters</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <div>
+                    <h3>Categories</h3>
+                    <div id="test-categories-list" style="max-height: 500px; overflow-y: auto;"></div>
+                </div>
+                
+                <div id="test-editor" style="display: none;">
+                    <h3 id="test-category-name"></h3>
+                    
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Add Bluesky list URIs to include users from these lists in your feed for testing.</p>
+                    
+                    <div id="test-lists-list" style="margin-bottom: 0.5rem; max-height: 300px; overflow-y: auto; border: 1px solid #e5e5e5; border-radius: 4px; padding: 0.5rem;"></div>
+                    
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="test-list-input" placeholder="at://did:plc:xxx/app.bsky.graph.list/xxx" style="flex: 1; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px; font-family: monospace; font-size: 0.85rem;">
+                        <button onclick="window.testFeedModule.addList()" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <button onclick="window.testFeedModule.saveCategory()" style="padding: 0.75rem 1.5rem; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 1.5rem;">
+                <button onclick="window.testFeedModule.closeManager()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spam Blocker Manager Modal -->
+    <div id="spam-blocker-modal" class="modal">
+        <div class="modal-content large">
+            <h2>Spam Blocker Manager</h2>
+            <p>Manage spam detection terms for bios and post content</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <div>
+                    <h3>Categories</h3>
+                    <div id="spam-categories-list" style="max-height: 500px; overflow-y: auto;"></div>
+                </div>
+                
+                <div id="spam-editor" style="display: none;">
+                    <h3 id="spam-category-name"></h3>
+                    
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 2px solid #e5e5e5;">
+                        <button class="spam-tab-btn active" onclick="window.spamBlockerModule.showSpamTab('bio_terms')" style="background: none; border: none; padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 3px solid transparent;">Bio Terms</button>
+                        <button class="spam-tab-btn" onclick="window.spamBlockerModule.showSpamTab('bio_exceptions')" style="background: none; border: none; padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 3px solid transparent;">Bio Exceptions</button>
+                        <button class="spam-tab-btn" onclick="window.spamBlockerModule.showSpamTab('post_terms')" style="background: none; border: none; padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 3px solid transparent;">Post Terms</button>
+                        <button class="spam-tab-btn" onclick="window.spamBlockerModule.showSpamTab('hashtags')" style="background: none; border: none; padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 3px solid transparent;">Hashtags</button>
+                    </div>
+                    
+                    <div id="spam-bio_terms-tab" class="spam-tab-content">
+                        <div id="spam-bio_terms-list" style="margin-bottom: 0.5rem; max-height: 300px; overflow-y: auto;"></div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="spam-bio_terms-input" placeholder="Add bio term..." style="flex: 1; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                            <button onclick="window.spamBlockerModule.addTerm('bio_terms')" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                        </div>
+                    </div>
+                    
+                    <div id="spam-bio_exceptions-tab" class="spam-tab-content" style="display: none;">
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Exception terms allow users through even if they match bio terms. Example: "fuck crypto" allows anti-crypto users.</p>
+                        <div id="spam-bio_exceptions-list" style="margin-bottom: 0.5rem; max-height: 300px; overflow-y: auto;"></div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="spam-bio_exceptions-input" placeholder="Add exception term..." style="flex: 1; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                            <button onclick="window.spamBlockerModule.addTerm('bio_exceptions')" style="padding: 0.5rem 1rem; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                        </div>
+                    </div>
+                    
+                    <div id="spam-post_terms-tab" class="spam-tab-content" style="display: none;">
+                        <div id="spam-post_terms-list" style="margin-bottom: 0.5rem; max-height: 300px; overflow-y: auto;"></div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="spam-post_terms-input" placeholder="Add post term..." style="flex: 1; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                            <button onclick="window.spamBlockerModule.addTerm('post_terms')" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                        </div>
+                    </div>
+                    
+                    <div id="spam-hashtags-tab" class="spam-tab-content" style="display: none;">
+                        <div id="spam-hashtags-list" style="margin-bottom: 0.5rem; max-height: 300px; overflow-y: auto;"></div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="spam-hashtags-input" placeholder="Add hashtag (without #)..." style="flex: 1; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                            <button onclick="window.spamBlockerModule.addTerm('hashtags')" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <button onclick="window.spamBlockerModule.saveCategory()" style="padding: 0.75rem 1.5rem; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 1.5rem;">
+                <button onclick="window.spamBlockerModule.closeManager()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Hashtag Filter Modal -->
+    <div id="hidden-hashtag-filter-modal" class="modal">
+        <div class="modal-content">
+            <h2>Hidden Hashtag Filter</h2>
+            <p style="color: #666; margin-bottom: 1rem;">Filter posts that use hidden hashtags (hashtags for discoverability but not visible in post text)</p>
+            
+            <div style="margin-bottom: 1rem;">
+                <label>Add Hidden Hashtag:</label>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <input type="text" id="hidden-hashtag-input" placeholder="Enter hashtag (without #)" style="flex: 1; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                    <button onclick="addHiddenHashtag()" style="padding: 0.5rem 1rem; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                </div>
+            </div>
+            
+            <div id="hidden-hashtag-list" style="margin-bottom: 1rem; min-height: 100px;"></div>
+            
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button onclick="closeModal('hidden-hashtag-filter-modal')" style="padding: 0.5rem 1rem; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                <button onclick="saveHiddenHashtagFilter()" style="padding: 0.5rem 1rem; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer;">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Editor Modal -->
+    <div id="action-editor-modal" class="modal">
+        <div class="modal-content" style="max-width: 1200px; max-height: 90vh; display: flex; flex-direction: column;">
+            <h2>Action Editor</h2>
+            
+            <div style="display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; flex: 1; min-height: 0;">
+                <!-- Left: Form -->
+                <div style="overflow-y: auto;">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">ID:</label>
+                        <input type="text" id="action-editor-id" placeholder="remove-users-list" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px; font-family: monospace;">
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Title:</label>
+                        <input type="text" id="action-editor-title" placeholder="Remove Users" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Description:</label>
+                        <textarea id="action-editor-description" rows="3" placeholder="What does this action do?" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Difficulty:</label>
+                        <select id="action-editor-difficulty" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px;">
+                            <option value="beginner">Beginner</option>
+                            <option value="basic">Basic</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Notes:</label>
+                        <textarea id="action-editor-notes" rows="4" placeholder="Tips, warnings, pros/cons..." style="width: 100%; padding: 0.5rem; border: 1px solid #e5e5e5; border-radius: 4px; resize: vertical;"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Right: Canvas -->
+                <div style="background: #1e1e1e; border-radius: 6px; padding: 1rem; overflow: auto; position: relative;">
+                    <div id="action-editor-canvas" style="min-height: 400px;"></div>
+                </div>
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 1rem;">
+                <button onclick="window.saveAction()" class="primary">Save Action</button>
+                <button onclick="window.closeActionEditor()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/static/app.js"></script>
+</body>
+</html>
