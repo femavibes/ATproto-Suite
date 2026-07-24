@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feed Compare</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><h1>Feed Compare</h1></header>
+
+<div class="container">
+  <div class="controls">
+    <div id="profiles-bar" class="profiles-bar" style="display:none"></div>
+    <div class="feed-inputs">
+      <div class="feed-input-group">
+        <label>Feed A (base)</label>
+        <input id="feedA" type="url" placeholder="https://bsky.app/profile/.../feed/... or at://..." />
+      </div>
+      <div class="feed-input-group">
+        <label>Feed B</label>
+        <input id="feedB" type="url" placeholder="https://bsky.app/profile/.../feed/... or at://..." />
+      </div>
+    </div>
+    <div class="controls-row">
+      <label class="row-label">Display</label>
+      <select id="displayLimit">
+        <option value="25">25 posts</option>
+        <option value="50">50 posts</option>
+        <option value="100" selected>100 posts</option>
+        <option value="250">250 posts</option>
+        <option value="500">500 posts</option>
+      </select>
+      <button class="primary" id="compareBtn" onclick="runCompare()">Compare</button>
+      <button id="refreshBtn" onclick="runRefresh()" style="display:none">Refresh</button>
+      <div class="row-divider"></div>
+      <label class="row-label">Snapshots</label>
+      <button class="primary" id="snapshotBtn" onclick="saveSnapshot()" style="display:none">Save Snapshot</button>
+      <label class="row-label" style="margin-left:6px">Auto</label>
+      <select id="autoInterval">
+        <option value="30">30s</option>
+        <option value="60" selected>1m</option>
+        <option value="300">5m</option>
+        <option value="900">15m</option>
+      </select>
+      <label class="row-label">Max</label><input id="autoCount" type="number" min="1" max="999" value="10" style="width:60px" title="Number of snapshots to take" />
+      <button id="autoBtn" onclick="startAutoSession()">Start Auto</button>
+      <div class="spacer"></div>
+      <button onclick="saveProfile()">[Save Profile]</button>
+      <a href="/snapshots.html" class="nav-link">[Snapshots]</a>
+      <button onclick="toggleSettings()">[settings]</button>
+    </div>
+    <div id="settings-panel" style="display:none" class="settings-panel">
+      <label>Default display count</label>
+      <select id="defaultLimit" onchange="saveSettings()">
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="250">250</option>
+        <option value="500">500</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="error" class="error-msg" style="display:none"></div>
+  <div id="results"></div>
+</div>
+
+<script src="utils.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

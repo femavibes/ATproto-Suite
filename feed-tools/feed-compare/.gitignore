@@ -1,0 +1,4 @@
+data/snapshots/*.json
+data/profiles.json
+data/sessions.json
+data/settings.json
