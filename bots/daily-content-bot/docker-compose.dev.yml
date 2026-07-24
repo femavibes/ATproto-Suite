@@ -1,0 +1,15 @@
+services:
+  daily-content-bot:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      # Mount entire directory for development
+      - .:/app
+      - /app/node_modules  # Prevent node_modules from being overwritten
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+    user: "1000:1000"

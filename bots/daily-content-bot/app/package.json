@@ -1,0 +1,12 @@
+{
+  "name": "daily-content-bot",
+  "version": "1.0.0",
+  "main": "daily-content-bot.js",
+  "type": "module",
+  "dependencies": {
+    "@atproto/api": "^0.9.10",
+    "dotenv": "^16.0.3",
+    "node-cron": "^3.0.2",
+    "node-fetch": "^2.6.7"
+  }
+}

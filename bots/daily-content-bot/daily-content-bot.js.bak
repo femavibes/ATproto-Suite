@@ -1,0 +1,440 @@
+// Bluesk// Load credentials and settings fromlet quotes = [];
+let words = [];
+let usedQuotes = new Set();
+let usedWords = new Set();
+
+function log(message, level = function getRandomContent(contentArray, usedSet) {
+  const availableContent = contentArray.filter(item => !usedSet.has(item));
+  if (availableContent.length === 0) {
+    log('All content used. Resetting history.', 'info');
+    usedSet.clear();
+    return getRandomContent(contentArray, usedSet);
+  }
+  const content = RANDOMIZE_QUOTES
+    ? availableContent[Math.floor(Math.random() * availableContent.length)]
+    : availableContent[0];
+  usedSet.add(content);
+  return content;
+}nst levels = ['debug', 'info', 'warn', 'error'];
+  if (levels.indexOf(level) >= levels.indexOf(LOG_LEVEL)) {
+    console.log(`[${level.toUpperCase()}] ${message}`);
+  }
+}
+
+// Express server for manual triggers
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.post('/trigger/quote', async (req, res) => {
+  try {
+    await postQuote();
+    res.json({ success: true, message: 'Quote posted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/trigger/word', async (req, res) => {
+  try {
+    await postWord();
+    res.json({ success: true, message: 'Word posted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});st BLUESKY_HANDLE = process.env.BLUESKY_HANDLE;
+const BLUESKY_PASSWORD = process.env.BLUESKY_PASSWORD;
+const QUOTE_TIME_CRON = process.env.QUOTE_TIME_CRON || '0 9 * * *'; // Default 9 AM
+const WORD_TIME_CRON = process.env.WORD_TIME_CRON || '0 12 * * *'; // Default 12 PM
+const TIMEZONE = process.env.TIMEZONE || undefined;
+const QUOTE_TAG = process.env.QUOTE_TAG || '#QuoteOfTheDay';
+const WORD_TAG = process.env.WORD_TAG || '#WordOfTheDay';
+const QUOTE_SOURCE = process.env.QUOTE_SOURCE || 'text'; // 'text' or 'api'
+const QUOTE_FILE = process.env.QUOTE_FILE || './quotes.txt';
+const WORD_FILE = process.env.WORD_FILE || './words.txt';
+const USED_QUOTES_FILE = process.env.USED_QUOTES_FILE || './used_quotes.json';
+const USED_WORDS_FILE = process.env.USED_WORDS_FILE || './used_words.json';f-the-Day Bot (Fully Configurable)
+
+require('dotenv').config();
+const fs = require('fs');
+const { BskyAgent, RichText } = require('@atproto/api');
+const cron = require('node-cron');
+const fetch = require('node-fetch');
+const express = require('express');
+
+// Load credentials and settings from .env
+const BLUESKY_HANDLE = process.env.BLUESKY_HANDLE;
+const BLUESKY_PASSWORD = process.env.BLUESKY_PASSWORD;
+const POST_TIME_CRON = process.env.POST_TIME_CRON || '0 9 * * *';
+const TIMEZONE = process.env.TIMEZONE || undefined;
+const POST_TAG = process.env.POST_TAG || '#QuoteOfTheDay';
+const QUOTE_SOURCE = process.env.QUOTE_SOURCE || 'text'; // 'text' or 'api'
+const QUOTE_FILE = process.env.QUOTE_FILE || './quotes.json';
+const USED_QUOTES_FILE = process.env.USED_QUOTES_FILE || './used_quotes.json';
+const QUOTE_API = process.env.QUOTE_API;
+const RANDOMIZE_QUOTES = process.env.RANDOMIZE_QUOTES !== 'false';
+const DRY_RUN = process.env.DRY_RUN === 'true';
+const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
+
+// Word of the Day settings
+const WORD_OF_THE_DAY_ENABLED = process.env.WORD_OF_THE_DAY_ENABLED === 'true';
+const WORD_OF_THE_DAY_CRON = process.env.WORD_OF_THE_DAY_CRON || '0 14 * * *';
+const WORD_OF_THE_DAY_TAG = process.env.WORD_OF_THE_DAY_TAG || '#WordOfTheDay';
+const WORD_FILE = process.env.WORD_FILE || './words.json';
+const USED_WORDS_FILE = process.env.USED_WORDS_FILE || './used_words.json';
+
+const agent = new BskyAgent({ service: 'https://bsky.social' });
+
+let quotes = [];
+let usedQuotes = new Set();
+let words = [];
+let usedWords = new Set();
+
+function log(message, level = 'info') {
+  const levels = ['debug', 'info', 'warn', 'error'];
+  if (levels.indexOf(level) >= levels.indexOf(LOG_LEVEL)) {
+    console.log(`[${level.toUpperCase()}] ${message}`);
+  }
+}
+
+function loadContent() {
+  // Load quotes
+  if (QUOTE_SOURCE === 'text') {
+    try {
+      const data = fs.readFileSync(QUOTE_FILE, 'utf-8');
+      quotes = data
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line);
+      log(`Loaded ${quotes.length} quotes.`, 'info');
+    } catch (err) {
+      log('Failed to load quotes file: ' + err.message, 'error');
+      process.exit(1);
+    }
+  }
+
+  // Load words
+  try {
+    const data = fs.readFileSync(WORD_FILE, 'utf-8');
+    words = data
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(line => line);
+    log(`Loaded ${words.length} words.`, 'info');
+  } catch (err) {
+    log('Failed to load words file: ' + err.message, 'error');
+    process.exit(1);
+  }
+
+  // Load used quotes history
+  try {
+    if (fs.existsSync(USED_QUOTES_FILE)) {
+      usedQuotes = new Set(JSON.parse(fs.readFileSync(USED_QUOTES_FILE, 'utf-8')));
+    }
+  } catch (err) {
+    log('Failed to load used quotes file: ' + err.message, 'warn');
+  }
+
+  // Load used words history
+  try {
+    if (fs.existsSync(USED_WORDS_FILE)) {
+      usedWords = new Set(JSON.parse(fs.readFileSync(USED_WORDS_FILE, 'utf-8')));
+    }
+  } catch (err) {
+    log('Failed to load used words file: ' + err.message, 'warn');
+  }
+}
+
+function saveUsedContent() {
+  try {
+    fs.writeFileSync(USED_QUOTES_FILE, JSON.stringify([...usedQuotes]), 'utf-8');
+    fs.writeFileSync(USED_WORDS_FILE, JSON.stringify([...usedWords]), 'utf-8');
+  } catch (err) {
+    log('Failed to save used content: ' + err.message, 'error');
+  }
+}
+
+function loadWords() {
+  try {
+    const data = fs.readFileSync(WORD_FILE, 'utf-8');
+    words = JSON.parse(data);
+    log(`Loaded ${words.length} words.`, 'info');
+  } catch (err) {
+    log('Failed to load words file, initializing as empty: ' + err.message, 'warn');
+    words = [];
+  }
+
+  try {
+    if (fs.existsSync(USED_WORDS_FILE)) {
+      const data = fs.readFileSync(USED_WORDS_FILE, 'utf-8');
+      if (data) {
+        usedWords = new Set(JSON.parse(data));
+      }
+    }
+  } catch (err) {
+    log('Failed to load used words file: ' + err.message, 'warn');
+  }
+}
+
+function saveUsedWords() {
+  try {
+    fs.writeFileSync(USED_WORDS_FILE, JSON.stringify([...usedWords]), 'utf-8');
+  } catch (err) {
+    log('Failed to save used words: ' + err.message, 'error');
+  }
+}
+
+function fetchWordOfTheDay() {
+  const availableWords = words.filter(w => !usedWords.has(w.word));
+  if (availableWords.length === 0) {
+    log('All words used. Resetting history.', 'info');
+    usedWords.clear();
+    return fetchWordOfTheDay();
+  }
+  const word = RANDOMIZE_QUOTES
+    ? availableWords[Math.floor(Math.random() * availableWords.length)]
+    : availableWords[0];
+  usedWords.add(word.word);
+  saveUsedWords();
+  return word;
+}
+
+function fetchQuoteFromText() {
+  const availableQuotes = quotes.filter(q => !usedQuotes.has(q.text));
+  if (availableQuotes.length === 0) {
+    log('All quotes used. Resetting history.', 'info');
+    usedQuotes.clear();
+    return fetchQuoteFromText();
+  }
+  const quote = RANDOMIZE_QUOTES
+    ? availableQuotes[Math.floor(Math.random() * availableQuotes.length)]
+    : availableQuotes[0];
+  usedQuotes.add(quote.text);
+  saveUsedQuotes();
+  return quote;
+}
+
+async function fetchQuoteFromAPI() {
+  if (!QUOTE_API) {
+    log('QUOTE_API not set for API source.', 'error');
+    return null;
+  }
+  try {
+    const res = await fetch(QUOTE_API);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.quote || JSON.stringify(data);
+  } catch (err) {
+    log('Error fetching quote from API: ' + err.message, 'error');
+    return null;
+  }
+}
+
+async function getQuote() {
+  if (QUOTE_SOURCE === 'api') {
+    return await fetchQuoteFromAPI();
+  } else {
+    return getRandomContent(quotes, usedQuotes);
+  }
+}
+
+function getWord() {
+  return getRandomContent(words, usedWords);
+}
+
+async function login() {
+  try {
+    const session = await agent.login({ identifier: BLUESKY_HANDLE, password: BLUESKY_PASSWORD });
+    log('Logged in as ' + session.handle, 'info');
+  } catch (err) {
+    log('Failed to log in: ' + err.message, 'error');
+    process.exit(1);
+  }
+}
+
+async function postQuote() {
+  const quote = await getQuote();
+  if (!quote) {
+    log('No quote available to post.', 'warn');
+    return;
+  }
+
+  const text = `${QUOTE_TAG}\n${quote}`;
+
+  if (DRY_RUN) {
+    log('[DRY RUN] Would post quote: ' + text, 'info');
+    return;
+  }
+
+  try {
+    const post = await agent.post({ text });
+    log('Posted quote: ' + post.uri, 'info');
+    saveUsedContent();
+  } catch (err) {
+    log('Error posting quote to Bluesky: ' + err.message, 'error');
+  }
+}
+
+async function postWord() {
+  const word = getWord();
+  if (!word) {
+    log('No word available to post.', 'warn');
+    return;
+  }
+
+  const text = `${WORD_TAG}\n${word}`;
+
+  if (DRY_RUN) {
+    log('[DRY RUN] Would post word: ' + text, 'info');
+    return;
+  }
+
+  try {
+    const post = await agent.post({ text });
+    log('Posted word: ' + post.uri, 'info');
+    saveUsedContent();
+  } catch (err) {
+    log('Error posting word to Bluesky: ' + err.message, 'error');
+  }
+}
+
+async function postWordOfTheDay() {
+  const word = fetchWordOfTheDay();
+  if (!word) {
+    log('No word available to post.', 'warn');
+    return;
+  }
+
+  let post = {};
+  let text = `${WORD_OF_THE_DAY_TAG}\n\n**${word.word}**\n\n*Definition:* ${word.definition}`;
+  if (word.example) {
+    text += `\n\n*Example:* "${word.example}"`;
+  }
+  
+  const rt = new RichText({ text });
+  await rt.detectFacets(agent);
+  post.text = rt.text;
+  post.facets = rt.facets;
+
+  if (word.image_url) {
+    try {
+      const imageRes = await fetch(word.image_url);
+      const imageBuffer = await imageRes.buffer();
+      const uploadedImage = await agent.uploadBlob(imageBuffer, {
+        encoding: imageRes.headers.get('content-type'),
+      });
+      post.embed = {
+        $type: 'app.bsky.embed.images',
+        images: [
+          {
+            image: uploadedImage.data.blob,
+            alt: word.word,
+          },
+        ],
+      };
+    } catch (err) {
+      log('Error processing image: ' + err.message, 'error');
+    }
+  } else if (word.link_url) {
+    post.embed = {
+      $type: 'app.bsky.embed.external',
+      external: {
+        uri: word.link_url,
+        title: word.word,
+        description: word.definition,
+      },
+    };
+  }
+
+  if (DRY_RUN) {
+    log('[DRY RUN] Would post: ' + JSON.stringify(post), 'info');
+    return;
+  }
+
+  try {
+    const response = await agent.post(post);
+    log('Posted word of the day: ' + response.uri, 'info');
+  } catch (err) {
+    log('Error posting to Bluesky: ' + err.message, 'error');
+  }
+}
+
+cron.schedule(POST_TIME_CRON, async () => {
+  log('Running scheduled job for quote: ' + new Date().toLocaleString(), 'debug');
+  await postQuote();
+}, { timezone: TIMEZONE });
+
+if (WORD_OF_THE_DAY_ENABLED) {
+  cron.schedule(WORD_OF_THE_DAY_CRON, async () => {
+    log('Running scheduled job for word of the day: ' + new Date().toLocaleString(), 'debug');
+    await postWordOfTheDay();
+  }, { timezone: TIMEZONE });
+}
+
+(async () => {
+  if (QUOTE_SOURCE === 'text') loadQuotes();
+  if (WORD_OF_THE_DAY_ENABLED) loadWords();
+  await login();
+  log(`Bot is running. Quote schedule: "${POST_TIME_CRON}" ${TIMEZONE ? `TZ: ${TIMEZONE}` : ''}`, 'info');
+  if (WORD_OF_THE_DAY_ENABLED) {
+    log(`Word of the Day is enabled. Schedule: "${WORD_OF_THE_DAY_CRON}" ${TIMEZONE ? `TZ: ${TIMEZONE}` : ''}`, 'info');
+  }
+
+  const app = express();
+  const port = process.env.PORT || 3000;
+
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
+  app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+  });
+
+  app.post('/add-quote', (req, res) => {
+    const { text, author, source, image_url, link_url, category } = req.body;
+    if (!text) {
+      return res.status(400).send('Quote text is required.');
+    }
+
+    log('quotes array before push: ' + JSON.stringify(quotes), 'debug');
+    const newQuote = { text, author, source, image_url, link_url, category };
+    quotes.push(newQuote);
+    log('quotes array after push: ' + JSON.stringify(quotes), 'debug');
+
+    try {
+      log('Writing to file: ' + QUOTE_FILE, 'debug');
+      fs.writeFileSync(QUOTE_FILE, JSON.stringify(quotes, null, 2), 'utf-8');
+      log('Added new quote: ' + text, 'info');
+      res.status(201).send('Quote added successfully.');
+    } catch (err) {
+      log('Failed to save new quote: ' + err.message, 'error');
+      res.status(500).send('Failed to add quote.');
+    }
+  });
+
+  app.post('/add-word', (req, res) => {
+    const { word, definition, example, image_url, link_url } = req.body;
+    if (!word || !definition) {
+      return res.status(400).send('Word and definition are required.');
+    }
+
+    log('words array before push: ' + JSON.stringify(words), 'debug');
+    const newWord = { word, definition, example, image_url, link_url };
+    words.push(newWord);
+    log('words array after push: ' + JSON.stringify(words), 'debug');
+
+    try {
+      log('Writing to file: ' + WORD_FILE, 'debug');
+      fs.writeFileSync(WORD_FILE, JSON.stringify(words, null, 2), 'utf-8');
+      log('Added new word: ' + word, 'info');
+      res.status(201).send('Word added successfully.');
+    } catch (err) {
+      log('Failed to save new word: ' + err.message, 'error');
+      res.status(500).send('Failed to add word.');
+    }
+  });
+
+  app.listen(port, () => {
+    log(`Web server started on http://localhost:${port}`, 'info');
+  });
+})();

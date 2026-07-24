@@ -1,0 +1,18 @@
+node_modules/
+.env
+*.log
+uploads/
+
+# Data directory - ignore actual data but keep structure
+data/*.json
+!data/.gitkeep
+
+# Legacy files (moved to data/)
+quotes.json
+words.json
+used_quotes.json
+used_words.json
+quote_categories.json
+word_categories.json
+quote_seasonal_periods.json
+word_seasonal_periods.jsongithub-commit-key.md

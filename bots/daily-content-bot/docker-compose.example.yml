@@ -1,0 +1,14 @@
+services:
+  daily-content-bot:
+    image: ghcr.io/femavibes/daily-content-bot:latest
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+    volumes:
+      - bot-data:/app
+      - ./.env:/app/.env
+    restart: unless-stopped
+
+volumes:
+  bot-data:
