@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>label-ops</title>
-  <link rel="stylesheet" href="/static/style.css?v=24" />
+  <link rel="stylesheet" href="/static/style.css?v=25" />
 </head>
 <body>
   <main class="wrap">
@@ -141,12 +141,7 @@
             </div>
             <button type="button" id="btn-fetch-mods" class="ghost">Refresh team</button>
           </div>
-          <p class="hint">Whitelist who can trigger autolabel. Turn on <strong>DM on errors</strong> for mods who should get a Bluesky DM when their auto-label fails.</p>
-          <div class="mods-cols" aria-hidden="true">
-            <span>Allow</span>
-            <span>DM</span>
-            <span></span>
-          </div>
+          <p class="hint">Enable <strong>Autolabel</strong> so their reports can trigger labels. Enable <strong>Notify</strong> to DM them if that auto-label fails.</p>
           <div id="mods-list" class="mods-list"></div>
           <p class="meta" id="mods-fetch-meta"></p>
         </div>
@@ -806,7 +801,7 @@
       const nSel = selectedModDids().length;
       const nDm = selectedNotifyDids().length;
       const at = state.ozoneTeamFetchedAt;
-      meta.textContent = `${members.length} member${members.length === 1 ? '' : 's'} · ${nSel} allowed · ${nDm} DM`
+      meta.textContent = `${members.length} member${members.length === 1 ? '' : 's'} · ${nSel} autolabel · ${nDm} notify`
         + (at ? ` · ${at}` : '');
     }
 
@@ -845,23 +840,32 @@
         const allow = el('input', {
           type: 'checkbox',
           'data-mod-did': m.did,
-          title: 'Allow autolabel',
           checked: canWhitelist && allowChecked,
           disabled: !canWhitelist,
         });
         const dm = el('input', {
           type: 'checkbox',
           'data-mod-notify': m.did,
-          title: 'DM on autolabel errors',
           checked: canWhitelist && dmChecked,
-          disabled: !canWhitelist || !(canWhitelist && allowChecked),
+          disabled: !canWhitelist || !allowChecked,
         });
+        const allowLab = el('label', {
+          className: 'mod-toggle' + (canWhitelist ? '' : ' is-disabled'),
+          title: 'Their reports can trigger autolabel',
+        }, [allow, document.createTextNode('Autolabel')]);
+        const dmLab = el('label', {
+          className: 'mod-toggle mod-toggle-notify' + ((!canWhitelist || !allowChecked) ? ' is-disabled' : ''),
+          title: 'DM this mod if autolabel fails on their report',
+        }, [dm, document.createTextNode('Notify')]);
+
         allow.addEventListener('change', () => {
           if (!allow.checked) {
             dm.checked = false;
             dm.disabled = true;
+            dmLab.classList.add('is-disabled');
           } else {
             dm.disabled = false;
+            dmLab.classList.remove('is-disabled');
           }
           updateModsMeta();
         });
@@ -870,19 +874,20 @@
         const row = el('div', {
           className: 'mod-row' + (canWhitelist ? '' : ' is-disabled'),
         }, [
-          allow,
-          dm,
           el('div', { className: 'mod-main' }, [
-            el('div', {
-              className: 'mod-name',
-              text: m.displayName || m.handle || m.did,
-            }),
+            el('div', { className: 'mod-title-row' }, [
+              el('div', {
+                className: 'mod-name',
+                text: m.displayName || m.handle || m.did,
+              }),
+              el('span', { className: roleClass, text: m.role || 'Member' }),
+            ]),
             el('div', {
               className: 'mod-handle',
               text: m.handle ? `@${m.handle}` : m.did,
             }),
           ]),
-          el('span', { className: roleClass, text: m.role || 'Member' }),
+          el('div', { className: 'mod-toggles' }, [allowLab, dmLab]),
         ]);
         root.append(row);
       }
@@ -1875,3 +1880,4 @@
   </script>
 </body>
 </html>
+j
