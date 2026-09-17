@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>label·ops</title>
-  <link rel="stylesheet" href="/static/style.css?v=22" />
+  <link rel="stylesheet" href="/static/style.css?v=23" />
 </head>
 <body>
   <main class="wrap">
@@ -138,14 +138,35 @@
         <div class="field-block">
           <div class="mods-head">
             <div class="setting-head">
-              <h3 class="mods-title">Ozone team / autolabel whitelist</h3>
+              <h3 class="mods-title">Ozone team</h3>
               <span class="app-tags"><span class="app-tag">autolabel</span></span>
             </div>
             <button type="button" id="btn-fetch-mods" class="ghost">Refresh team</button>
           </div>
-          <p class="hint">Checked members can trigger autolabel via reports. Roles come from your Ozone team config.</p>
+          <p class="hint">Whitelist who can trigger autolabel. Turn on <strong>DM on errors</strong> for mods who should get a Bluesky DM when their auto-label fails.</p>
+          <div class="mods-cols" aria-hidden="true">
+            <span>Allow</span>
+            <span>DM</span>
+            <span></span>
+          </div>
           <div id="mods-list" class="mods-list"></div>
           <p class="meta" id="mods-fetch-meta"></p>
+        </div>
+        <div class="field-block">
+          <div class="setting-head">
+            <h3 class="mods-title">DM sender account</h3>
+            <span class="app-tags"><span class="app-tag">autolabel</span></span>
+          </div>
+          <p class="hint">Account that sends those error DMs. Leave blank to use the labeler account (needs a chat-capable app password).</p>
+          <div class="row creds">
+            <label>Handle
+              <input id="dmHandle" type="text" placeholder="same as labeler if blank" autocomplete="off" />
+            </label>
+            <label>App password (chat)
+              <input id="dmPassword" type="password" placeholder="leave blank to keep" autocomplete="new-password" />
+            </label>
+          </div>
+          <p class="field-hint account-hint" id="dmPasswordHint"></p>
         </div>
         <div class="row actions">
           <button type="button" id="btn-save-labeler" class="primary">Save labeler</button>
@@ -157,7 +178,7 @@
           <h2>Graze feeds account</h2>
           <span class="app-tags" id="graze-app-tags"></span>
         </div>
-        <p class="hint">Usually a different account from the labeler — the one that owns your Graze feeds. App password is enough (no session cookie).</p>
+        <p class="hint">Usually a different account from the labeler — the one that owns your Graze feeds.</p>
         <div class="row creds">
           <label>Handle
             <input id="grazeHandle" type="text" placeholder="feeds.example.bsky.social" autocomplete="off" />
@@ -610,6 +631,14 @@
       document.getElementById('grazePasswordHint').textContent = G.passwordHint || (G.ready ? '' : 'Required for post-remover + feed list');
       renderAppTags(document.getElementById('graze-app-tags'), G.usedBy || ['graze-post-remover']);
 
+      const O = accounts.optional || {};
+      document.getElementById('dmHandle').value = O.dmUsername || '';
+      document.getElementById('dmPassword').value = '';
+      document.getElementById('dmPassword').placeholder = O.dmPasswordSet
+        ? 'Leave blank to keep saved password' : 'Chat-capable app password';
+      document.getElementById('dmPasswordHint').textContent = O.dmPasswordHint
+        || (O.dmUsername || O.dmPasswordSet ? '' : 'Optional — defaults to the labeler account');
+
       fillSettingsForm(accounts.settings);
       updateListAccountUI();
     }
@@ -709,6 +738,41 @@
         .map(x => x.getAttribute('data-mod-did'));
     }
 
+    function selectedNotifyDids() {
+      return [...document.querySelectorAll('#mods-list input[data-mod-notify]:checked')]
+        .map(x => x.getAttribute('data-mod-notify'));
+    }
+
+    function parseNotifySet(raw) {
+      const v = (raw || '').trim();
+      if (!v || v.toLowerCase() === 'default') return { mode: 'default', dids: new Set() };
+      if (v.toLowerCase() === 'none' || v.toLowerCase() === 'off') return { mode: 'none', dids: new Set() };
+      const dids = new Set();
+      for (const part of v.split(',')) {
+        const [did, method] = part.trim().split(':');
+        if (did && (!method || method === 'dm')) dids.add(did);
+      }
+      return { mode: 'explicit', dids };
+    }
+
+    function serializeNotifyPrefs(whitelist, notifyDids) {
+      const allowed = new Set(whitelist);
+      const picked = notifyDids.filter(d => allowed.has(d));
+      if (!picked.length) return 'none';
+      return picked.map(d => `${d}:dm`).join(',');
+    }
+
+    function updateModsMeta() {
+      const meta = document.getElementById('mods-fetch-meta');
+      const members = state.ozoneTeam || [];
+      if (!members.length) { meta.textContent = ''; return; }
+      const nSel = selectedModDids().length;
+      const nDm = selectedNotifyDids().length;
+      const at = state.ozoneTeamFetchedAt;
+      meta.textContent = `${members.length} member${members.length === 1 ? '' : 's'} · ${nSel} allowed · ${nDm} DM`
+        + (at ? ` · ${at}` : '');
+    }
+
     function renderModsList() {
       const root = document.getElementById('mods-list');
       const meta = document.getElementById('mods-fetch-meta');
@@ -720,6 +784,7 @@
           .map(s => s.trim())
           .filter(Boolean)
       );
+      const notify = parseNotifySet(accounts?.labeler?.moderatorNotifications);
       if (!members.length) {
         root.append(el('p', {
           className: 'mods-empty',
@@ -730,25 +795,46 @@
       }
       for (const m of members) {
         const canWhitelist = m.whitelistable !== false && m.role !== 'Verifier';
-        const checked = selected.has(m.did) || (!selected.size && canWhitelist && m.whitelistable);
+        const allowChecked = selected.has(m.did) || (!selected.size && canWhitelist && m.whitelistable);
+        let dmChecked = false;
+        if (allowChecked) {
+          if (notify.mode === 'default') dmChecked = true;
+          else if (notify.mode === 'explicit') dmChecked = notify.dids.has(m.did);
+        }
         const roleClass = 'mod-role'
           + (m.role === 'Admin' ? ' is-admin' : '')
           + (m.role === 'Moderator' ? ' is-moderator' : '');
-        const row = el('label', {
+
+        const allow = el('input', {
+          type: 'checkbox',
+          'data-mod-did': m.did,
+          title: 'Allow autolabel',
+          checked: canWhitelist && allowChecked,
+          disabled: !canWhitelist,
+        });
+        const dm = el('input', {
+          type: 'checkbox',
+          'data-mod-notify': m.did,
+          title: 'DM on autolabel errors',
+          checked: canWhitelist && dmChecked,
+          disabled: !canWhitelist || !(canWhitelist && allowChecked),
+        });
+        allow.addEventListener('change', () => {
+          if (!allow.checked) {
+            dm.checked = false;
+            dm.disabled = true;
+          } else {
+            dm.disabled = false;
+          }
+          updateModsMeta();
+        });
+        dm.addEventListener('change', () => updateModsMeta());
+
+        const row = el('div', {
           className: 'mod-row' + (canWhitelist ? '' : ' is-disabled'),
         }, [
-            el('input', {
-            type: 'checkbox',
-            'data-mod-did': m.did,
-            checked: canWhitelist && checked,
-            disabled: !canWhitelist,
-            onChange: () => {
-              const nSel = selectedModDids().length;
-              const at = state.ozoneTeamFetchedAt;
-              meta.textContent = `${members.length} member${members.length === 1 ? '' : 's'} · ${nSel} whitelisted`
-                + (at ? ` · ${at}` : '');
-            },
-          }),
+          allow,
+          dm,
           el('div', { className: 'mod-main' }, [
             el('div', {
               className: 'mod-name',
@@ -763,10 +849,7 @@
         ]);
         root.append(row);
       }
-      const nSel = selectedModDids().length;
-      const at = state.ozoneTeamFetchedAt;
-      meta.textContent = `${members.length} member${members.length === 1 ? '' : 's'} · ${nSel} whitelisted`
-        + (at ? ` · ${at}` : '');
+      updateModsMeta();
     }
 
     function updateGrazeMeta() {
@@ -806,14 +889,25 @@
     }
 
     function labelerAccountPayload() {
+      const whitelist = selectedModDids();
       const payload = {
         identity: document.getElementById('labelerIdentity').value.trim(),
         ozoneUrl: document.getElementById('ozoneUrl').value.trim(),
-        whitelistedModerators: selectedModDids().join(','),
+        whitelistedModerators: whitelist.join(','),
+        moderatorNotifications: serializeNotifyPrefs(whitelist, selectedNotifyDids()),
         syncIntervalMinutes: Number(document.getElementById('syncInterval').value) || 15,
       };
       const pw = document.getElementById('labelerPassword').value.trim();
       if (pw) payload.password = pw;
+      return payload;
+    }
+
+    function dmAccountPayload() {
+      const payload = {
+        dmUsername: document.getElementById('dmHandle').value.trim(),
+      };
+      const pw = document.getElementById('dmPassword').value.trim();
+      if (pw) payload.dmPassword = pw;
       return payload;
     }
 
@@ -828,7 +922,10 @@
 
     async function saveAccounts(section) {
       const body = {};
-      if (section === 'labeler' || section === 'all') body.labeler = labelerAccountPayload();
+      if (section === 'labeler' || section === 'all') {
+        body.labeler = labelerAccountPayload();
+        body.optional = dmAccountPayload();
+      }
       if (section === 'graze' || section === 'all') body.graze = grazeAccountPayload();
       if (section === 'settings') body.settings = settingsPayload();
       const data = await api('/api/accounts', { method: 'POST', body: JSON.stringify(body) });

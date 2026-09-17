@@ -13,6 +13,8 @@ export class NotificationService {
 
   private dmUsername: string;
   private dmPassword: string;
+  /** default = DM all whitelisted; explicit = only prefs map; none = nobody */
+  private notifyMode: "default" | "explicit" | "none" = "default";
 
   constructor(labelerUsername: string, labelerPassword: string, preferencesString: string, whitelistedModerators: string[]) {
     this.dmUsername = labelerUsername;
@@ -88,12 +90,24 @@ export class NotificationService {
   }
 
   private parsePreferences(preferencesString: string) {
-    const entries = preferencesString.split(',').map(entry => entry.trim());
-    
-    for (const entry of entries) {
-      const [did, method] = entry.split(':');
-      if (did && method === 'dm') {
-        this.preferences.set(did, { did, method: 'dm' });
+    const raw = (preferencesString || "").trim();
+    if (!raw || raw.toLowerCase() === "default") {
+      this.notifyMode = "default";
+      this.preferences.clear();
+      return;
+    }
+    if (raw.toLowerCase() === "none" || raw.toLowerCase() === "off") {
+      this.notifyMode = "none";
+      this.preferences.clear();
+      return;
+    }
+
+    this.notifyMode = "explicit";
+    this.preferences.clear();
+    for (const entry of raw.split(",").map((e) => e.trim()).filter(Boolean)) {
+      const [did, method] = entry.split(":");
+      if (did && method === "dm") {
+        this.preferences.set(did, { did, method: "dm" });
       }
     }
   }
@@ -115,15 +129,14 @@ export class NotificationService {
     
     let preference = this.preferences.get(moderatorDid);
     
-    // Default to DM for whitelisted moderators if no specific preference
-    if (!preference && this.whitelistedModerators.has(moderatorDid)) {
-      preference = { did: moderatorDid, method: 'dm' };
-      console.log(`Using default DM preference for whitelisted moderator ${moderatorDid}`);
-    }
-    
     if (!preference) {
-      console.log(`No notification preference found for ${moderatorDid} and not whitelisted`);
-      return;
+      if (this.notifyMode === "default" && this.whitelistedModerators.has(moderatorDid)) {
+        preference = { did: moderatorDid, method: "dm" };
+        console.log(`Using default DM preference for whitelisted moderator ${moderatorDid}`);
+      } else {
+        console.log(`No DM preference for ${moderatorDid} (mode=${this.notifyMode})`);
+        return;
+      }
     }
     console.log(`Using preference for ${moderatorDid}: ${preference.method}`);
 

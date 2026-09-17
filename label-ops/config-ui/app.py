@@ -208,31 +208,6 @@ SETTINGS_FIELDS = [
         "secret": True,
     },
     {
-        "key": "MODERATOR_NOTIFICATIONS",
-        "label": "Moderator notifications",
-        "app": "autolabel",
-        "hint": "Format: did:plc:…:dm,did:plc:…:dm — who gets DMs on autolabel errors.",
-        "default": "",
-        "type": "text",
-    },
-    {
-        "key": "BSKY_DM_USERNAME",
-        "label": "DM notify handle",
-        "app": "autolabel",
-        "hint": "Account used to send notification DMs (needs chat-capable app password).",
-        "default": "",
-        "type": "text",
-    },
-    {
-        "key": "BSKY_DM_PASSWORD",
-        "label": "DM notify app password",
-        "app": "autolabel",
-        "hint": "Leave blank to keep the saved password.",
-        "default": "",
-        "type": "password",
-        "secret": True,
-    },
-    {
         "key": "CONFIG_UI_PASSWORD",
         "label": "Config UI password",
         "app": "config-ui",
@@ -554,6 +529,7 @@ def accounts_public_view(state: dict | None = None) -> dict:
             or socket_url_from_ozone(secrets.get("OZONE_URL")),
             "ozoneUrl": clean_secret(secrets.get("OZONE_URL")),
             "whitelistedModerators": clean_secret(secrets.get("WHITELISTED_MODERATORS")),
+            "moderatorNotifications": clean_secret(secrets.get("MODERATOR_NOTIFICATIONS")),
             "syncIntervalMinutes": sync_mins,
             "usedBy": ["label-watcher", "autolabel", "graze-post-remover"],
         },
@@ -567,6 +543,7 @@ def accounts_public_view(state: dict | None = None) -> dict:
         "optional": {
             "dmUsername": clean_secret(secrets.get("BSKY_DM_USERNAME")),
             "dmPasswordSet": bool(secrets.get("BSKY_DM_PASSWORD")),
+            "dmPasswordHint": "Password saved" if secrets.get("BSKY_DM_PASSWORD") else "",
             "uiPasswordSet": bool(secrets.get("CONFIG_UI_PASSWORD")),
         },
         "settings": settings_public_view(secrets),
@@ -1627,6 +1604,10 @@ def api_accounts_post():
                 )
         if "whitelistedModerators" in labeler:
             updates["WHITELISTED_MODERATORS"] = str(labeler.get("whitelistedModerators") or "").strip()
+        if "moderatorNotifications" in labeler:
+            # Explicit list (did:dm,…), "none", or "default" (legacy: all whitelisted)
+            raw = str(labeler.get("moderatorNotifications") or "").strip()
+            updates["MODERATOR_NOTIFICATIONS"] = raw
         if "syncIntervalMinutes" in labeler:
             try:
                 mins = max(1, int(labeler["syncIntervalMinutes"]))

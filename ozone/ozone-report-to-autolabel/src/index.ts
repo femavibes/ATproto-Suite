@@ -19,8 +19,8 @@ async function main() {
   const labelerUsername = getRequiredEnv("BSKY_LABELER_USERNAME");
   const labelerPassword = getRequiredEnv("BSKY_LABELER_PASSWORD");
   const labelerDid = getRequiredEnv("BSKY_LABELER_DID");
-  const dmUsername = getRequiredEnv("BSKY_DM_USERNAME");
-  const dmPassword = getRequiredEnv("BSKY_DM_PASSWORD");
+  const dmUsername = (process.env.BSKY_DM_USERNAME || "").trim() || labelerUsername;
+  const dmPassword = (process.env.BSKY_DM_PASSWORD || "").trim() || labelerPassword;
   const ozoneUrl = getRequiredEnv("OZONE_URL");
   const pollingSeconds = parseInt(getRequiredEnv("POLLING_SECONDS"));
   const whitelistedModerators = getRequiredEnv("WHITELISTED_MODERATORS").split(",").map(did => did.trim());
