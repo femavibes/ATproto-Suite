@@ -105,7 +105,11 @@ export class NotificationService {
     this.notifyMode = "explicit";
     this.preferences.clear();
     for (const entry of raw.split(",").map((e) => e.trim()).filter(Boolean)) {
-      const [did, method] = entry.split(":");
+      // Format is did:plc:xxx:dm — method is the last :segment
+      const idx = entry.lastIndexOf(":");
+      if (idx <= 0) continue;
+      const did = entry.slice(0, idx);
+      const method = entry.slice(idx + 1);
       if (did && method === "dm") {
         this.preferences.set(did, { did, method: "dm" });
       }

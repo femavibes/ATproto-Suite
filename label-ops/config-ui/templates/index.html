@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>label-ops</title>
-  <link rel="stylesheet" href="/static/style.css?v=25" />
+  <link rel="stylesheet" href="/static/style.css?v=26" />
 </head>
 <body>
   <main class="wrap">
@@ -164,7 +164,8 @@
               <input id="dmPassword" type="password" placeholder="leave blank to keep" autocomplete="new-password" />
             </label>
           </div>
-          <p class="field-hint account-hint" id="dmPasswordHint"></p>
+          <p class="dm-status" id="dm-status" role="status"></p>
+          <p class="field-hint account-hint" id="dmPasswordHint" hidden></p>
         </div>
         <div class="row actions">
           <button type="button" id="btn-save-labeler" class="primary">Save labeler</button>
@@ -643,19 +644,54 @@
     }
 
     function updateDmHint(mode, O) {
+      const status = document.getElementById('dm-status');
       const hint = document.getElementById('dmPasswordHint');
       const L = accounts?.labeler || {};
       const G = accounts?.graze || {};
+      hint.hidden = true;
+      hint.textContent = '';
+
       if (mode === 'labeler') {
-        const who = L.handle || L.identity || 'the labeler account';
-        hint.textContent = `Uses ${who} (needs a chat-capable app password on that account).`;
-      } else if (mode === 'graze') {
-        hint.textContent = G.handle
-          ? `Uses Graze feeds account ${G.handle}.`
-          : 'Uses the Graze feeds account — configure it below first.';
+        const who = L.handle || L.identity;
+        if (who && L.passwordSet) {
+          status.className = 'dm-status is-ready';
+          status.textContent = `Sending as @${String(who).replace(/^@/, '')} (labeler account)`;
+        } else if (who) {
+          status.className = 'dm-status is-warn';
+          status.textContent = `Selected labeler @${String(who).replace(/^@/, '')} — save a chat-capable app password on the labeler account above.`;
+        } else {
+          status.className = 'dm-status is-warn';
+          status.textContent = 'Selected labeler account — configure the labeler handle + app password above.';
+        }
+        return;
+      }
+
+      if (mode === 'graze') {
+        if (G.handle && G.ready) {
+          status.className = 'dm-status is-ready';
+          status.textContent = `Sending as @${String(G.handle).replace(/^@/, '')} (Graze feeds account)`;
+        } else if (G.handle) {
+          status.className = 'dm-status is-warn';
+          status.textContent = `Selected Graze @${String(G.handle).replace(/^@/, '')} — save its app password below.`;
+        } else {
+          status.className = 'dm-status is-warn';
+          status.textContent = 'Selected Graze feeds account — configure it in the section below.';
+        }
+        return;
+      }
+
+      const customHandle = (document.getElementById('dmHandle')?.value || O?.dmUsername || '').trim();
+      if (customHandle && (O?.dmPasswordSet || document.getElementById('dmPassword')?.value)) {
+        status.className = 'dm-status is-ready';
+        status.textContent = `Sending as @${customHandle.replace(/^@/, '')} (custom account)`;
+      } else if (customHandle) {
+        status.className = 'dm-status is-warn';
+        status.textContent = `Custom account @${customHandle.replace(/^@/, '')} — enter a chat-capable app password.`;
+        hint.hidden = false;
+        hint.textContent = O?.dmPasswordHint || '';
       } else {
-        hint.textContent = O?.dmPasswordHint
-          || (O?.dmUsername || O?.dmPasswordSet ? '' : 'Enter a handle + chat-capable app password.');
+        status.className = 'dm-status is-warn';
+        status.textContent = 'Custom account — enter a handle + chat-capable app password.';
       }
     }
 
@@ -781,8 +817,14 @@
       if (v.toLowerCase() === 'none' || v.toLowerCase() === 'off') return { mode: 'none', dids: new Set() };
       const dids = new Set();
       for (const part of v.split(',')) {
-        const [did, method] = part.trim().split(':');
-        if (did && (!method || method === 'dm')) dids.add(did);
+        const entry = part.trim();
+        if (!entry) continue;
+        // Format is did:plc:xxx:dm — method is the last :segment
+        const idx = entry.lastIndexOf(':');
+        if (idx <= 0) continue;
+        const did = entry.slice(0, idx);
+        const method = entry.slice(idx + 1);
+        if (did && method === 'dm') dids.add(did);
       }
       return { mode: 'explicit', dids };
     }
@@ -1685,6 +1727,12 @@
       const btn = e.target.closest('[data-dm-source]');
       if (!btn) return;
       setDmSource(btn.getAttribute('data-dm-source'));
+    });
+    document.getElementById('dmHandle').addEventListener('input', () => {
+      if (currentDmSource() === 'custom') updateDmHint('custom', accounts?.optional);
+    });
+    document.getElementById('dmPassword').addEventListener('input', () => {
+      if (currentDmSource() === 'custom') updateDmHint('custom', accounts?.optional);
     });
 
     document.getElementById('btn-save-graze').onclick = async () => {

@@ -534,6 +534,25 @@ button:disabled { opacity: 0.45; cursor: wait; }
 .dm-source + .creds {
   margin-top: 0.55rem;
 }
+.dm-status {
+  margin: 0.55rem 0 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--muted);
+  background: var(--bg);
+}
+.dm-status.is-ready {
+  color: var(--new);
+  border-color: color-mix(in srgb, var(--new) 35%, var(--line));
+  background: var(--new-bg);
+}
+.dm-status.is-warn {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
 .mods-list {
   display: grid;
   gap: 0;
