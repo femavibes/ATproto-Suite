@@ -1,19 +1,9 @@
-# label-ops — config UI + three modular workers
+# label·ops — config UI + three workers (all from GHCR)
 #
-# All four services pull from GHCR (no local build required):
-#   ghcr.io/femavibes/label-ops-config-ui
-#   ghcr.io/femavibes/bsky-label-watcher
-#   ghcr.io/femavibes/graze-post-remover
-#   ghcr.io/femavibes/ozone-report-to-autolabel
+#   docker compose up -d
+#   open http://localhost:8787  → configure in the UI
 #
-# Setup:
-#   cp .env.example .env
-#   docker compose up -d config-ui
-#   open http://localhost:8787 → configure → Save
-#   docker compose --profile workers up -d
-#
-# Update one worker:
-#   docker compose pull label-watcher && docker compose --profile workers up -d label-watcher
+# Saves recreate workers automatically via docker.sock (no DOCKER_GID needed).
 
 services:
   config-ui:
@@ -22,11 +12,12 @@ services:
     ports:
       - "${CONFIG_UI_PORT:-8787}:8787"
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       LABEL_OPS_CONFIG: /data/config/labels.json
       LABEL_OPS_OVERLAYS: /data/config/overlays
-      LABEL_OPS_ENV: /data/.env
+      LABEL_OPS_ENV: /data/stack/.env
       LABEL_OPS_COMPOSE_DIR: /data/stack
       LABEL_OPS_AUTO_RELOAD: ${LABEL_OPS_AUTO_RELOAD:-1}
       COMPOSE_PROJECT_NAME: label-ops
@@ -36,29 +27,23 @@ services:
       CONFIG_UI_PASSWORD: ${CONFIG_UI_PASSWORD:-}
     volumes:
       - ./config:/data/config
-      - ./.env:/data/.env
       - .:/data/stack
       - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/bin/docker:/usr/bin/docker:ro
-      - /usr/libexec/docker/cli-plugins:/usr/libexec/docker/cli-plugins:ro
-    group_add:
-      # Host `docker` group GID so the UI can talk to the mounted docker.sock
-      - ${DOCKER_GID:-996}
     restart: unless-stopped
 
   label-watcher:
     image: ghcr.io/femavibes/bsky-label-watcher:latest
-    profiles: ["workers", "all"]
     ports:
       - "3501:3500"
     env_file:
-      - .env
+      - path: .env
+        required: false
       - path: ./config/overlays/label-watcher.env
         required: false
     environment:
-      LABELER_DID: ${LABELER_DID}
-      LABELER_APP_PASSWORD: ${LABELER_APP_PASSWORD}
-      LABELER_SOCKET_URL: ${LABELER_SOCKET_URL}
+      LABELER_DID: ${LABELER_DID:-}
+      LABELER_APP_PASSWORD: ${LABELER_APP_PASSWORD:-}
+      LABELER_SOCKET_URL: ${LABELER_SOCKET_URL:-}
       LABELER_CURSOR_FILEPATH: /var/data/cursor.txt
       LOG_FILEPATH: /var/data/log.txt
       BSKY_SERVICE: ${BSKY_SERVICE:-https://bsky.social}
@@ -70,17 +55,17 @@ services:
 
   graze-post-remover:
     image: ghcr.io/femavibes/graze-post-remover:latest
-    profiles: ["workers", "all"]
     env_file:
-      - .env
+      - path: .env
+        required: false
       - path: ./config/overlays/graze-post-remover.env
         required: false
     environment:
-      LABELER_SOCKET_URL: ${LABELER_SOCKET_URL}
-      LABELER_DID: ${LABELER_DID}
+      LABELER_SOCKET_URL: ${LABELER_SOCKET_URL:-}
+      LABELER_DID: ${LABELER_DID:-}
       OZONE_URL: ${OZONE_URL:-}
-      BSKY_HANDLE: ${BSKY_HANDLE:-${LABELER_HANDLE}}
-      BSKY_APP_PASSWORD: ${BSKY_APP_PASSWORD:-${LABELER_APP_PASSWORD}}
+      BSKY_HANDLE: ${BSKY_HANDLE:-${LABELER_HANDLE:-}}
+      BSKY_APP_PASSWORD: ${BSKY_APP_PASSWORD:-${LABELER_APP_PASSWORD:-}}
       CURSOR_FILEPATH: /app/data/cursor.txt
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       OZONE_POLLING_SECONDS: ${OZONE_POLLING_SECONDS:-30}
@@ -90,21 +75,18 @@ services:
 
   autolabel:
     image: ghcr.io/femavibes/ozone-report-to-autolabel:latest
-    # Requires sibling ../ozone/ozone-report-to-autolabel when building locally.
-    # Pure pull deploys can omit this build key once GHCR is up to date.
-    build: ../ozone/ozone-report-to-autolabel
-    profiles: ["workers", "all"]
     env_file:
-      - .env
+      - path: .env
+        required: false
       - path: ./config/overlays/autolabel.env
         required: false
     environment:
-      BSKY_LABELER_USERNAME: ${LABELER_HANDLE}
-      BSKY_LABELER_PASSWORD: ${LABELER_APP_PASSWORD}
-      BSKY_LABELER_DID: ${LABELER_DID}
+      BSKY_LABELER_USERNAME: ${LABELER_HANDLE:-}
+      BSKY_LABELER_PASSWORD: ${LABELER_APP_PASSWORD:-}
+      BSKY_LABELER_DID: ${LABELER_DID:-}
       BSKY_DM_USERNAME: ${BSKY_DM_USERNAME:-}
       BSKY_DM_PASSWORD: ${BSKY_DM_PASSWORD:-}
-      OZONE_URL: ${OZONE_URL}
+      OZONE_URL: ${OZONE_URL:-}
       POLLING_SECONDS: ${POLLING_SECONDS:-30}
       WHITELISTED_MODERATORS: ${WHITELISTED_MODERATORS:-}
       MODERATOR_NOTIFICATIONS: ${MODERATOR_NOTIFICATIONS:-}

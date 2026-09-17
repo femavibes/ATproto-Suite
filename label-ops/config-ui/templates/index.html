@@ -61,9 +61,7 @@
       </div>
       <p class="hint" id="list-account-hint">Lists are created/updated on the labeler account.</p>
       <p class="meta" id="lists-meta"></p>
-      <p class="hint" id="workers-reload-hint">Saving applies to running workers automatically (brief recreate). Start workers once with
-        <code>docker compose --profile workers up -d</code>
-      </p>
+      <p class="hint" id="workers-reload-hint">Saving recreates workers automatically so new settings apply live.</p>
       <p class="meta" id="workers-reload-meta"></p>
       <div id="labels" class="labels"></div>
     </section>
@@ -863,8 +861,6 @@
         const data = await api('/api/workers/reload');
         if (data.ok && data.recreated && data.recreated.length) {
           meta.textContent = 'Workers updated: ' + data.recreated.join(', ');
-        } else if (data.ok && data.detail === 'no workers running') {
-          meta.textContent = 'Saved. Start workers with docker compose --profile workers up -d';
         } else if (data.ok) {
           meta.textContent = data.detail || 'Workers up to date.';
         } else {

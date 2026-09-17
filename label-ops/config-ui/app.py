@@ -486,37 +486,15 @@ def run_worker_reload(reason: str = "") -> dict:
         return result
 
     try:
-        # Only touch services that are already running (don't auto-start workers)
-        running: list[str] = []
-        for svc in WORKER_SERVICES:
-            probe = subprocess.run(
-                ["docker", "compose", "ps", "-q", "--status", "running", svc],
-                cwd=str(compose_dir),
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-            if probe.returncode == 0 and probe.stdout.strip():
-                running.append(svc)
-            else:
-                result["skipped"].append(svc)
-
-        if not running:
-            result["ok"] = True
-            result["detail"] = "no workers running"
-            _last_reload = result
-            return result
-
+        # Recreate all workers so UI saves apply even if a worker was down/crash-looping.
         cmd = [
             "docker",
             "compose",
-            "--profile",
-            "workers",
             "up",
             "-d",
             "--force-recreate",
             "--no-deps",
-            *running,
+            *WORKER_SERVICES,
         ]
         proc = subprocess.run(
             cmd,
@@ -525,7 +503,8 @@ def run_worker_reload(reason: str = "") -> dict:
             text=True,
             timeout=180,
         )
-        result["recreated"] = running
+        result["recreated"] = list(WORKER_SERVICES)
+        result["skipped"] = []
         result["ok"] = proc.returncode == 0
         detail = (proc.stderr or proc.stdout or "").strip()
         result["detail"] = detail[-2000:] if detail else ("ok" if result["ok"] else "compose failed")
