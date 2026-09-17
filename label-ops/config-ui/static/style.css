@@ -553,6 +553,32 @@ button:disabled { opacity: 0.45; cursor: wait; }
   color: var(--ink);
   border-color: var(--line-strong);
 }
+.dm-test {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  gap: 0.45rem;
+  align-items: end;
+  margin-top: 0.65rem;
+}
+.dm-test-label {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.dm-test-label select {
+  font-weight: 400;
+}
+#dm-test-meta {
+  margin-top: 0.35rem;
+}
+@media (max-width: 640px) {
+  .dm-test {
+    grid-template-columns: 1fr;
+  }
+}
 .mods-list {
   display: grid;
   gap: 0;

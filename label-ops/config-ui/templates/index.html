@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>label-ops</title>
-  <link rel="stylesheet" href="/static/style.css?v=26" />
+  <link rel="stylesheet" href="/static/style.css?v=27" />
 </head>
 <body>
   <main class="wrap">
@@ -166,6 +166,16 @@
           </div>
           <p class="dm-status" id="dm-status" role="status"></p>
           <p class="field-hint account-hint" id="dmPasswordHint" hidden></p>
+          <div class="dm-test">
+            <label class="dm-test-label">Test DM
+              <select id="dm-test-to">
+                <option value="">Pick a recipient…</option>
+              </select>
+            </label>
+            <input id="dm-test-custom" type="text" placeholder="or handle / did" autocomplete="off" />
+            <button type="button" id="btn-dm-test" class="ghost">Send test DM</button>
+          </div>
+          <p class="meta" id="dm-test-meta"></p>
         </div>
         <div class="row actions">
           <button type="button" id="btn-save-labeler" class="primary">Save labeler</button>
@@ -641,6 +651,7 @@
 
       fillSettingsForm(accounts.settings);
       updateListAccountUI();
+      fillDmRecipientSelect();
     }
 
     function updateDmHint(mode, O) {
@@ -693,6 +704,29 @@
         status.className = 'dm-status is-warn';
         status.textContent = 'Custom account — enter a handle + chat-capable app password.';
       }
+    }
+
+    function fillDmRecipientSelect() {
+      const sel = document.getElementById('dm-test-to');
+      if (!sel) return;
+      const prev = sel.value;
+      sel.innerHTML = '';
+      sel.append(el('option', { value: '', text: 'Pick a team member…' }));
+      const members = state.ozoneTeam || [];
+      for (const m of members) {
+        if (!m.did) continue;
+        const label = (m.handle ? `@${m.handle}` : m.did)
+          + (m.displayName ? ` — ${m.displayName}` : '');
+        const opt = el('option', { value: m.did, text: label });
+        sel.append(opt);
+      }
+      if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+    }
+
+    function dmTestRecipient() {
+      const custom = (document.getElementById('dm-test-custom')?.value || '').trim();
+      if (custom) return custom;
+      return (document.getElementById('dm-test-to')?.value || '').trim();
     }
 
     function setDmSource(mode, opts = {}) {
@@ -934,6 +968,7 @@
         root.append(row);
       }
       updateModsMeta();
+      fillDmRecipientSelect();
     }
 
     function updateGrazeMeta() {
@@ -1734,6 +1769,39 @@
     document.getElementById('dmPassword').addEventListener('input', () => {
       if (currentDmSource() === 'custom') updateDmHint('custom', accounts?.optional);
     });
+    document.getElementById('btn-dm-test').onclick = async () => {
+      const btn = document.getElementById('btn-dm-test');
+      const meta = document.getElementById('dm-test-meta');
+      const to = dmTestRecipient();
+      if (!to) {
+        meta.textContent = 'Pick a team member or enter a handle.';
+        return;
+      }
+      btn.disabled = true;
+      meta.textContent = 'Sending test DM…';
+      try {
+        const body = {
+          to,
+          dmAccount: currentDmSource(),
+        };
+        if (body.dmAccount === 'custom') {
+          body.dmUsername = document.getElementById('dmHandle').value.trim();
+          const pw = document.getElementById('dmPassword').value.trim();
+          if (pw) body.dmPassword = pw;
+        }
+        const data = await api('/api/dm/test', {
+          method: 'POST',
+          body: JSON.stringify(body),
+        });
+        const from = data.fromHandle ? `@${String(data.fromHandle).replace(/^@/, '')}` : 'sender';
+        const dest = data.toHandle ? `@${String(data.toHandle).replace(/^@/, '')}` : to;
+        meta.textContent = `Sent — ${from} → ${dest}`;
+      } catch (e) {
+        meta.textContent = 'Test DM failed: ' + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    };
 
     document.getElementById('btn-save-graze').onclick = async () => {
       const btn = document.getElementById('btn-save-graze');
