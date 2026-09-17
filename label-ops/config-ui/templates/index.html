@@ -175,6 +175,7 @@
             <input id="dm-test-custom" type="text" placeholder="or handle / did" autocomplete="off" />
             <button type="button" id="btn-dm-test" class="ghost">Send test DM</button>
           </div>
+          <p class="hint dm-test-hint">Uses the selected sender. If you typed a new app password above, Test DM will use that typed value (Save labeler to keep it).</p>
           <p class="meta" id="dm-test-meta"></p>
         </div>
         <div class="row actions">
@@ -1780,14 +1781,20 @@
       btn.disabled = true;
       meta.textContent = 'Sending test DM…';
       try {
-        const body = {
-          to,
-          dmAccount: currentDmSource(),
-        };
-        if (body.dmAccount === 'custom') {
+        const mode = currentDmSource();
+        const body = { to, dmAccount: mode };
+        // Prefer password currently typed in the matching account field so a
+        // freshly pasted chat password works even before Save.
+        if (mode === 'labeler') {
+          const pw = document.getElementById('labelerPassword').value.trim();
+          if (pw) body.password = pw;
+        } else if (mode === 'graze') {
+          const pw = document.getElementById('grazePassword').value.trim();
+          if (pw) body.password = pw;
+        } else {
           body.dmUsername = document.getElementById('dmHandle').value.trim();
           const pw = document.getElementById('dmPassword').value.trim();
-          if (pw) body.dmPassword = pw;
+          if (pw) body.password = pw;
         }
         const data = await api('/api/dm/test', {
           method: 'POST',
@@ -1795,7 +1802,10 @@
         });
         const from = data.fromHandle ? `@${String(data.fromHandle).replace(/^@/, '')}` : 'sender';
         const dest = data.toHandle ? `@${String(data.toHandle).replace(/^@/, '')}` : to;
-        meta.textContent = `Sent — ${from} → ${dest}`;
+        const used = data.usedTypedPassword
+          ? ' (used password from the form)'
+          : ' (used saved password)';
+        meta.textContent = `Sent — ${from} → ${dest}${used}`;
       } catch (e) {
         meta.textContent = 'Test DM failed: ' + e.message;
       } finally {

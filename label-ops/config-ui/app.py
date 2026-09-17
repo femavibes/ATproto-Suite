@@ -835,26 +835,29 @@ def resolve_dm_sender_creds(
     dm_account: str | None = None,
     custom_handle: str | None = None,
     custom_password: str | None = None,
+    password_override: str | None = None,
 ) -> tuple[str, str, str]:
     """
     Return (handle, password, source_label) for the configured DM sender.
     source_label is labeler|graze|custom.
+    password_override wins over saved secrets (for test DM with unsaved form input).
     """
     secrets = secrets or load_secrets()
     mode = (dm_account or secrets.get("BSKY_DM_ACCOUNT") or "labeler").strip().lower()
     if mode not in ("labeler", "graze", "custom"):
         mode = "labeler"
+    override = (password_override or "").strip()
 
     if mode == "graze":
         handle = clean_secret(secrets.get("BSKY_HANDLE"))
-        password = (secrets.get("BSKY_APP_PASSWORD") or "").strip()
+        password = override or (secrets.get("BSKY_APP_PASSWORD") or "").strip()
         if not handle or not password or is_placeholder(password):
             raise RuntimeError("Graze feeds account handle + app password required for DMs")
         return handle, password, "graze"
 
     if mode == "custom":
         handle = normalize_handle(custom_handle) if custom_handle else clean_secret(secrets.get("BSKY_DM_USERNAME"))
-        password = (custom_password or "").strip() or (secrets.get("BSKY_DM_PASSWORD") or "").strip()
+        password = override or (custom_password or "").strip() or (secrets.get("BSKY_DM_PASSWORD") or "").strip()
         if not handle:
             raise RuntimeError("Custom DM account handle required")
         if not password or is_placeholder(password):
@@ -862,7 +865,7 @@ def resolve_dm_sender_creds(
         return handle, password, "custom"
 
     handle = clean_secret(secrets.get("LABELER_HANDLE")) or clean_secret(secrets.get("LABELER_DID"))
-    password = (secrets.get("LABELER_APP_PASSWORD") or "").strip()
+    password = override or (secrets.get("LABELER_APP_PASSWORD") or "").strip()
     if not handle or not password or is_placeholder(password):
         raise RuntimeError("Labeler handle + app password required for DMs")
     return handle, password, "labeler"
@@ -1948,11 +1951,13 @@ def api_dm_test():
     """Send a one-off test DM using the configured (or form) DM sender account."""
     data = request.get_json(force=True) or {}
     recipient = (data.get("to") or data.get("recipient") or "").strip()
+    typed_pw = (data.get("password") or data.get("dmPassword") or "").strip()
     try:
         handle, password, source = resolve_dm_sender_creds(
             dm_account=data.get("dmAccount"),
             custom_handle=data.get("dmUsername"),
             custom_password=data.get("dmPassword"),
+            password_override=typed_pw or None,
         )
         result = send_test_dm(
             sender_handle=handle,
@@ -1961,7 +1966,12 @@ def api_dm_test():
         )
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 400
-    return jsonify({"ok": True, "source": source, **result})
+    return jsonify({
+        "ok": True,
+        "source": source,
+        "usedTypedPassword": bool(typed_pw),
+        **result,
+    })
 
 
 @app.get("/api/lists")
