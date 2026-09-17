@@ -1,28 +1,32 @@
 # label·ops
 
-Shared config UI for three labeler workers:
+Shared config UI for three labeler workers (lists, Graze remover, Ozone autolabel).
 
-1. **bsky-label-watcher** — labels → Bluesky lists  
-2. **graze-post-remover** — labels → hide posts in Graze feeds  
-3. **ozone-report-to-autolabel** — Ozone reports → apply labels  
+Images live on **GHCR** (`ghcr.io/femavibes/...`). The install script only downloads the compose files from GitHub, then `docker compose pull` fetches the four images.
 
-## Quick start
+## Deploy (paste on a webpage)
 
-```bash
-cd label-ops
-chmod +x up.sh && ./up.sh
-# → http://localhost:8787
-```
-
-Or without the script:
+**One line** (needs Docker + Compose):
 
 ```bash
-cp .env.example .env   # only if .env is missing
-docker compose up -d
+curl -fsSL https://raw.githubusercontent.com/femavibes/ATproto-Suite/main/label-ops/install.sh | bash
 ```
 
-Then in the UI: **Config → Accounts** → save → **Labels** → Fetch → set actions → Save.  
-Workers are already running; saves recreate them so new settings apply. No `DOCKER_GID`, no host Docker binary mounts, no compose profiles.
+That creates `~/label-ops`, pulls the images, starts everything → **http://localhost:8787**
+
+Then in the UI: **Config → Accounts** → save → **Labels** → Fetch → set actions → Save.
+
+Custom install dir:
+
+```bash
+LABEL_OPS_DIR=/opt/label-ops bash <(curl -fsSL https://raw.githubusercontent.com/femavibes/ATproto-Suite/main/label-ops/install.sh)
+```
+
+## Already have this folder (monorepo)
+
+```bash
+cd label-ops && ./up.sh
+```
 
 ## Images
 
@@ -36,11 +40,13 @@ Workers are already running; saves recreate them so new settings apply. No `DOCK
 ## Updating
 
 ```bash
+cd ~/label-ops   # or your install dir
 docker compose pull && docker compose up -d
 ```
 
 ## Notes
 
-- `.env` is created automatically (from `.env.example`) on first start; prefer editing secrets in the UI.
-- Optional UI password: set `CONFIG_UI_PASSWORD` in `.env` or Config → Settings.
-- You need an Ozone labeler already publishing labels; this stack configures the three consumers.
+- `.env` is created from `.env.example` on first start; set secrets in the UI.
+- Optional UI password: `CONFIG_UI_PASSWORD` in `.env`.
+- You need an Ozone labeler already publishing labels; this stack runs the three consumers.
+- Local image builds (dev): `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build`

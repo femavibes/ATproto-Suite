@@ -1,14 +1,13 @@
-# label·ops — config UI + three workers (all from GHCR)
+# label·ops — four containers from GHCR
 #
-#   docker compose up -d
-#   open http://localhost:8787  → configure in the UI
+# Install (from any empty folder, or via install.sh):
+#   curl -fsSL https://raw.githubusercontent.com/femavibes/ATproto-Suite/main/label-ops/install.sh | bash
 #
-# Saves recreate workers automatically via docker.sock (no DOCKER_GID needed).
+# Then open http://localhost:8787 and configure in the UI.
 
 services:
   config-ui:
     image: ghcr.io/femavibes/label-ops-config-ui:latest
-    build: ./config-ui
     ports:
       - "${CONFIG_UI_PORT:-8787}:8787"
     env_file:

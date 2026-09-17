@@ -1,0 +1,8 @@
+# Optional local builds when developing inside ATproto-Suite.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+
+services:
+  config-ui:
+    build: ./config-ui
+  autolabel:
+    build: ../ozone/ozone-report-to-autolabel
