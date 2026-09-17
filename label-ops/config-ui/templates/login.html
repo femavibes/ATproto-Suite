@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>label·ops login</title>
+  <link rel="stylesheet" href="/static/style.css?v=22" />
+</head>
+<body class="login-body">
+  <form class="login-card" method="post">
+    <h1 class="brand" aria-label="label-ops">
+      <span class="brand-mark">label</span><span class="brand-sep">·</span><span class="brand-ops">ops</span>
+    </h1>
+    <p>Password</p>
+    {% if error %}<p class="err">{{ error }}</p>{% endif %}
+    <input type="password" name="password" autofocus required placeholder="••••••••" />
+    <button type="submit">Continue</button>
+  </form>
+</body>
+</html>

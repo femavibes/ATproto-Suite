@@ -8,6 +8,7 @@ A collection of tools and apps built around the AT Protocol / Bluesky ecosystem.
 ATproto-Suite/
   feed-tools/
     feed-compare/               — A/B compare two Bluesky feed generators, with snapshot and session tracking
+    community-content-finder/   — Discover posts amplified by list-based communities; optional Graze insert sink
 
   graze/
     graze-feed-moderator/       — Feed moderation tooling for Bluesky, includes browser extension and zero-trust auth proxy
@@ -17,6 +18,8 @@ ATproto-Suite/
   ozone/
     ozone-label-master/         — Label management tooling for Ozone moderation service
     ozone-report-to-autolabel/  — Automatically converts Ozone reports into labels
+
+  label-ops/                    — Docker Compose umbrella + shared config UI for label-watcher, graze-post-remover, and autolabel
 
   bots/
     daily-content-bot/          — Automated daily content posting bot for Bluesky

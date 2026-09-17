@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>label·ops</title>
+  <link rel="stylesheet" href="/static/style.css?v=22" />
+</head>
+<body>
+  <main class="wrap">
+  <header class="top">
+    <div>
+      <h1 class="brand" aria-label="label-ops">
+        <span class="brand-mark">label</span><span class="brand-sep">·</span><span class="brand-ops">ops</span>
+      </h1>
+      <p class="sub">Shared label config for list watcher, Graze remover, and autolabel.</p>
+    </div>
+    <div class="top-actions">
+      {% if password_enabled %}<a href="/logout">Log out</a>{% endif %}
+    </div>
+  </header>
+
+  {% if sync_error %}
+  <div class="banner err-banner">Sync error: {{ sync_error }}</div>
+  {% endif %}
+
+  <nav class="tabs" role="tablist" aria-label="label-ops sections">
+    <button type="button" class="tab is-active" role="tab" aria-selected="true" data-tab="labels" id="tab-btn-labels">Labels</button>
+    <button type="button" class="tab" role="tab" aria-selected="false" data-tab="mappings" id="tab-btn-mappings">Mappings</button>
+    <button type="button" class="tab" role="tab" aria-selected="false" data-tab="config" id="tab-btn-config">Config</button>
+  </nav>
+
+  <div id="tab-labels" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-btn-labels">
+    <section class="panel panel-tight">
+      <div class="row between">
+        <div class="labels-heading">
+          <h2>Labels</h2>
+          <span class="meta" id="sync-meta">
+            {% if state.syncedAt %}{{ state.syncedAt }}{% if state.lastSyncSource %} · {{ state.lastSyncSource }}{% endif %}{% else %}Not synced{% endif %}
+          </span>
+        </div>
+        <div class="row actions labels-actions">
+          <button type="button" id="btn-show-new" class="ghost" hidden>New labels</button>
+          <button type="button" id="btn-refresh-lists" class="ghost">Refresh lists</button>
+          <button type="button" id="btn-fetch" class="ghost">Fetch labels</button>
+          <button type="button" id="btn-save-actions" class="primary">Save actions</button>
+        </div>
+      </div>
+      <div class="labels-toolbar">
+        <label class="search-wrap">
+          <span class="sr-only">Search labels</span>
+          <input id="label-search" type="search" placeholder="Search labels…" autocomplete="off" />
+        </label>
+        <label class="list-account-wrap">
+          Bluesky lists on
+          <select id="listAccount">
+            <option value="labeler">Labeler account</option>
+            <option value="graze">Graze feeds account</option>
+          </select>
+        </label>
+      </div>
+      <p class="hint" id="list-account-hint">Lists are created/updated on the labeler account.</p>
+      <p class="meta" id="lists-meta"></p>
+      <p class="hint" id="workers-reload-hint">Saving applies to running workers automatically (brief recreate). Start workers once with
+        <code>docker compose --profile workers up -d</code>
+      </p>
+      <p class="meta" id="workers-reload-meta"></p>
+      <div id="labels" class="labels"></div>
+    </section>
+  </div>
+
+  <div id="tab-mappings" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-mappings" hidden>
+    <section class="panel panel-tight">
+      <div class="row between">
+        <div class="labels-heading">
+          <h2>Mappings</h2>
+          <span class="meta">autolabel cheat sheet for moderators</span>
+        </div>
+        <div class="row actions labels-actions">
+          <button type="button" id="btn-export-mappings" class="ghost">Export PNG</button>
+        </div>
+      </div>
+      <p class="hint">Report reason → which of your labels auto-apply. Every label also works via comment command on any report reason (often “Other”): <code>add &lt;label-id&gt;</code>.</p>
+      <div id="mappings-root" class="mappings"></div>
+    </section>
+  </div>
+
+  <div id="tab-config" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-config" hidden>
+    <nav class="subtabs" role="tablist" aria-label="Config sections">
+      <button type="button" class="subtab is-active" role="tab" aria-selected="true" data-subtab="accounts" id="subtab-btn-accounts">Accounts</button>
+      <button type="button" class="subtab" role="tab" aria-selected="false" data-subtab="settings" id="subtab-btn-settings">Settings</button>
+    </nav>
+
+    <div id="config-accounts" class="subtab-panel is-active" role="tabpanel" aria-labelledby="subtab-btn-accounts">
+      <section class="panel">
+        <div class="section-head">
+          <h2>Labeler account</h2>
+          <span class="app-tags" id="labeler-app-tags"></span>
+        </div>
+        <p class="hint">Asked once — shared identity for the stack. App password logs workers into Bluesky / Ozone.</p>
+        <div class="row creds">
+          <label>Handle or DID
+            <input id="labelerIdentity" type="text" placeholder="mylabeler.bsky.social" autocomplete="off" />
+          </label>
+          <label>App password
+            <input id="labelerPassword" type="password" placeholder="leave blank to keep" autocomplete="new-password" />
+          </label>
+        </div>
+        <p class="field-hint account-hint" id="labelerPasswordHint"></p>
+        <p class="meta" id="labelerResolved">—</p>
+        <div class="field-block">
+          <div class="setting-head">
+            <span class="setting-label">Ozone URL</span>
+            <span class="app-tags">
+              <span class="app-tag">autolabel</span>
+              <span class="app-tag">graze-post-remover</span>
+              <span class="app-tag">label-watcher</span>
+            </span>
+          </div>
+          <div class="row" style="margin-top:0.35rem;">
+            <label class="grow">
+              <span class="sr-only">Ozone URL</span>
+              <input id="ozoneUrl" type="text" placeholder="https://labeler.example.com" />
+            </label>
+          </div>
+          <p class="meta" id="socketDerived">Label firehose is derived from the Ozone URL.</p>
+        </div>
+        <div class="field-block">
+          <div class="setting-head">
+            <span class="setting-label">Label catalog sync (minutes)</span>
+            <span class="app-tags"><span class="app-tag">config-ui</span></span>
+          </div>
+          <div class="row" style="margin-top:0.35rem;">
+            <label style="flex:0 0 7rem; min-width:7rem;">
+              <span class="sr-only">Sync interval</span>
+              <input id="syncInterval" type="number" min="1" value="15" />
+            </label>
+          </div>
+        </div>
+        <div class="field-block">
+          <div class="mods-head">
+            <div class="setting-head">
+              <h3 class="mods-title">Ozone team / autolabel whitelist</h3>
+              <span class="app-tags"><span class="app-tag">autolabel</span></span>
+            </div>
+            <button type="button" id="btn-fetch-mods" class="ghost">Refresh team</button>
+          </div>
+          <p class="hint">Checked members can trigger autolabel via reports. Roles come from your Ozone team config.</p>
+          <div id="mods-list" class="mods-list"></div>
+          <p class="meta" id="mods-fetch-meta"></p>
+        </div>
+        <div class="row actions">
+          <button type="button" id="btn-save-labeler" class="primary">Save labeler</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Graze feeds account</h2>
+          <span class="app-tags" id="graze-app-tags"></span>
+        </div>
+        <p class="hint">Usually a different account from the labeler — the one that owns your Graze feeds. App password is enough (no session cookie).</p>
+        <div class="row creds">
+          <label>Handle
+            <input id="grazeHandle" type="text" placeholder="feeds.example.bsky.social" autocomplete="off" />
+          </label>
+          <label>App password
+            <input id="grazePassword" type="password" placeholder="leave blank to keep" autocomplete="new-password" />
+          </label>
+        </div>
+        <p class="field-hint account-hint" id="grazePasswordHint"></p>
+        <div class="row actions">
+          <button type="button" id="btn-save-graze" class="primary">Save</button>
+          <button type="button" id="btn-refresh-feeds" class="ghost">Refresh published feeds</button>
+          <span class="meta" id="graze-feeds-meta"></span>
+        </div>
+      </section>
+    </div>
+
+    <div id="config-settings" class="subtab-panel" role="tabpanel" aria-labelledby="subtab-btn-settings" hidden>
+      <section class="panel">
+        <h2>Settings</h2>
+        <p class="hint">Small knobs for the worker apps. Each field is tagged with which app it applies to. Saving applies to running workers automatically.</p>
+        <div id="settings-fields" class="settings-fields"></div>
+        <div class="row actions">
+          <button type="button" id="btn-save-settings" class="primary">Save settings</button>
+        </div>
+      </section>
+    </div>
+  </div>
+  </main>
+
+  <div id="new-modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card" role="dialog" aria-labelledby="new-modal-title">
+      <header class="modal-head">
+        <h2 id="new-modal-title">New labels</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">×</button>
+      </header>
+      <p class="hint" id="new-modal-sub">These appeared on your labeler and don’t have actions yet.</p>
+      <ul id="new-modal-list" class="new-list"></ul>
+      <footer class="modal-foot">
+        <button type="button" id="btn-dismiss-new">Dismiss all</button>
+        <button type="button" class="primary" data-close>Close</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="info-modal" class="modal" hidden>
+    <div class="modal-backdrop" data-info-close></div>
+    <div class="modal-card modal-card-info" role="dialog" aria-labelledby="info-modal-title">
+      <header class="modal-head">
+        <h2 id="info-modal-title">About</h2>
+        <button type="button" class="icon-btn" data-info-close aria-label="Close">×</button>
+      </header>
+      <div id="info-modal-body" class="info-modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    const REPORT_TYPES = {{ report_types|tojson }};
+    const REPORT_REASONS = {{ report_reasons|tojson }};
+    const REPORT_REASON_CATEGORIES = {{ report_reason_categories|tojson }};
+    let state = {{ state|tojson }};
+    let accounts = {{ accounts|tojson }};
+    let expandedIds = new Set();
+    let labelFilter = '';
+
+    const GEAR_SVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.3.6.9 1 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>`;
+    const INFO_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10.5v6"/><path d="M12 7.5h.01"/></svg>`;
+
+    function el(tag, attrs={}, kids=[]) {
+      const n = document.createElement(tag);
+      for (const [k,v] of Object.entries(attrs)) {
+        if (k === 'className') n.className = v;
+        else if (k === 'text') n.textContent = v;
+        else if (k === 'html') n.innerHTML = v;
+        else if (k.startsWith('on') && typeof v === 'function') n.addEventListener(k.slice(2).toLowerCase(), v);
+        else if (k === 'checked') n.checked = !!v;
+        else if (k === 'hidden') n.hidden = !!v;
+        else if (k === 'disabled') n.disabled = !!v;
+        else n.setAttribute(k, v);
+      }
+      for (const c of kids) if (c != null) n.append(c);
+      return n;
+    }
+
+    function actionFor(id) {
+      return state.actions?.[id] || {
+        list: 'off', grazeFeeds: '', commandable: true, reportTypes: [], autoban: '', configured: false
+      };
+    }
+
+    function readOpenCard(card) {
+      const list = card.querySelector('[data-field=list]')?.value;
+      if (list == null) return null;
+      const picker = card.querySelector('.graze-picker');
+      return {
+        list,
+        grazeFeeds: picker?.getValue?.() ?? '',
+        commandable: !!card.querySelector('[data-field=commandable]')?.checked,
+        reportTypes: [...card.querySelectorAll('[data-report]:checked')].map(x => x.getAttribute('data-report')),
+        autoban: (card.querySelector('[data-field=autoban]')?.value || '').trim(),
+        configured: true,
+      };
+    }
+
+    function flushOpenCards() {
+      document.querySelectorAll('.label-card.is-open').forEach(card => {
+        const patch = readOpenCard(card);
+        if (!patch) return;
+        state.actions = state.actions || {};
+        state.actions[card.dataset.id] = patch;
+      });
+    }
+
+    function toggleExpand(id) {
+      flushOpenCards();
+      if (expandedIds.has(id)) expandedIds.delete(id);
+      else expandedIds.add(id);
+      render();
+    }
+
+    function field(labelText, control, hint, info) {
+      const wrap = el('div', { className: 'field' });
+      const labelRow = el('div', { className: 'field-label-row' }, [
+        el('span', { className: 'field-label', text: labelText }),
+        info ? makeInfoButton(info) : null,
+      ].filter(Boolean));
+      wrap.append(labelRow);
+      wrap.append(control);
+      if (hint) wrap.append(el('span', { className: 'field-hint', text: hint }));
+      return wrap;
+    }
+
+    function makeInfoButton(info) {
+      return el('button', {
+        type: 'button',
+        className: 'info-btn',
+        title: 'About this setting',
+        'aria-label': 'About ' + (info.title || 'this setting'),
+        html: INFO_SVG,
+        onClick: (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openInfoModal(info);
+        },
+      });
+    }
+
+    function openInfoModal(info) {
+      const modal = document.getElementById('info-modal');
+      const title = document.getElementById('info-modal-title');
+      const body = document.getElementById('info-modal-body');
+      title.textContent = info.title || 'About';
+      body.innerHTML = '';
+      const blocks = info.blocks || [];
+      for (const block of blocks) {
+        if (block.type === 'p') {
+          body.append(el('p', { text: block.text }));
+        } else if (block.type === 'examples') {
+          const list = el('ul', { className: 'info-examples' });
+          for (const ex of block.items || []) {
+            list.append(el('li', {}, [el('code', { text: ex })]));
+          }
+          body.append(list);
+        } else if (block.type === 'note') {
+          body.append(el('p', { className: 'info-note', text: block.text }));
+        } else if (block.type === 'tag') {
+          body.append(el('p', { className: 'info-tag', text: block.text }));
+        }
+      }
+      modal.hidden = false;
+      document.body.classList.add('modal-open');
+    }
+
+    function closeInfoModal() {
+      const modal = document.getElementById('info-modal');
+      if (!modal || modal.hidden) return;
+      modal.hidden = true;
+      if (document.getElementById('new-modal')?.hidden) {
+        document.body.classList.remove('modal-open');
+      }
+    }
+
+    function parseGrazeSelection(raw) {
+      const v = (raw || '').trim();
+      if (!v) return { mode: 'off', ids: new Set() };
+      if (v.toLowerCase() === 'all') return { mode: 'all', ids: new Set() };
+      const ids = new Set(v.split(/[\s,]+/).map(s => s.trim()).filter(Boolean));
+      return { mode: 'ids', ids };
+    }
+
+    function serializeGrazeSelection(mode, ids) {
+      if (mode === 'all') return 'all';
+      if (mode === 'off' || !ids.size) return '';
+      return [...ids].sort((a,b) => Number(a) - Number(b)).join(',');
+    }
+
+    function actionSummary(a) {
+      const bits = [];
+      if (a.list && a.list !== 'off') bits.push(a.list === 'mod' ? 'mod list' : 'curate list');
+      const g = parseGrazeSelection(a.grazeFeeds);
+      if (g.mode === 'all') bits.push('graze: all');
+      else if (g.mode === 'ids') bits.push(`graze: ${g.ids.size}`);
+      if ((a.reportTypes || []).length) bits.push(`reports: ${a.reportTypes.length}`);
+      if (a.commandable === false) bits.push('commands off');
+      if (a.autoban) bits.push('autoban');
+      return bits.length ? bits.join(' · ') : 'no actions';
+    }
+
+    async function copyText(text) {
+      const v = String(text || '');
+      if (!v) return false;
+      try {
+        await navigator.clipboard.writeText(v);
+        return true;
+      } catch (_) {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = v;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          const ok = document.execCommand('copy');
+          ta.remove();
+          return ok;
+        } catch {
+          return false;
+        }
+      }
+    }
+
+    function listMatchFor(id) {
+      return (state.blueskyLists || {})[id] || null;
+    }
+
+    function updateListsMeta() {
+      const elMeta = document.getElementById('lists-meta');
+      if (!elMeta) return;
+      const lists = state.blueskyLists || {};
+      const at = state.blueskyListsFetchedAt;
+      const handle = state.blueskyListsActorHandle;
+      const matched = Object.values(lists).filter(x => x && x.found).length;
+      const pending = Object.values(lists).filter(x => x && !x.found && x.listMode && x.listMode !== 'off').length;
+      if (!at) {
+        elMeta.textContent = 'Refresh lists to load Bluesky list links (matched by label display name).';
+        return;
+      }
+      const who = handle ? `@${handle}` : 'list account';
+      let text = `${matched} list link${matched === 1 ? '' : 's'} on ${who}`;
+      if (pending) text += ` · ${pending} configured, not created yet`;
+      if (at) text += ` · ${at}`;
+      elMeta.textContent = text;
+    }
+
+    function buildListLinkPanel(id, labelName, listMode) {
+      const wrap = el('div', { className: 'list-link-panel', 'data-list-panel': id });
+      const status = el('p', { className: 'list-link-status' });
+      const row = el('div', { className: 'list-link-row', hidden: true });
+      const link = el('a', {
+        className: 'list-link-url',
+        href: '#',
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        text: '',
+      });
+      const copyBtn = el('button', {
+        type: 'button',
+        className: 'ghost list-copy-btn',
+        text: 'Copy link',
+      });
+      row.append(link, copyBtn);
+      wrap.append(status, row);
+
+      function paint(mode) {
+        const m = (mode || 'off').trim();
+        const match = listMatchFor(id);
+        const at = state.blueskyListsFetchedAt;
+        const hasLink = !!(match && match.found && match.url);
+        if (m === 'off' && !hasLink) {
+          wrap.hidden = true;
+          return;
+        }
+        wrap.hidden = false;
+        if (!at) {
+          status.textContent = 'Refresh lists to load the Bluesky list link.';
+          row.hidden = true;
+          return;
+        }
+        if (hasLink) {
+          const count = match.listItemCount;
+          const countBit = (count == null) ? '' : ` · ${count} member${count === 1 ? '' : 's'}`;
+          const syncBit = (m === 'off')
+            ? ' · list sync off'
+            : '';
+          status.textContent = `Linked to “${match.name || labelName}”${countBit}${syncBit}`;
+          link.href = match.url;
+          link.textContent = match.url;
+          link.title = match.url;
+          row.hidden = false;
+          copyBtn.onclick = async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const ok = await copyText(match.url);
+            const prev = copyBtn.textContent;
+            copyBtn.textContent = ok ? 'Copied' : 'Copy failed';
+            setTimeout(() => { copyBtn.textContent = prev; }, 1400);
+          };
+          return;
+        }
+        status.textContent = `No list named “${labelName}” on the list account yet. label-watcher creates it when this label is used.`;
+        row.hidden = true;
+      }
+
+      wrap.paint = paint;
+      paint(listMode);
+      return wrap;
+    }
+
+    function buildGrazePicker(a) {
+      const sel = parseGrazeSelection(a.grazeFeeds);
+      const wrap = el('div', { className: 'graze-picker', 'data-field': 'grazeFeeds' });
+      wrap.dataset.mode = sel.mode;
+      wrap._ids = new Set(sel.ids);
+
+      const modeRow = el('div', { className: 'graze-modes' });
+      const modes = [
+        ['off', 'Off'],
+        ['all', 'All feeds'],
+        ['ids', 'Selected'],
+      ];
+      for (const [value, label] of modes) {
+        const btn = el('button', {
+          type: 'button',
+          className: 'chip-btn' + (sel.mode === value ? ' is-on' : ''),
+          'data-mode': value,
+          text: label,
+          onClick: () => {
+            wrap.dataset.mode = value;
+            modeRow.querySelectorAll('.chip-btn').forEach(b => {
+              b.classList.toggle('is-on', b.dataset.mode === value);
+            });
+            list.hidden = value !== 'ids';
+            syncHidden();
+          },
+        });
+        modeRow.append(btn);
+      }
+
+      const list = el('div', { className: 'graze-feed-list', hidden: sel.mode !== 'ids' });
+      const catalog = state.grazeFeeds || [];
+      if (!catalog.length) {
+        list.append(el('p', {
+          className: 'field-hint',
+          text: 'No published Graze feeds cached yet — save the Graze feeds account, then refresh.',
+        }));
+      } else {
+        for (const feed of catalog) {
+          const id = String(feed.id);
+          const row = el('label', { className: 'check graze-feed' }, [
+            el('input', {
+              type: 'checkbox',
+              value: id,
+              checked: sel.ids.has(id),
+              onChange: (e) => {
+                if (e.target.checked) wrap._ids.add(id);
+                else wrap._ids.delete(id);
+                syncHidden();
+              },
+            }),
+            el('span', { className: 'graze-feed-name', text: feed.name }),
+            el('code', { className: 'graze-feed-id', text: String(feed.id) }),
+          ]);
+          list.append(row);
+        }
+      }
+
+      // Preserve unknown ids not in catalog
+      for (const id of sel.ids) {
+        if (!catalog.some(f => String(f.id) === id)) {
+          const row = el('label', { className: 'check graze-feed is-orphan' }, [
+            el('input', {
+              type: 'checkbox',
+              value: id,
+              checked: true,
+              onChange: (e) => {
+                if (e.target.checked) wrap._ids.add(id);
+                else wrap._ids.delete(id);
+                syncHidden();
+              },
+            }),
+            el('span', { className: 'graze-feed-name', text: `Unknown feed ${id}` }),
+            el('code', { className: 'graze-feed-id', text: id }),
+          ]);
+          list.append(row);
+        }
+      }
+
+      const hidden = el('input', {
+        type: 'hidden',
+        'data-graze-value': '1',
+        value: serializeGrazeSelection(sel.mode, sel.ids),
+      });
+
+      function syncHidden() {
+        hidden.value = serializeGrazeSelection(wrap.dataset.mode, wrap._ids);
+      }
+
+      wrap.append(modeRow, list, hidden);
+      wrap.getValue = () => hidden.value;
+      return wrap;
+    }
+
+    function matchesFilter(id, d) {
+      const q = labelFilter.trim().toLowerCase();
+      if (!q) return true;
+      return [id, d.name || '', d.description || ''].join(' ').toLowerCase().includes(q);
+    }
+
+    function renderAppTags(root, apps) {
+      if (!root) return;
+      root.innerHTML = '';
+      for (const a of apps || []) {
+        root.append(el('span', { className: 'app-tag', text: a }));
+      }
+    }
+
+    function fillAccountsForm(a) {
+      accounts = a || accounts;
+      const L = accounts.labeler || {};
+      const G = accounts.graze || {};
+      document.getElementById('labelerIdentity').value = L.identity || L.handle || L.did || '';
+      document.getElementById('labelerPassword').value = '';
+      document.getElementById('labelerPassword').placeholder = L.passwordSet
+        ? 'Leave blank to keep saved password' : 'App password';
+      document.getElementById('labelerPasswordHint').textContent = L.passwordHint || '';
+      document.getElementById('ozoneUrl').value = L.ozoneUrl || '';
+      document.getElementById('syncInterval').value = L.syncIntervalMinutes || 15;
+      const resolved = [L.did, L.handle].filter(Boolean).join(' · ');
+      document.getElementById('labelerResolved').textContent = resolved || 'Save to resolve DID from handle.';
+      updateSocketDerived();
+      renderModsList();
+      renderAppTags(document.getElementById('labeler-app-tags'), L.usedBy || ['label-watcher', 'autolabel', 'graze-post-remover']);
+
+      document.getElementById('grazeHandle').value = G.handle || '';
+      document.getElementById('grazePassword').value = '';
+      document.getElementById('grazePassword').placeholder = G.passwordSet
+        ? 'Leave blank to keep saved password' : 'App password';
+      document.getElementById('grazePasswordHint').textContent = G.passwordHint || (G.ready ? '' : 'Required for post-remover + feed list');
+      renderAppTags(document.getElementById('graze-app-tags'), G.usedBy || ['graze-post-remover']);
+
+      fillSettingsForm(accounts.settings);
+      updateListAccountUI();
+    }
+
+    function fillSettingsForm(settings) {
+      const root = document.getElementById('settings-fields');
+      if (!root) return;
+      const fields = (settings && settings.fields) || (accounts.settings && accounts.settings.fields) || [];
+      root.innerHTML = '';
+      if (!fields.length) {
+        root.append(el('p', { className: 'hint', text: 'No settings available.' }));
+        return;
+      }
+      for (const f of fields) {
+        const apps = String(f.app || '').split(',').map(s => s.trim()).filter(Boolean);
+        const tags = el('span', { className: 'app-tags' },
+          apps.map(a => el('span', { className: 'app-tag', text: a }))
+        );
+        const head = el('div', { className: 'setting-head' }, [
+          el('span', { className: 'setting-label', text: f.label }),
+          tags,
+        ]);
+        let input;
+        const inputId = 'setting-' + f.key;
+        if (f.type === 'select') {
+          input = el('select', { id: inputId, 'data-setting-key': f.key });
+          for (const c of (f.choices || [])) {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            if ((f.value || f.default || '') === c) opt.selected = true;
+            input.appendChild(opt);
+          }
+          if (!f.value && f.default) input.value = f.default;
+        } else {
+          const attrs = {
+            id: inputId,
+            type: f.type === 'password' ? 'password' : (f.type === 'number' ? 'number' : 'text'),
+            'data-setting-key': f.key,
+            autocomplete: f.type === 'password' ? 'new-password' : 'off',
+            value: f.type === 'password' ? '' : (f.value || ''),
+          };
+          if (f.type === 'number') attrs.min = '1';
+          if (f.type === 'password') {
+            attrs.placeholder = f.hintSaved || f.set
+              ? 'Leave blank to keep saved value'
+              : (f.default ? f.default : (f.hint || ''));
+          } else if (!f.value && f.default) {
+            attrs.placeholder = 'default: ' + f.default;
+          } else if (f.key === 'LABELER_SOCKET_URL') {
+            attrs.placeholder = 'leave blank — auto from Ozone URL';
+          }
+          input = el('input', attrs);
+        }
+        const row = el('div', { className: 'setting-row' }, [
+          head,
+          input,
+          f.hint ? el('p', { className: 'field-hint', text: f.hint }) : null,
+          (f.hintSaved && f.type === 'password')
+            ? el('p', { className: 'field-hint account-hint', text: f.hintSaved })
+            : null,
+        ].filter(Boolean));
+        root.append(row);
+      }
+    }
+
+    function settingsPayload() {
+      const out = {};
+      document.querySelectorAll('[data-setting-key]').forEach(inp => {
+        const key = inp.getAttribute('data-setting-key');
+        out[key] = inp.value;
+      });
+      return out;
+    }
+
+    function updateListAccountUI() {
+      const sel = document.getElementById('listAccount');
+      const mode = (state.listAccount === 'graze') ? 'graze' : 'labeler';
+      sel.value = mode;
+      const hint = document.getElementById('list-account-hint');
+      if (mode === 'graze') {
+        const handle = accounts?.graze?.handle;
+        hint.textContent = handle
+          ? `Lists are created/updated on the Graze feeds account (${handle}).`
+          : 'Lists are created/updated on the Graze feeds account — configure that account under Config first.';
+      } else {
+        const handle = accounts?.labeler?.handle || accounts?.labeler?.identity;
+        hint.textContent = handle
+          ? `Lists are created/updated on the labeler account (${handle}).`
+          : 'Lists are created/updated on the labeler account.';
+      }
+      updateListsMeta();
+    }
+
+    function selectedModDids() {
+      return [...document.querySelectorAll('#mods-list input[data-mod-did]:checked')]
+        .map(x => x.getAttribute('data-mod-did'));
+    }
+
+    function renderModsList() {
+      const root = document.getElementById('mods-list');
+      const meta = document.getElementById('mods-fetch-meta');
+      root.innerHTML = '';
+      const members = state.ozoneTeam || [];
+      const selected = new Set(
+        (accounts?.labeler?.whitelistedModerators || '')
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean)
+      );
+      if (!members.length) {
+        root.append(el('p', {
+          className: 'mods-empty',
+          text: 'No team loaded yet — click Refresh team (needs labeler app password + Ozone URL).',
+        }));
+        meta.textContent = '';
+        return;
+      }
+      for (const m of members) {
+        const canWhitelist = m.whitelistable !== false && m.role !== 'Verifier';
+        const checked = selected.has(m.did) || (!selected.size && canWhitelist && m.whitelistable);
+        const roleClass = 'mod-role'
+          + (m.role === 'Admin' ? ' is-admin' : '')
+          + (m.role === 'Moderator' ? ' is-moderator' : '');
+        const row = el('label', {
+          className: 'mod-row' + (canWhitelist ? '' : ' is-disabled'),
+        }, [
+            el('input', {
+            type: 'checkbox',
+            'data-mod-did': m.did,
+            checked: canWhitelist && checked,
+            disabled: !canWhitelist,
+            onChange: () => {
+              const nSel = selectedModDids().length;
+              const at = state.ozoneTeamFetchedAt;
+              meta.textContent = `${members.length} member${members.length === 1 ? '' : 's'} · ${nSel} whitelisted`
+                + (at ? ` · ${at}` : '');
+            },
+          }),
+          el('div', { className: 'mod-main' }, [
+            el('div', {
+              className: 'mod-name',
+              text: m.displayName || m.handle || m.did,
+            }),
+            el('div', {
+              className: 'mod-handle',
+              text: m.handle ? `@${m.handle}` : m.did,
+            }),
+          ]),
+          el('span', { className: roleClass, text: m.role || 'Member' }),
+        ]);
+        root.append(row);
+      }
+      const nSel = selectedModDids().length;
+      const at = state.ozoneTeamFetchedAt;
+      meta.textContent = `${members.length} member${members.length === 1 ? '' : 's'} · ${nSel} whitelisted`
+        + (at ? ` · ${at}` : '');
+    }
+
+    function updateGrazeMeta() {
+      const elMeta = document.getElementById('graze-feeds-meta');
+      const n = (state.grazeFeeds || []).length;
+      const at = state.grazeFeedsFetchedAt;
+      if (!n && !at) {
+        elMeta.textContent = accounts?.graze?.ready ? 'No feeds loaded yet' : 'Set Graze account first';
+        return;
+      }
+      elMeta.textContent = `${n} published` + (at ? ` · ${at}` : '');
+    }
+
+    function deriveSocket(ozoneUrl) {
+      let raw = (ozoneUrl || '').trim();
+      if (!raw) return '';
+      if (raw.startsWith('wss://') || raw.startsWith('ws://')) {
+        return raw.includes('/xrpc/') ? raw.replace(/\/$/, '') : raw.replace(/\/$/, '') + '/xrpc/com.atproto.label.subscribeLabels';
+      }
+      if (!raw.includes('://')) raw = 'https://' + raw;
+      try {
+        const u = new URL(raw);
+        const scheme = (u.protocol === 'http:') ? 'ws' : 'wss';
+        return `${scheme}://${u.host}/xrpc/com.atproto.label.subscribeLabels`;
+      } catch {
+        return '';
+      }
+    }
+
+    function updateSocketDerived() {
+      const ozone = document.getElementById('ozoneUrl').value.trim();
+      const derived = deriveSocket(ozone);
+      const el = document.getElementById('socketDerived');
+      el.textContent = derived
+        ? `Label firehose (auto): ${derived}`
+        : 'Label firehose is derived from the Ozone URL when you save. Override under Settings if needed.';
+    }
+
+    function labelerAccountPayload() {
+      const payload = {
+        identity: document.getElementById('labelerIdentity').value.trim(),
+        ozoneUrl: document.getElementById('ozoneUrl').value.trim(),
+        whitelistedModerators: selectedModDids().join(','),
+        syncIntervalMinutes: Number(document.getElementById('syncInterval').value) || 15,
+      };
+      const pw = document.getElementById('labelerPassword').value.trim();
+      if (pw) payload.password = pw;
+      return payload;
+    }
+
+    function grazeAccountPayload() {
+      const payload = {
+        handle: document.getElementById('grazeHandle').value.trim(),
+      };
+      const pw = document.getElementById('grazePassword').value.trim();
+      if (pw) payload.password = pw;
+      return payload;
+    }
+
+    async function saveAccounts(section) {
+      const body = {};
+      if (section === 'labeler' || section === 'all') body.labeler = labelerAccountPayload();
+      if (section === 'graze' || section === 'all') body.graze = grazeAccountPayload();
+      if (section === 'settings') body.settings = settingsPayload();
+      const data = await api('/api/accounts', { method: 'POST', body: JSON.stringify(body) });
+      if (data.state) state = { ...state, ...data.state };
+      fillAccountsForm({
+        labeler: data.labeler,
+        graze: data.graze,
+        optional: data.optional,
+        settings: data.settings,
+      });
+      noteWorkersReload(data.workersReload);
+      return data;
+    }
+
+    function noteWorkersReload(flag) {
+      const meta = document.getElementById('workers-reload-meta');
+      if (!meta) return;
+      if (flag === 'scheduled') {
+        meta.textContent = 'Applying to running workers…';
+        setTimeout(pollWorkersReload, 2000);
+      } else if (flag === 'disabled') {
+        meta.textContent = 'Auto-reload is off (LABEL_OPS_AUTO_RELOAD=0).';
+      }
+    }
+
+    async function pollWorkersReload() {
+      const meta = document.getElementById('workers-reload-meta');
+      if (!meta) return;
+      try {
+        const data = await api('/api/workers/reload');
+        if (data.ok && data.recreated && data.recreated.length) {
+          meta.textContent = 'Workers updated: ' + data.recreated.join(', ');
+        } else if (data.ok && data.detail === 'no workers running') {
+          meta.textContent = 'Saved. Start workers with docker compose --profile workers up -d';
+        } else if (data.ok) {
+          meta.textContent = data.detail || 'Workers up to date.';
+        } else {
+          meta.textContent = 'Worker reload issue: ' + (data.detail || 'unknown');
+        }
+      } catch (e) {
+        meta.textContent = 'Saved. Worker reload status unavailable.';
+      }
+    }
+
+    function render() {
+      const root = document.getElementById('labels');
+      root.innerHTML = '';
+      const ids = Object.keys(state.discovered || {}).sort((a,b) => {
+        const an = (state.newLabelIds || []).includes(a) ? 0 : 1;
+        const bn = (state.newLabelIds || []).includes(b) ? 0 : 1;
+        if (an !== bn) return an - bn;
+        return a.localeCompare(b);
+      });
+      const visible = ids.filter(id => matchesFilter(id, state.discovered[id]));
+      if (!ids.length) {
+        root.append(el('p', { className: 'hint', text: 'No labels yet — fetch from your labeler.' }));
+        updateNewButton();
+        updateGrazeMeta();
+        return;
+      }
+      if (!visible.length) {
+        root.append(el('p', { className: 'hint', text: 'No labels match your search.' }));
+        updateNewButton();
+        updateGrazeMeta();
+        return;
+      }
+      for (const id of visible) {
+        const d = state.discovered[id];
+        const a = actionFor(id);
+        const isNew = (state.newLabelIds || []).includes(id);
+        const open = expandedIds.has(id);
+        const card = el('article', {
+          className: 'label-card' + (isNew ? ' is-new' : '') + (d.stale ? ' is-stale' : '') + (open ? ' is-open' : ''),
+          'data-id': id,
+          id: 'label-' + id,
+        });
+
+        const toggle = el('button', {
+          type: 'button',
+          className: 'gear-btn' + (open ? ' is-open' : ''),
+          title: open ? 'Collapse' : 'Configure',
+          'aria-expanded': open ? 'true' : 'false',
+          'aria-label': open ? 'Collapse settings' : 'Expand settings',
+          html: GEAR_SVG,
+          onClick: (e) => {
+            e.stopPropagation();
+            toggleExpand(id);
+          },
+        });
+
+        const match = listMatchFor(id);
+        const head = el('header', {
+          className: 'label-head',
+          onClick: () => toggleExpand(id),
+        }, [
+          el('div', { className: 'label-head-main' }, [
+            el('div', { className: 'label-title-row' }, [
+              el('code', { text: id }),
+              el('strong', { text: d.name || id }),
+              d.stale ? el('span', { className: 'pill stale', text: 'gone' }) : null,
+              isNew ? el('span', { className: 'pill new', text: 'new' }) : null,
+              (match && match.found) ? el('span', { className: 'pill list-linked', text: 'list' }) : null,
+            ].filter(Boolean)),
+            el('p', { className: 'label-summary', text: actionSummary(a) }),
+            (!open && match && match.found && match.url) ? el('div', {
+              className: 'list-link-inline',
+              onClick: (e) => e.stopPropagation(),
+            }, [
+              el('a', {
+                href: match.url,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                text: 'Open list',
+              }),
+              el('button', {
+                type: 'button',
+                className: 'ghost list-copy-btn',
+                text: 'Copy',
+                onClick: async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const btn = e.currentTarget;
+                  const ok = await copyText(match.url);
+                  const prev = btn.textContent;
+                  btn.textContent = ok ? 'Copied' : 'Failed';
+                  setTimeout(() => { btn.textContent = prev; }, 1400);
+                },
+              }),
+            ]) : null,
+            (!open && d.description) ? el('p', { className: 'desc', text: d.description }) : null,
+          ].filter(Boolean)),
+          toggle,
+        ]);
+
+        card.append(head);
+
+        if (open) {
+          const listSel = el('select', { 'data-field': 'list' });
+          for (const [v, lab] of [['off','Off'],['curate','Curate list'],['mod','Mod list']]) {
+            const o = el('option', { value: v, text: lab });
+            if (a.list === v) o.selected = true;
+            listSel.append(o);
+          }
+
+          const labelName = d.name || id;
+          const listPanel = buildListLinkPanel(id, labelName, a.list || 'off');
+          listSel.addEventListener('change', () => {
+            listPanel.paint(listSel.value);
+          });
+          const listField = field('Bluesky list', listSel, null, {
+              title: 'Bluesky list',
+              blocks: [
+                { type: 'tag', text: 'label-watcher' },
+                { type: 'p', text: 'When this label is applied to an account, add them to a Bluesky list on the account chosen above (“Bluesky lists on”).' },
+                { type: 'p', text: 'Curate list — a normal public/subscribeable list. Mod list — a moderation list used for blocking/filtering.' },
+                { type: 'note', text: 'Off means this label does not create or update a list. Use Refresh lists to load links for lists that already exist (matched by display name).' },
+              ],
+            });
+          listField.append(listPanel);
+
+          const cmd = el('div', { className: 'cmd-block' }, [
+            el('label', { className: 'check' }, [
+              el('input', {
+                type: 'checkbox',
+                'data-field': 'commandable',
+                checked: a.commandable !== false,
+              }),
+              document.createTextNode(' Allow comment commands for this label'),
+            ]),
+          ]);
+
+          const reports = buildReportReasonPicker(a.reportTypes || []);
+
+          const autoban = el('input', {
+            type: 'text', 'data-field': 'autoban', value: a.autoban || '',
+            placeholder: 'optional, e.g. 5:2'
+          });
+
+          const body = el('div', { className: 'fields label-body' }, [
+            d.description ? el('p', { className: 'desc', text: d.description }) : null,
+            listField,
+            field('Graze feeds', buildGrazePicker(a), null, {
+              title: 'Graze feeds',
+              blocks: [
+                { type: 'tag', text: 'graze-post-remover' },
+                { type: 'p', text: 'When a post receives this label, hide it from the selected published Graze feeds owned by the Graze feeds account.' },
+                { type: 'p', text: '“All feeds” uses every published feed on that account. “Selected” lets you pick individual feeds (refresh the catalog under Config → Accounts first).' },
+                { type: 'note', text: 'Off means this label does not remove posts from any Graze feed.' },
+              ],
+            }),
+            field('Ozone comment commands', cmd, null, {
+              title: 'Ozone comment commands',
+              blocks: [
+                { type: 'tag', text: 'autolabel' },
+                { type: 'p', text: 'Enrolled automatically for every label. Uncheck only to opt this label out.' },
+                { type: 'p', text: 'Whitelisted mods can type commands in any Ozone report comment — any reason (Misleading, Other, Harassment, …). The report reason does not matter; the comment does.' },
+                { type: 'p', text: 'Examples:' },
+                { type: 'examples', items: [
+                  'add ' + id,
+                  'add ' + id + ',other',
+                  'remove ' + id,
+                  'add-account ' + id,
+                  'add-post ' + id,
+                ]},
+                { type: 'note', text: 'Shortcuts: add-a / add-p / remove-a / remove-p. Opting out blocks this id from comment commands (and from VALID_LABELS unless report-reason auto-apply or autoban still needs it).' },
+              ],
+            }),
+            field('Auto-apply this label on report reason', reports, null, {
+              title: 'Auto-apply on report reason',
+              blocks: [
+                { type: 'tag', text: 'autolabel' },
+                { type: 'p', text: 'These checkboxes are Ozone report reasons (what the reporter picked) — not labels.' },
+                { type: 'p', text: 'Checking “Spam” means: when a whitelisted mod files a Spam report, apply “' + labelName + '” automatically. No comment needed.' },
+                { type: 'p', text: 'To also apply another of your labels for the same reason, open that label’s card and check the same reason there.' },
+                { type: 'note', text: 'Bluesky-only reasons (CSAM, grooming, extremist, …) never reach community labelers, so they are not listed.' },
+              ],
+            }),
+            field(
+              'Autoban threshold',
+              autoban,
+              null,
+              {
+                title: 'Autoban threshold',
+                blocks: [
+                  { type: 'tag', text: 'autolabel' },
+                  { type: 'p', text: 'After this label has been applied to a user’s posts enough times, also apply it as an account label.' },
+                  { type: 'p', text: 'Format: threshold:otherCap — e.g. 5:2 means need 5 points total; at most 2 may come from other autoban labels.' },
+                ],
+              },
+            ),
+          ].filter(Boolean));
+          card.append(body);
+        }
+        root.append(card);
+      }
+      updateNewButton();
+      updateListsMeta();
+      updateGrazeMeta();
+      if (!document.getElementById('tab-mappings')?.hidden) renderMappings();
+    }
+
+    function reasonLabel(id) {
+      const r = REPORT_REASONS.find(x => x.id === id);
+      return r ? r.label : id;
+    }
+
+    function reasonCategoryLabel(id) {
+      const r = REPORT_REASONS.find(x => x.id === id);
+      if (!r) return '';
+      const cat = REPORT_REASON_CATEGORIES.find(c => c.id === r.category);
+      return cat ? cat.label : '';
+    }
+
+    function collectMappings() {
+      const reasonToLabels = new Map(); // reasonId -> [{id, name}]
+      const labelRows = [];
+      const ids = Object.keys(state.discovered || {}).sort((a, b) => a.localeCompare(b));
+      for (const id of ids) {
+        const d = state.discovered[id] || {};
+        if (d.stale) continue;
+        const a = actionFor(id);
+        const reasons = [...(a.reportTypes || [])];
+        const name = d.name || id;
+        const commandsOn = a.commandable !== false;
+        labelRows.push({ id, name, reasons, commandsOn });
+        for (const rid of reasons) {
+          if (!reasonToLabels.has(rid)) reasonToLabels.set(rid, []);
+          reasonToLabels.get(rid).push({ id, name });
+        }
+      }
+      return { reasonToLabels, labelRows };
+    }
+
+    function renderMappings() {
+      const root = document.getElementById('mappings-root');
+      if (!root) return;
+      root.innerHTML = '';
+      const { reasonToLabels, labelRows } = collectMappings();
+      if (!labelRows.length) {
+        root.append(el('p', { className: 'hint', text: 'No labels yet — fetch from your labeler on the Labels tab.' }));
+        return;
+      }
+
+      const sheet = el('div', { className: 'mappings-sheet', id: 'mappings-sheet' });
+
+      // —— Auto-apply by report reason ——
+      const autoSec = el('section', { className: 'map-section' }, [
+        el('h3', { className: 'map-section-title', text: 'Auto-apply by report reason' }),
+        el('p', { className: 'map-section-sub', text: 'When a whitelisted mod files this reason, these labels are applied with no comment.' }),
+      ]);
+      const reasonIds = [...reasonToLabels.keys()].sort((a, b) => {
+        const ca = reasonCategoryLabel(a).localeCompare(reasonCategoryLabel(b));
+        if (ca) return ca;
+        return reasonLabel(a).localeCompare(reasonLabel(b));
+      });
+      if (!reasonIds.length) {
+        autoSec.append(el('p', { className: 'map-empty', text: 'No report-reason auto-maps yet. Open a label on Labels and check reasons under “Auto-apply this label on report reason”.' }));
+      } else {
+        let lastCat = null;
+        for (const rid of reasonIds) {
+          const cat = reasonCategoryLabel(rid);
+          if (cat !== lastCat) {
+            lastCat = cat;
+            autoSec.append(el('div', { className: 'map-cat', text: cat }));
+          }
+          const labels = reasonToLabels.get(rid);
+          const row = el('div', { className: 'map-row' }, [
+            el('div', { className: 'map-from' }, [
+              el('span', { className: 'map-reason', text: reasonLabel(rid) }),
+            ]),
+            el('span', { className: 'map-arrow', text: '→', 'aria-hidden': 'true' }),
+            el('div', { className: 'map-to' }, labels.map(l =>
+              el('span', { className: 'map-chip', title: l.id, text: l.name })
+            )),
+          ]);
+          autoSec.append(row);
+        }
+      }
+      sheet.append(autoSec);
+
+      // —— All labels + commands ——
+      const cmdSec = el('section', { className: 'map-section' }, [
+        el('h3', { className: 'map-section-title', text: 'All labels & comment commands' }),
+        el('p', {
+          className: 'map-section-sub',
+          text: 'Every enrolled label can be applied with a comment on any report reason (Other is fine). Example: add ableist',
+        }),
+      ]);
+      const table = el('div', { className: 'map-label-table' });
+      table.append(el('div', { className: 'map-label-head' }, [
+        el('span', { text: 'Label' }),
+        el('span', { text: 'Auto on reasons' }),
+        el('span', { text: 'Comment command' }),
+      ]));
+      for (const row of labelRows) {
+        const reasonsText = row.reasons.length
+          ? row.reasons.map(reasonLabel).join(', ')
+          : '—';
+        const cmd = row.commandsOn ? ('add ' + row.id) : 'commands off';
+        table.append(el('div', { className: 'map-label-row' + (row.commandsOn ? '' : ' is-off') }, [
+          el('div', { className: 'map-label-name' }, [
+            el('strong', { text: row.name }),
+            el('code', { text: row.id }),
+          ]),
+          el('span', { className: 'map-label-reasons', text: reasonsText }),
+          el('code', { className: 'map-label-cmd', text: cmd }),
+        ]));
+      }
+      cmdSec.append(table);
+      sheet.append(cmdSec);
+
+      sheet.append(el('p', {
+        className: 'map-footer',
+        text: 'Only whitelisted Ozone team members trigger autolabel. Report-reason maps and comment commands both require whitelist.',
+      }));
+
+      root.append(sheet);
+    }
+
+    async function exportMappingsPng() {
+      const btn = document.getElementById('btn-export-mappings');
+      const { reasonToLabels, labelRows } = collectMappings();
+      if (!labelRows.length) {
+        alert('No labels to export yet.');
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Exporting…';
+      try {
+        const canvas = drawMappingsCanvas(reasonToLabels, labelRows);
+        const a = document.createElement('a');
+        a.download = 'label-ops-mappings.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      } catch (e) {
+        alert('Export failed: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Export PNG';
+      }
+    }
+
+    function drawMappingsCanvas(reasonToLabels, labelRows) {
+      const W = 1100;
+      const pad = 40;
+      const lineH = 22;
+      const titleSize = 28;
+      const sectionSize = 18;
+      const bodySize = 14;
+      const monoSize = 13;
+
+      // Measure content height
+      let y = pad;
+      y += titleSize + 8 + 18 + 28; // title + sub + gap
+      y += sectionSize + 12 + 16;
+      const reasonIds = [...reasonToLabels.keys()].sort((a, b) => {
+        const ca = reasonCategoryLabel(a).localeCompare(reasonCategoryLabel(b));
+        if (ca) return ca;
+        return reasonLabel(a).localeCompare(reasonLabel(b));
+      });
+      if (!reasonIds.length) y += lineH + 8;
+      else {
+        let lastCat = null;
+        for (const rid of reasonIds) {
+          const cat = reasonCategoryLabel(rid);
+          if (cat !== lastCat) { lastCat = cat; y += lineH; }
+          y += lineH + 4;
+        }
+      }
+      y += 28 + sectionSize + 12 + 16;
+      y += lineH; // header
+      y += labelRows.length * (lineH + 6);
+      y += 40 + 36; // footer + pad
+
+      const H = Math.max(y, 600);
+      const canvas = document.createElement('canvas');
+      const scale = 2;
+      canvas.width = W * scale;
+      canvas.height = H * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(scale, scale);
+
+      // background
+      ctx.fillStyle = '#f7f6f3';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = `600 ${titleSize}px ui-sans-serif, system-ui, sans-serif`;
+      let cy = pad + titleSize;
+      ctx.fillText('label·ops · moderator mappings', pad, cy);
+      cy += 22;
+      ctx.fillStyle = '#666';
+      ctx.font = `400 13px ui-sans-serif, system-ui, sans-serif`;
+      ctx.fillText('Report reason → auto labels  ·  Any reason + comment command still works for enrolled labels', pad, cy);
+      cy += 36;
+
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = `600 ${sectionSize}px ui-sans-serif, system-ui, sans-serif`;
+      ctx.fillText('Auto-apply by report reason', pad, cy);
+      cy += 24;
+      ctx.fillStyle = '#555';
+      ctx.font = `400 12px ui-sans-serif, system-ui, sans-serif`;
+      ctx.fillText('Whitelisted mod files this reason → these labels apply (no comment needed).', pad, cy);
+      cy += 20;
+
+      if (!reasonIds.length) {
+        ctx.fillStyle = '#888';
+        ctx.fillText('No report-reason auto-maps configured yet.', pad, cy);
+        cy += lineH;
+      } else {
+        let lastCat = null;
+        for (const rid of reasonIds) {
+          const cat = reasonCategoryLabel(rid);
+          if (cat !== lastCat) {
+            lastCat = cat;
+            cy += 6;
+            ctx.fillStyle = '#888';
+            ctx.font = `600 11px ui-sans-serif, system-ui, sans-serif`;
+            ctx.fillText(cat.toUpperCase(), pad, cy);
+            cy += lineH - 2;
+          }
+          const labels = reasonToLabels.get(rid).map(l => l.name).join(', ');
+          ctx.fillStyle = '#1a1a1a';
+          ctx.font = `600 ${bodySize}px ui-sans-serif, system-ui, sans-serif`;
+          const left = reasonLabel(rid);
+          ctx.fillText(left, pad, cy);
+          const leftW = ctx.measureText(left).width;
+          ctx.fillStyle = '#999';
+          ctx.font = `400 ${bodySize}px ui-sans-serif, system-ui, sans-serif`;
+          ctx.fillText(' → ', pad + leftW, cy);
+          const arrowW = ctx.measureText(' → ').width;
+          ctx.fillStyle = '#1a1a1a';
+          ctx.font = `400 ${bodySize}px ui-sans-serif, system-ui, sans-serif`;
+          ctx.fillText(labels, pad + leftW + arrowW, cy);
+          cy += lineH + 2;
+        }
+      }
+
+      cy += 28;
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = `600 ${sectionSize}px ui-sans-serif, system-ui, sans-serif`;
+      ctx.fillText('All labels & comment commands', pad, cy);
+      cy += 24;
+      ctx.fillStyle = '#555';
+      ctx.font = `400 12px ui-sans-serif, system-ui, sans-serif`;
+      ctx.fillText('Use on any report reason (Other is fine). Only whitelisted mods.', pad, cy);
+      cy += 22;
+
+      // column headers
+      const col1 = pad;
+      const col2 = pad + 280;
+      const col3 = pad + 720;
+      ctx.fillStyle = '#888';
+      ctx.font = `600 11px ui-sans-serif, system-ui, sans-serif`;
+      ctx.fillText('LABEL', col1, cy);
+      ctx.fillText('AUTO ON REASONS', col2, cy);
+      ctx.fillText('COMMAND', col3, cy);
+      cy += 8;
+      ctx.strokeStyle = '#ddd';
+      ctx.beginPath();
+      ctx.moveTo(pad, cy);
+      ctx.lineTo(W - pad, cy);
+      ctx.stroke();
+      cy += 18;
+
+      for (const row of labelRows) {
+        ctx.fillStyle = '#1a1a1a';
+        ctx.font = `600 ${bodySize}px ui-sans-serif, system-ui, sans-serif`;
+        ctx.fillText(row.name, col1, cy);
+        ctx.fillStyle = '#888';
+        ctx.font = `400 ${monoSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+        ctx.fillText(row.id, col1, cy + 14);
+
+        ctx.fillStyle = '#444';
+        ctx.font = `400 12px ui-sans-serif, system-ui, sans-serif`;
+        const reasonsText = row.reasons.length ? row.reasons.map(reasonLabel).join(', ') : '—';
+        // truncate if needed
+        let rt = reasonsText;
+        while (ctx.measureText(rt).width > col3 - col2 - 16 && rt.length > 3) rt = rt.slice(0, -2);
+        if (rt !== reasonsText) rt += '…';
+        ctx.fillText(rt, col2, cy + 6);
+
+        ctx.fillStyle = row.commandsOn ? '#1a1a1a' : '#aaa';
+        ctx.font = `400 ${monoSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+        ctx.fillText(row.commandsOn ? ('add ' + row.id) : 'commands off', col3, cy + 6);
+
+        cy += lineH + 12;
+      }
+
+      cy += 16;
+      ctx.fillStyle = '#888';
+      ctx.font = `400 11px ui-sans-serif, system-ui, sans-serif`;
+      ctx.fillText('Generated by label·ops  ·  Whitelist required for all autolabel actions', pad, cy);
+
+      return canvas;
+    }
+
+    function buildReportReasonPicker(selectedList) {
+      const selected = new Set(selectedList || []);
+      const wrap = el('div', { className: 'reports report-reasons' });
+      const cats = REPORT_REASON_CATEGORIES.filter(cat =>
+        REPORT_REASONS.some(r => r.category === cat.id && !r.authorityOnly)
+      );
+      let active = cats[0]?.id || '';
+      // Prefer a tab that already has selections
+      for (const cat of cats) {
+        const n = REPORT_REASONS.filter(r => r.category === cat.id && !r.authorityOnly && selected.has(r.id)).length;
+        if (n) { active = cat.id; break; }
+      }
+
+      const tabRow = el('div', { className: 'reason-tabs', role: 'tablist' });
+      const panels = el('div', { className: 'reason-panels' });
+
+      function countFor(catId) {
+        return REPORT_REASONS.filter(r => r.category === catId && !r.authorityOnly && selected.has(r.id)).length;
+      }
+
+      function renderTabs() {
+        tabRow.innerHTML = '';
+        for (const cat of cats) {
+          const n = countFor(cat.id);
+          const btn = el('button', {
+            type: 'button',
+            className: 'reason-tab' + (cat.id === active ? ' is-active' : ''),
+            role: 'tab',
+            'aria-selected': cat.id === active ? 'true' : 'false',
+            text: n ? `${cat.label} (${n})` : cat.label,
+            onClick: () => {
+              active = cat.id;
+              renderTabs();
+              renderPanels();
+            },
+          });
+          tabRow.append(btn);
+        }
+      }
+
+      function renderPanels() {
+        panels.innerHTML = '';
+        const reasons = REPORT_REASONS.filter(r => r.category === active && !r.authorityOnly);
+        const panel = el('div', { className: 'reason-panel', role: 'tabpanel' });
+        for (const r of reasons) {
+          panel.append(el('label', { className: 'check' }, [
+            el('input', {
+              type: 'checkbox',
+              'data-report': r.id,
+              checked: selected.has(r.id),
+              onChange: (e) => {
+                if (e.target.checked) selected.add(r.id);
+                else selected.delete(r.id);
+                renderTabs();
+              },
+            }),
+            document.createTextNode(' ' + r.label),
+          ]));
+        }
+        panels.append(panel);
+      }
+
+      renderTabs();
+      renderPanels();
+      wrap.append(tabRow, panels);
+      return wrap;
+    }
+
+    function updateNewButton() {
+      const btn = document.getElementById('btn-show-new');
+      const n = (state.newLabelIds || []).length;
+      btn.hidden = n === 0;
+      btn.textContent = n ? `${n} new` : 'New labels';
+    }
+
+    function openNewModal() {
+      const ids = state.newLabelIds || [];
+      if (!ids.length) return;
+      const list = document.getElementById('new-modal-list');
+      list.innerHTML = '';
+      document.getElementById('new-modal-sub').textContent =
+        `${ids.length} label${ids.length === 1 ? '' : 's'} on your labeler still need actions configured.`;
+      for (const id of ids) {
+        const d = state.discovered[id] || {};
+        const li = el('li', {}, [
+          el('button', {
+            type: 'button',
+            className: 'new-item',
+            onClick: () => {
+              closeNewModal();
+              flushOpenCards();
+              expandedIds.add(id);
+              render();
+              const card = document.getElementById('label-' + id);
+              if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                card.classList.add('flash');
+                setTimeout(() => card.classList.remove('flash'), 1200);
+              }
+            }
+          }, [
+            el('code', { text: id }),
+            el('span', { text: d.name || id }),
+          ])
+        ]);
+        list.append(li);
+      }
+      document.getElementById('new-modal').hidden = false;
+      document.body.classList.add('modal-open');
+    }
+
+    function closeNewModal() {
+      document.getElementById('new-modal').hidden = true;
+      document.body.classList.remove('modal-open');
+    }
+
+    function collectActions() {
+      flushOpenCards();
+      const updates = {};
+      for (const id of Object.keys(state.discovered || {})) {
+        updates[id] = { ...actionFor(id) };
+      }
+      return updates;
+    }
+
+    async function api(path, opts) {
+      const res = await fetch(path, {
+        headers: { 'Content-Type': 'application/json' },
+        ...opts,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error(data.error || res.statusText);
+      return data;
+    }
+
+    document.getElementById('ozoneUrl').addEventListener('input', updateSocketDerived);
+
+    document.getElementById('btn-fetch-mods').onclick = async () => {
+      const btn = document.getElementById('btn-fetch-mods');
+      const meta = document.getElementById('mods-fetch-meta');
+      btn.disabled = true;
+      meta.textContent = 'Fetching…';
+      try {
+        await saveAccounts('labeler');
+        const data = await api('/api/ozone/moderators/fetch', {
+          method: 'POST',
+          body: JSON.stringify({ labeler: labelerAccountPayload() }),
+        });
+        if (data.state) state = { ...state, ...data.state };
+        else {
+          state.ozoneTeam = data.members || [];
+          state.ozoneTeamFetchedAt = data.fetchedAt;
+        }
+        if (data.accounts) {
+          accounts = data.accounts;
+          // keep whitelist from fetch selection
+          if (accounts.labeler) {
+            accounts.labeler.whitelistedModerators = data.whitelistedModerators || '';
+          }
+        }
+        fillAccountsForm(accounts);
+      } catch (e) {
+        meta.textContent = '';
+        alert('Fetch team failed: ' + e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    document.getElementById('btn-save-labeler').onclick = async () => {
+      const btn = document.getElementById('btn-save-labeler');
+      btn.disabled = true;
+      try { await saveAccounts('labeler'); }
+      catch (e) { alert(e.message); }
+      finally { btn.disabled = false; }
+    };
+
+    document.getElementById('btn-save-graze').onclick = async () => {
+      const btn = document.getElementById('btn-save-graze');
+      btn.disabled = true;
+      try { await saveAccounts('graze'); updateGrazeMeta(); }
+      catch (e) { alert(e.message); }
+      finally { btn.disabled = false; }
+    };
+
+    document.getElementById('btn-save-settings').onclick = async () => {
+      const btn = document.getElementById('btn-save-settings');
+      btn.disabled = true;
+      try { await saveAccounts('settings'); }
+      catch (e) { alert(e.message); }
+      finally { btn.disabled = false; }
+    };
+
+    document.getElementById('btn-refresh-feeds').onclick = async () => {
+      const btn = document.getElementById('btn-refresh-feeds');
+      btn.disabled = true;
+      btn.textContent = 'Refreshing…';
+      try {
+        await saveAccounts('graze');
+        const data = await api('/api/graze/feeds/refresh', { method: 'POST', body: '{}' });
+        state.grazeFeeds = data.feeds;
+        state.grazeFeedsFetchedAt = data.fetchedAt;
+        render();
+      } catch (e) { alert('Feed refresh failed: ' + e.message); }
+      finally {
+        btn.disabled = false;
+        btn.textContent = 'Refresh published feeds';
+      }
+    };
+
+    document.getElementById('label-search').addEventListener('input', (e) => {
+      flushOpenCards();
+      labelFilter = e.target.value || '';
+      render();
+    });
+
+    document.getElementById('btn-fetch').onclick = async () => {
+      const btn = document.getElementById('btn-fetch');
+      btn.disabled = true;
+      try {
+        try { await saveAccounts('labeler'); } catch (_) { /* config may be incomplete */ }
+        const identity = document.getElementById('labelerIdentity').value.trim()
+          || accounts?.labeler?.identity
+          || state.labelerHandle
+          || state.labelerDid
+          || '';
+        if (!identity) throw new Error('Set the labeler account under Config first');
+        const data = await api('/api/sync', {
+          method: 'POST',
+          body: JSON.stringify({ labeler: identity }),
+        });
+        state = { ...state, ...data.state };
+        const acc = await api('/api/accounts');
+        fillAccountsForm(acc);
+        document.getElementById('sync-meta').textContent =
+          [state.syncedAt, state.lastSyncSource].filter(Boolean).join(' · ') || 'Not synced';
+        render();
+        if ((state.newLabelIds || []).length) openNewModal();
+      } catch (e) { alert('Fetch failed: ' + e.message); }
+      finally { btn.disabled = false; }
+    };
+
+    document.getElementById('listAccount').addEventListener('change', () => {
+      state.listAccount = document.getElementById('listAccount').value;
+      updateListAccountUI();
+    });
+
+    document.getElementById('btn-refresh-lists').onclick = async () => {
+      const btn = document.getElementById('btn-refresh-lists');
+      btn.disabled = true;
+      try {
+        const mode = document.getElementById('listAccount').value;
+        const data = await api('/api/lists/refresh', {
+          method: 'POST',
+          body: JSON.stringify({ listAccount: mode }),
+        });
+        state.listAccount = mode;
+        state.blueskyLists = data.lists || {};
+        state.blueskyListsFetchedAt = data.fetchedAt;
+        state.blueskyListsActorDid = data.actorDid;
+        state.blueskyListsActorHandle = data.actorHandle;
+        updateListAccountUI();
+        render();
+      } catch (e) {
+        alert('Refresh lists failed: ' + e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    document.getElementById('btn-save-actions').onclick = async () => {
+      try {
+        const data = await api('/api/actions', {
+          method: 'POST',
+          body: JSON.stringify({
+            actions: collectActions(),
+            listAccount: document.getElementById('listAccount').value,
+          }),
+        });
+        state = { ...state, ...data.state };
+        updateListAccountUI();
+        render();
+        noteWorkersReload(data.workersReload);
+      } catch (e) { alert(e.message); }
+    };
+
+    document.getElementById('btn-show-new').onclick = () => openNewModal();
+    document.getElementById('new-modal').querySelectorAll('[data-close]').forEach(n => {
+      n.addEventListener('click', closeNewModal);
+    });
+    document.getElementById('info-modal').querySelectorAll('[data-info-close]').forEach(n => {
+      n.addEventListener('click', closeInfoModal);
+    });
+    document.getElementById('btn-dismiss-new').onclick = async () => {
+      try {
+        const data = await api('/api/actions', {
+          method: 'POST',
+          body: JSON.stringify({ dismissNew: state.newLabelIds || [] }),
+        });
+        state = { ...state, ...data.state };
+        closeNewModal();
+        render();
+      } catch (e) { alert(e.message); }
+    };
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (!document.getElementById('info-modal')?.hidden) closeInfoModal();
+      else closeNewModal();
+    });
+
+    function setTab(name) {
+      document.querySelectorAll('.tab').forEach(btn => {
+        const on = btn.dataset.tab === name;
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        const on = panel.id === 'tab-' + name;
+        panel.classList.toggle('is-active', on);
+        panel.hidden = !on;
+      });
+      try { localStorage.setItem('label-ops-tab', name); } catch (_) {}
+      if (name === 'mappings') renderMappings();
+    }
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => setTab(btn.dataset.tab));
+    });
+
+    document.getElementById('btn-export-mappings').onclick = () => exportMappingsPng();
+
+    function setSubtab(name) {
+      document.querySelectorAll('.subtab').forEach(btn => {
+        const on = btn.dataset.subtab === name;
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.querySelectorAll('.subtab-panel').forEach(panel => {
+        const on = panel.id === 'config-' + name;
+        panel.classList.toggle('is-active', on);
+        panel.hidden = !on;
+      });
+      try { localStorage.setItem('label-ops-subtab', name); } catch (_) {}
+    }
+    document.querySelectorAll('.subtab').forEach(btn => {
+      btn.addEventListener('click', () => setSubtab(btn.dataset.subtab));
+    });
+    let startSub = 'accounts';
+    try {
+      const savedSub = localStorage.getItem('label-ops-subtab');
+      if (savedSub === 'accounts' || savedSub === 'settings') startSub = savedSub;
+    } catch (_) {}
+    setSubtab(startSub);
+
+    let startTab = 'labels';
+    try {
+      const saved = localStorage.getItem('label-ops-tab');
+      if (saved === 'config' || saved === 'labels' || saved === 'mappings') startTab = saved;
+    } catch (_) {}
+    if (!accounts?.labeler?.identity && !state.labelerDid) startTab = 'config';
+    setTab(startTab);
+
+    fillAccountsForm(accounts);
+    updateListAccountUI();
+    render();
+    if ((state.newLabelIds || []).length) {
+      setTimeout(openNewModal, 200);
+    }
+  </script>
+</body>
+</html>

@@ -3,6 +3,7 @@ import { CommandParser } from "./CommandParser";
 import { LabelApplier } from "./LabelApplier";
 import { NotificationService } from "./NotificationService";
 import { AutoBanChecker } from "./AutoBanChecker";
+import { labelsForReportReason, loadReportReasonLabelMap } from "./reportReasons";
 import type { ModEventView } from "@atproto/api/dist/client/types/tools/ozone/moderation/defs";
 
 function getRequiredEnv(key: string): string {
@@ -25,31 +26,24 @@ async function main() {
   const whitelistedModerators = getRequiredEnv("WHITELISTED_MODERATORS").split(",").map(did => did.trim());
   const moderatorNotifications = process.env.MODERATOR_NOTIFICATIONS || "";
   const validLabels = getRequiredEnv("VALID_LABELS").split(",").map(label => label.trim());
-  
+
   // Load auto-ban configuration
   const modLabels = process.env.MODLABELS?.split(",").map(label => label.trim()) || [];
   const autoBanConfig = process.env.AUTOBAN || "";
 
-  // Load report type auto-labels
-  const reportTypeLabels = {
-    "com.atproto.moderation.defs#reasonMisleading": process.env.REPORT_TYPE_MISLEADING?.split(",").map(l => l.trim()).filter(l => l) || [],
-    "com.atproto.moderation.defs#reasonSpam": process.env.REPORT_TYPE_SPAM?.split(",").map(l => l.trim()).filter(l => l) || [],
-    "com.atproto.moderation.defs#reasonSexual": process.env.REPORT_TYPE_SEXUAL?.split(",").map(l => l.trim()).filter(l => l) || [],
-    "com.atproto.moderation.defs#reasonRude": process.env.REPORT_TYPE_RUDE?.split(",").map(l => l.trim()).filter(l => l) || [],
-    "com.atproto.moderation.defs#reasonViolation": process.env.REPORT_TYPE_VIOLATION?.split(",").map(l => l.trim()).filter(l => l) || [],
-    "com.atproto.moderation.defs#reasonOther": process.env.REPORT_TYPE_OTHER?.split(",").map(l => l.trim()).filter(l => l) || [],
-  };
+  // Modern tools.ozone.report.defs reasons (+ legacy REPORT_TYPE_* fallback)
+  const reportTypeLabels = loadReportReasonLabelMap();
 
   console.log(`Starting auto-labeler with ${whitelistedModerators.length} whitelisted moderators`);
   console.log(`Valid labels: [${validLabels.join(', ')}]`);
   console.log(`Mod labels: [${modLabels.join(', ')}]`);
   console.log(`Auto-ban config: ${autoBanConfig}`);
-  console.log(`Report type auto-labels configured:`, reportTypeLabels);
+  console.log(`Report reason auto-labels configured:`, reportTypeLabels);
 
   // Initialize AT Protocol agent for Ozone with session persistence
-  const agent = new AtpAgent({ 
+  const agent = new AtpAgent({
     service: "https://bsky.social",
-    persistSession: (evt, session) => {
+    persistSession: (evt, _session) => {
       console.log(`Ozone agent session event: ${evt}`);
     }
   });
@@ -61,14 +55,14 @@ async function main() {
 
   // Initialize services
   const notificationService = new NotificationService(dmUsername, dmPassword, moderatorNotifications, whitelistedModerators);
-  
+
   // Initialize DM agent
   console.log("Initializing DM agent...");
   await notificationService.initializeDMAgent();
-  
+
   // Initialize auto-ban checker
   const autoBanChecker = new AutoBanChecker(agent, labelerDid, modLabels, autoBanConfig);
-  
+
   const labelApplier = new LabelApplier(agent, labelerDid, notificationService, ozoneUrl, validLabels, autoBanChecker);
 
   // Health check server
@@ -97,12 +91,12 @@ async function main() {
       );
 
       const events = response.data.events;
-      
+
       for (const event of events) {
         if (event.event.$type !== "tools.ozone.moderation.defs#modEventReport") {
           continue;
         }
-        
+
         // On first run, only process the latest event to establish baseline
         if (isFirstRun) {
           if (event.id > lastProcessedId) {
@@ -110,14 +104,14 @@ async function main() {
           }
           continue;
         }
-        
+
         // Only process events newer than what we've seen
         if (event.id > lastProcessedId) {
           await processReport(event);
           lastProcessedId = event.id;
         }
       }
-      
+
       if (isFirstRun) {
         isFirstRun = false;
         console.log(`Established baseline at event ID: ${lastProcessedId}`);
@@ -125,7 +119,7 @@ async function main() {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.log(`Failed to query moderation events: ${errorMsg}`);
-      
+
       if (errorMsg.includes('ExpiredToken') || errorMsg.includes('Unauthorized')) {
         console.log('Ozone agent token may be expired, attempting re-login...');
         try {
@@ -153,31 +147,31 @@ async function main() {
     const reportEvent = event.event as any;
     const comment = reportEvent.comment;
     const reportTypeReason = reportEvent.reportType;
-    
+
     let commands: any[] = [];
-    
+
     // Parse commands from comment if present
     if (comment) {
       commands = CommandParser.parse(comment);
     }
-    
-    // Check for report type auto-labels
-    const autoLabels = reportTypeLabels[reportTypeReason as keyof typeof reportTypeLabels] || [];
+
+    // Auto-labels from modern (or legacy) report reason
+    const autoLabels = labelsForReportReason(reportTypeReason, reportTypeLabels);
     if (autoLabels.length > 0) {
       commands.push({ action: 'add', target: 'default', labels: autoLabels });
-      console.log(`Added auto-labels for report type "${reportTypeReason}": [${autoLabels.join(', ')}]`);
+      console.log(`Added auto-labels for report reason "${reportTypeReason}": [${autoLabels.join(', ')}]`);
     }
-    
+
     if (commands.length === 0) {
-      console.log(`No commands or auto-labels for report type "${reportTypeReason}" with comment: "${comment || 'none'}"`);
+      console.log(`No commands or auto-labels for report reason "${reportTypeReason}" with comment: "${comment || 'none'}"`);
       return;
     }
 
     console.log(`Processing ${commands.length} commands from ${event.creatorHandle} (type: ${reportTypeReason}): "${comment || 'auto-label'}"`);
 
-    // Determine report type
+    // Determine subject kind (post vs account)
     const reportType = event.subject.$type === "com.atproto.admin.defs#repoRef" ? "account" : "post";
-    
+
     // Process commands
     await labelApplier.processCommands(commands, event.subject, reportType, event.creatorHandle || 'unknown', event.createdBy, event.id);
   }

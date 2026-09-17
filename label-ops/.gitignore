@@ -1,0 +1,7 @@
+.env
+data/*/
+__pycache__/
+*.pyc
+config/labels.json
+config/overlays/*.env
+config-ui/.venv/

@@ -29,8 +29,16 @@ Automatically applies labels to Bluesky posts and accounts based on reports from
 - `remove-a` / `remove-p` - Shortcuts for above
 
 ### Report Type Auto-Labels
-Automatically apply labels based on the report type selected (spam, misleading, etc.).
-Configure in environment variables - works without needing to write comments.
+Automatically apply labels based on the report reason selected.
+
+Uses the modern `tools.ozone.report.defs#*` vocabulary (RFC 0009). Configure via:
+
+```env
+REPORT_REASON_misleadingSpam="spam,promotional-content"
+REPORT_REASON_harassmentOther="harassment"
+```
+
+Legacy `REPORT_TYPE_SPAM` / `REPORT_TYPE_MISLEADING` / etc. still work and map to the preferred modern equivalents. Old clients may still emit `com.atproto.moderation.defs#reasonSpam`; those are accepted and matched to the same label lists.
 
 ### Auto-Ban System
 Automatically applies account labels when users exceed violation thresholds:
