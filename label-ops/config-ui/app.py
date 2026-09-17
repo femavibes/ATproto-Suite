@@ -910,18 +910,34 @@ def send_test_dm(*, sender_handle: str, sender_password: str, recipient: str) ->
     if sender_did and sender_did == recipient_did:
         raise RuntimeError("Pick a different account — can't DM yourself")
 
-    # Probe chat scope early with a clear error
+    # Prefer PDS + atproto-proxy (correct chat routing); fall back to api.bsky.chat.
+    pds = ""
     try:
-        bsky_chat_request("GET", "chat.bsky.convo.listConvos?limit=1", jwt)
-    except RuntimeError as e:
-        raise RuntimeError(
-            f"{e}. The sender app password likely needs chat permission."
-        ) from e
+        pds = resolve_pds(sender_did) if sender_did else ""
+    except Exception:
+        pds = ""
 
-    convo = bsky_chat_request(
+    def chat_call(method: str, path: str, body: dict | None = None) -> dict:
+        if pds:
+            return bsky_chat_via_pds(method, path, jwt, pds, body)
+        return bsky_chat_request(method, path, jwt, body)
+
+    try:
+        chat_call("GET", "chat.bsky.convo.listConvos?limit=1")
+    except RuntimeError as e:
+        msg = str(e)
+        if "Bad token scope" in msg or "InvalidToken" in msg:
+            raise RuntimeError(
+                "This app password can't use Bluesky chat. In Bluesky Settings → "
+                "Privacy and security → App passwords, create a new password with "
+                "“Allow access to your direct messages” checked, then save it on "
+                "the DM sender account here."
+            ) from e
+        raise RuntimeError(f"{e}. The sender app password likely needs chat permission.") from e
+
+    convo = chat_call(
         "GET",
         f"chat.bsky.convo.getConvoForMembers?members={urllib.parse.quote(recipient_did)}",
-        jwt,
     )
     convo_id = ((convo.get("convo") or {}).get("id")) or ""
     if not convo_id:
@@ -930,10 +946,9 @@ def send_test_dm(*, sender_handle: str, sender_password: str, recipient: str) ->
     text = (
         "label-ops test DM — if you got this, error notifications from this sender can reach you."
     )
-    bsky_chat_request(
+    chat_call(
         "POST",
         "chat.bsky.convo.sendMessage",
-        jwt,
         {"convoId": convo_id, "message": {"text": text}},
     )
     return {
@@ -942,6 +957,32 @@ def send_test_dm(*, sender_handle: str, sender_password: str, recipient: str) ->
         "toHandle": recipient_handle,
         "toDid": recipient_did,
     }
+
+
+def bsky_chat_via_pds(
+    method: str, path: str, access_jwt: str, pds: str, body: dict | None = None
+) -> dict:
+    """Chat calls proxied through the account PDS (required routing for chat.bsky)."""
+    url = f"{pds.rstrip('/')}/xrpc/{path}"
+    data = None if body is None else json.dumps(body).encode()
+    req = urllib.request.Request(
+        url,
+        data=data,
+        method=method,
+        headers={
+            "Authorization": f"Bearer {access_jwt}",
+            "Content-Type": "application/json",
+            "Atproto-Proxy": "did:web:api.bsky.chat#bsky_chat",
+            "User-Agent": "label-ops-config-ui/1.0",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+            return json.loads(raw) if raw else {}
+    except urllib.error.HTTPError as e:
+        err = e.read().decode("utf-8", errors="replace")[:300]
+        raise RuntimeError(f"Chat API {path} failed ({e.code}): {err or e.reason}") from e
 
 
 OZONE_TEAM_ROLES = {
