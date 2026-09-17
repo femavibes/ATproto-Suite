@@ -142,6 +142,7 @@ SECRET_KEYS = {
     "BSKY_APP_PASSWORD",
     "BSKY_DM_USERNAME",
     "BSKY_DM_PASSWORD",
+    "BSKY_DM_ACCOUNT",
     "CONFIG_UI_PASSWORD",
     "LABEL_SYNC_INTERVAL_MINUTES",
     "LIST_ACCOUNT_DID",
@@ -541,6 +542,7 @@ def accounts_public_view(state: dict | None = None) -> dict:
             "usedBy": ["graze-post-remover"],
         },
         "optional": {
+            "dmAccount": (secrets.get("BSKY_DM_ACCOUNT") or "labeler").strip().lower() or "labeler",
             "dmUsername": clean_secret(secrets.get("BSKY_DM_USERNAME")),
             "dmPasswordSet": bool(secrets.get("BSKY_DM_PASSWORD")),
             "dmPasswordHint": "Password saved" if secrets.get("BSKY_DM_PASSWORD") else "",
@@ -1625,12 +1627,29 @@ def api_accounts_post():
 
     optional = data.get("optional") or {}
     if isinstance(optional, dict) and optional:
-        if "dmUsername" in optional:
-            updates["BSKY_DM_USERNAME"] = normalize_handle(optional.get("dmUsername") or "")
-        if "dmPassword" in optional and str(optional.get("dmPassword") or "").strip():
-            updates["BSKY_DM_PASSWORD"] = str(optional["dmPassword"]).strip()
+        secrets_now = load_secrets()
+        mode = str(
+            optional.get("dmAccount")
+            if "dmAccount" in optional
+            else (secrets_now.get("BSKY_DM_ACCOUNT") or "labeler")
+        ).strip().lower() or "labeler"
+
+        if "dmAccount" in optional:
+            if mode not in ("labeler", "graze", "custom"):
+                errors.append("dmAccount must be labeler, graze, or custom")
+                mode = "labeler"
+            updates["BSKY_DM_ACCOUNT"] = mode
+            if mode in ("labeler", "graze"):
+                updates["BSKY_DM_USERNAME"] = ""
+                updates["BSKY_DM_PASSWORD"] = ""
+
+        if mode == "custom":
+            if "dmUsername" in optional:
+                updates["BSKY_DM_USERNAME"] = normalize_handle(optional.get("dmUsername") or "")
+            if "dmPassword" in optional and str(optional.get("dmPassword") or "").strip():
+                updates["BSKY_DM_PASSWORD"] = str(optional["dmPassword"]).strip()
+
         if "uiPassword" in optional:
-            # Allow clearing UI password with empty string when key explicitly sent
             updates["CONFIG_UI_PASSWORD"] = str(optional.get("uiPassword") or "").strip()
 
     settings = data.get("settings") or {}

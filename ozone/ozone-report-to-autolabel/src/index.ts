@@ -19,8 +19,16 @@ async function main() {
   const labelerUsername = getRequiredEnv("BSKY_LABELER_USERNAME");
   const labelerPassword = getRequiredEnv("BSKY_LABELER_PASSWORD");
   const labelerDid = getRequiredEnv("BSKY_LABELER_DID");
-  const dmUsername = (process.env.BSKY_DM_USERNAME || "").trim() || labelerUsername;
-  const dmPassword = (process.env.BSKY_DM_PASSWORD || "").trim() || labelerPassword;
+  const dmAccount = (process.env.BSKY_DM_ACCOUNT || "labeler").trim().toLowerCase();
+  let dmUsername = labelerUsername;
+  let dmPassword = labelerPassword;
+  if (dmAccount === "graze") {
+    dmUsername = (process.env.BSKY_HANDLE || "").trim() || labelerUsername;
+    dmPassword = (process.env.BSKY_APP_PASSWORD || "").trim() || labelerPassword;
+  } else if (dmAccount === "custom") {
+    dmUsername = (process.env.BSKY_DM_USERNAME || "").trim() || labelerUsername;
+    dmPassword = (process.env.BSKY_DM_PASSWORD || "").trim() || labelerPassword;
+  }
   const ozoneUrl = getRequiredEnv("OZONE_URL");
   const pollingSeconds = parseInt(getRequiredEnv("POLLING_SECONDS"));
   const whitelistedModerators = getRequiredEnv("WHITELISTED_MODERATORS").split(",").map(did => did.trim());

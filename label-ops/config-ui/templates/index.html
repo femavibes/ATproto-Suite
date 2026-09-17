@@ -3,16 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>label·ops</title>
-  <link rel="stylesheet" href="/static/style.css?v=23" />
+  <title>label-ops</title>
+  <link rel="stylesheet" href="/static/style.css?v=24" />
 </head>
 <body>
   <main class="wrap">
   <header class="top">
     <div>
-      <h1 class="brand" aria-label="label-ops">
-        <span class="brand-mark">label</span><span class="brand-sep">·</span><span class="brand-ops">ops</span>
-      </h1>
+      <h1 class="brand">label-ops</h1>
       <p class="sub">Shared label config for list watcher, Graze remover, and autolabel.</p>
     </div>
     <div class="top-actions">
@@ -157,10 +155,15 @@
             <h3 class="mods-title">DM sender account</h3>
             <span class="app-tags"><span class="app-tag">autolabel</span></span>
           </div>
-          <p class="hint">Account that sends those error DMs. Leave blank to use the labeler account (needs a chat-capable app password).</p>
-          <div class="row creds">
+          <p class="hint">Who sends error DMs to mods. Needs a chat-capable app password on that account.</p>
+          <div class="dm-source" id="dm-source" role="group" aria-label="DM sender">
+            <button type="button" class="chip-btn is-on" data-dm-source="labeler">Labeler account</button>
+            <button type="button" class="chip-btn" data-dm-source="graze">Graze feeds account</button>
+            <button type="button" class="chip-btn" data-dm-source="custom">Other account</button>
+          </div>
+          <div id="dm-custom-fields" class="row creds" hidden>
             <label>Handle
-              <input id="dmHandle" type="text" placeholder="same as labeler if blank" autocomplete="off" />
+              <input id="dmHandle" type="text" placeholder="notify.example.bsky.social" autocomplete="off" />
             </label>
             <label>App password (chat)
               <input id="dmPassword" type="password" placeholder="leave blank to keep" autocomplete="new-password" />
@@ -632,15 +635,49 @@
       renderAppTags(document.getElementById('graze-app-tags'), G.usedBy || ['graze-post-remover']);
 
       const O = accounts.optional || {};
+      const dmMode = (O.dmAccount === 'graze' || O.dmAccount === 'custom') ? O.dmAccount : 'labeler';
+      setDmSource(dmMode, { silent: true });
       document.getElementById('dmHandle').value = O.dmUsername || '';
       document.getElementById('dmPassword').value = '';
       document.getElementById('dmPassword').placeholder = O.dmPasswordSet
         ? 'Leave blank to keep saved password' : 'Chat-capable app password';
-      document.getElementById('dmPasswordHint').textContent = O.dmPasswordHint
-        || (O.dmUsername || O.dmPasswordSet ? '' : 'Optional — defaults to the labeler account');
+      updateDmHint(dmMode, O);
 
       fillSettingsForm(accounts.settings);
       updateListAccountUI();
+    }
+
+    function updateDmHint(mode, O) {
+      const hint = document.getElementById('dmPasswordHint');
+      const L = accounts?.labeler || {};
+      const G = accounts?.graze || {};
+      if (mode === 'labeler') {
+        const who = L.handle || L.identity || 'the labeler account';
+        hint.textContent = `Uses ${who} (needs a chat-capable app password on that account).`;
+      } else if (mode === 'graze') {
+        hint.textContent = G.handle
+          ? `Uses Graze feeds account ${G.handle}.`
+          : 'Uses the Graze feeds account — configure it below first.';
+      } else {
+        hint.textContent = O?.dmPasswordHint
+          || (O?.dmUsername || O?.dmPasswordSet ? '' : 'Enter a handle + chat-capable app password.');
+      }
+    }
+
+    function setDmSource(mode, opts = {}) {
+      const m = (mode === 'graze' || mode === 'custom') ? mode : 'labeler';
+      document.querySelectorAll('#dm-source .chip-btn').forEach(btn => {
+        btn.classList.toggle('is-on', btn.getAttribute('data-dm-source') === m);
+      });
+      const custom = document.getElementById('dm-custom-fields');
+      custom.hidden = m !== 'custom';
+      if (!opts.silent) updateDmHint(m, accounts?.optional);
+      return m;
+    }
+
+    function currentDmSource() {
+      const on = document.querySelector('#dm-source .chip-btn.is-on');
+      return on?.getAttribute('data-dm-source') || 'labeler';
     }
 
     function fillSettingsForm(settings) {
@@ -903,11 +940,13 @@
     }
 
     function dmAccountPayload() {
-      const payload = {
-        dmUsername: document.getElementById('dmHandle').value.trim(),
-      };
-      const pw = document.getElementById('dmPassword').value.trim();
-      if (pw) payload.dmPassword = pw;
+      const mode = currentDmSource();
+      const payload = { dmAccount: mode };
+      if (mode === 'custom') {
+        payload.dmUsername = document.getElementById('dmHandle').value.trim();
+        const pw = document.getElementById('dmPassword').value.trim();
+        if (pw) payload.dmPassword = pw;
+      }
       return payload;
     }
 
@@ -1352,7 +1391,7 @@
       ctx.fillStyle = '#1a1a1a';
       ctx.font = `600 ${titleSize}px ui-sans-serif, system-ui, sans-serif`;
       let cy = pad + titleSize;
-      ctx.fillText('label·ops · moderator mappings', pad, cy);
+      ctx.fillText('label-ops · moderator mappings', pad, cy);
       cy += 22;
       ctx.fillStyle = '#666';
       ctx.font = `400 13px ui-sans-serif, system-ui, sans-serif`;
@@ -1455,7 +1494,7 @@
       cy += 16;
       ctx.fillStyle = '#888';
       ctx.font = `400 11px ui-sans-serif, system-ui, sans-serif`;
-      ctx.fillText('Generated by label·ops  ·  Whitelist required for all autolabel actions', pad, cy);
+      ctx.fillText('Generated by label-ops  ·  Whitelist required for all autolabel actions', pad, cy);
 
       return canvas;
     }
@@ -1636,6 +1675,12 @@
       catch (e) { alert(e.message); }
       finally { btn.disabled = false; }
     };
+
+    document.getElementById('dm-source').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-dm-source]');
+      if (!btn) return;
+      setDmSource(btn.getAttribute('data-dm-source'));
+    });
 
     document.getElementById('btn-save-graze').onclick = async () => {
       const btn = document.getElementById('btn-save-graze');
